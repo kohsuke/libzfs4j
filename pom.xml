@@ -1,12 +1,25 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>com.sun</groupId>
-  <artifactId>libzfs-java</artifactId>
+  <groupId>org.jvnet.libzfs</groupId>
+  <artifactId>libzfs</artifactId>
   <packaging>jar</packaging>
   <version>1.0-SNAPSHOT</version>
   <name>libzfs-java</name>
-  <url>http://maven.apache.org</url>
+  <description>libzfs for Java</description>
+  <url>https://zfs.dev.java.net/</url>
+
+  <distributionManagement>
+    <site>
+      <id>zfs-www</id>
+      <url>java-net:/zfs/trunk/www/</url>
+    </site>
+    <repository>
+      <uniqueVersion>false</uniqueVersion>
+      <id>java.net-maven2-repository</id>
+      <url>java-net:/maven2-repository/trunk/www/repository/</url>
+    </repository>
+  </distributionManagement>
 
   <build>
     <plugins>
@@ -15,6 +28,12 @@
         <configuration>
           <source>1.5</source>
           <target>1.5</target>
+        </configuration>
+      </plugin>
+      <plugin>
+        <artifactId>maven-release-plugin</artifactId>
+        <configuration>
+          <arguments>-Prelease</arguments>
         </configuration>
       </plugin>
     </plugins>
@@ -42,4 +61,30 @@
       <layout>default</layout>
     </repository>
   </repositories>
+
+  <reporting>
+    <plugins>
+      <plugin>
+        <artifactId>maven-javadoc-plugin</artifactId>
+      </plugin>
+    </plugins>
+  </reporting>
+
+  <licenses>
+    <license>
+      <name>COMMON DEVELOPMENT AND DISTRIBUTION LICENSE</name>
+      <url>http://www.opensource.org/licenses/cddl1.txt</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+
+  <profiles>
+    <profile>
+      <id>release</id>
+      <properties>
+        <!-- so that I can release from Linux -->
+        <maven.test.skip>true</maven.test.skip>
+      </properties>
+    </profile>
+  </profiles>
 </project>
