@@ -21,7 +21,6 @@
 
 package org.jvnet.solaris.libzfs.jna;
 
-import org.jvnet.solaris.libzfs.zfs_type_t;
 
 /**
  * @author Kohsuke Kawaguchi
