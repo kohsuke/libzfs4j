@@ -1,0 +1,31 @@
+
+  This project develops a Java wrapper of {{{http://www.opensolaris.org/os/community/zfs/}libzfs}},
+  which is a native library in Solaris to manipulate ZFS.
+  The goal is to expose all the capabilities of <<<libzfs>>> in Java-friendly binding.
+
+  With this library, you can write a program like the following to create a new file system:
+
+------------------
+LibZFS zfs = new LibZFS();
+ZFSObject newFS = zfs.create("rpool/kohsuke/test", ZFSType.FILESYSTEM);
+newFS.mount();
+------------------
+
+  ... or to destroy it:
+
+------------------
+ZFSObject fs = zfs.open("rpool/kohsuke/test");
+fs.unmount();
+fs.destory();
+------------------
+
+  ... or any other things you can do with <<<libzfs>>>, like querying file system information, create snapshots and/or
+  clones, roll back, etc., etc.
+
+
+  The project is still very much a work in progress. If you are interested in helping us,
+  please let us know so that we can add you as a committer.
+  This project depends on {{{https://jna.dev.java.net/}JNA}} to bridge to the native code,
+  so no JNI experience is required to hack the project.
+
+
