@@ -9,6 +9,11 @@
   <description>libzfs for Java</description>
   <url>https://zfs.dev.java.net/</url>
 
+  <scm>
+    <connection>scm:svn:https://svn.dev.java.net/svn/zfs/trunk/libzfs/</connection>
+    <developerConnection>scm:svn:https://svn.dev.java.net/svn/zfs/trunk/libzfs/</developerConnection>
+  </scm>
+
   <distributionManagement>
     <site>
       <id>zfs-www</id>
