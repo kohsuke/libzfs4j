@@ -1,12 +1,29 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>com.sun</groupId>
-  <artifactId>libzfs-java</artifactId>
+  <groupId>org.jvnet.libzfs</groupId>
+  <artifactId>libzfs</artifactId>
   <packaging>jar</packaging>
-  <version>1.0-SNAPSHOT</version>
+  <version>0.1</version>
   <name>libzfs-java</name>
-  <url>http://maven.apache.org</url>
+  <description>libzfs for Java</description>
+  <url>https://zfs.dev.java.net/</url>
+
+  <scm>
+    <connection>scm:svn:https://svn.dev.java.net/svn/zfs/tags/libzfs-0.1</connection>
+    <developerConnection>scm:svn:https://svn.dev.java.net/svn/zfs/tags/libzfs-0.1</developerConnection>
+  </scm>
+
+  <distributionManagement>
+    <site>
+      <id>zfs-www</id>
+      <url>java-net:/zfs/trunk/www/</url>
+    </site>
+    <repository>
+      <uniqueVersion>false</uniqueVersion>
+      <id>java.net-maven2-repository</id>
+      <url>java-net:/maven2-repository/trunk/www/repository/</url>
+    </repository>
+  </distributionManagement>
 
   <build>
     <plugins>
@@ -17,7 +34,20 @@
           <target>1.5</target>
         </configuration>
       </plugin>
+      <plugin>
+        <artifactId>maven-release-plugin</artifactId>
+        <configuration>
+          <arguments>-Prelease</arguments>
+        </configuration>
+      </plugin>
     </plugins>
+    <extensions>
+      <extension>
+        <groupId>org.jvnet.wagon-svn</groupId>
+        <artifactId>wagon-svn</artifactId>
+        <version>1.8</version>
+      </extension>
+    </extensions>    
   </build>
 
   <dependencies>
@@ -30,7 +60,7 @@
     <dependency>
       <groupId>net.java.dev.jna</groupId>
       <artifactId>jna</artifactId>
-      <version>3.0.3</version>
+      <version>3.0.3-patch-1</version>
     </dependency>
   </dependencies>
 
@@ -42,4 +72,30 @@
       <layout>default</layout>
     </repository>
   </repositories>
+
+  <reporting>
+    <plugins>
+      <plugin>
+        <artifactId>maven-javadoc-plugin</artifactId>
+      </plugin>
+    </plugins>
+  </reporting>
+
+  <licenses>
+    <license>
+      <name>COMMON DEVELOPMENT AND DISTRIBUTION LICENSE</name>
+      <url>http://www.opensource.org/licenses/cddl1.txt</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+
+  <profiles>
+    <profile>
+      <id>release</id>
+      <properties>
+        <!-- so that I can release from Linux -->
+        <maven.test.skip>true</maven.test.skip>
+      </properties>
+    </profile>
+  </profiles>
 </project>
