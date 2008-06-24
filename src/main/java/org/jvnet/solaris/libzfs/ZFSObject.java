@@ -37,9 +37,11 @@ import java.util.List;
  * @author Kohsuke Kawaguchi
  */
 public class ZFSObject {
+    private final LibZFS parent;
     private zfs_handle_t handle;
 
-    ZFSObject(zfs_handle_t handle) {
+    ZFSObject(LibZFS parent, zfs_handle_t handle) {
+        this.parent = parent;
         if(handle==null)
             throw new ZFSException();
         this.handle = handle;
@@ -53,7 +55,7 @@ public class ZFSObject {
         final List<ZFSObject> r = new ArrayList<ZFSObject>();
         LIBZFS.zfs_iter_children(handle, new libzfs.zfs_iter_f() {
             public int callback(zfs_handle_t handle, Pointer arg) {
-                r.add(new ZFSObject(handle));
+                r.add(new ZFSObject(parent,handle));
                 return 0;
             }
         }, null );
@@ -112,11 +114,25 @@ public class ZFSObject {
      */
     public ZFSObject createSnapshot(String snapshotName, boolean recursive) {
         String fullName = getName() + '@' + snapshotName;
-        libzfs_handle_t libzfs = LIBZFS.zfs_get_handle(handle);
-        if(LIBZFS.zfs_snapshot(libzfs, fullName,recursive)!=0)
+        if(LIBZFS.zfs_snapshot(parent.getHandle(), fullName,recursive)!=0)
             throw new ZFSException();
 
-        return new ZFSObject(LIBZFS.zfs_open(libzfs, fullName, zfs_type_t.SNAPSHOT)); 
+        return parent.open(fullName,zfs_type_t.SNAPSHOT);
+    }
+
+    /**
+     * Creates a clone from this snapshot.
+     *
+     * This method fails if this {@link ZFSObject} is not a snapshot.
+     */
+    public ZFSObject clone(String fullDestinationName) {
+        if(LIBZFS.zfs_clone(handle,fullDestinationName,null)!=0)
+            throw new ZFSException();
+        ZFSObject target = parent.open(fullDestinationName);
+        // this behavior mimics "zfs clone"
+        target.mount();
+        target.share();
+        return target;
     }
 
     @Override

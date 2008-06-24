@@ -109,7 +109,11 @@ public class LibZFS {
      * Opens a ZFS data set of the given name.
      */
     public ZFSObject open(String name) {
-        return new ZFSObject(LIBZFS.zfs_open(handle,name, zfs_type_t.DATASET));
+        return open(name,zfs_type_t.DATASET);
+    }
+
+    /*package*/ ZFSObject open(String name, int/*zfs_type_t*/ mask ) {
+        return new ZFSObject(this,LIBZFS.zfs_open(handle,name, mask));
     }
 
     /**
