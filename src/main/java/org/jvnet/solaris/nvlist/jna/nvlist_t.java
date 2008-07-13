@@ -46,6 +46,13 @@ public class nvlist_t extends PointerType {
             throw new NVListException();
     }
 
+    public nvlist_t getNVList(String key) {
+        PtrByReference<nvlist_t> r = new PtrByReference<nvlist_t>();
+        if(LIBNVPAIR.nvlist_lookup_nvlist(this,key,r)!=0)
+            return null;
+        return r.getValue(nvlist_t.class);
+    }
+
     @Override
     protected void finalize() throws Throwable {
         dispose();
