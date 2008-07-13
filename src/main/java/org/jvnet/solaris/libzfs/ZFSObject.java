@@ -30,6 +30,7 @@ import org.jvnet.solaris.libzfs.jna.zfs_type_t;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Represents ZFS snapshot, file system, volume, or pool.
@@ -141,6 +142,10 @@ public class ZFSObject {
     public void setProperty(String key, String value) {
         if(LIBZFS.zfs_prop_set(handle, key, value)!=0)
             throw new ZFSException();
+    }
+
+    public Map<String,String> getUserProperties() {
+        
     }
 
     @Override

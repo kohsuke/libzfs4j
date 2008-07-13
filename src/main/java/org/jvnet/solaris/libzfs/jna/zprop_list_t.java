@@ -29,8 +29,18 @@ import com.sun.jna.Pointer;
  * @author Kohsuke Kawaguchi
  */
 public class zprop_list_t extends Structure implements Structure.ByReference {
+    /**
+     * If this property is a native property, its ID.
+     * Otherwise ZPROP_INVAL.
+     */
     public int pl_prop;
+    /**
+     * If this property is an user-defined property, its name.
+     */
     public String pl_user_prop;
+    /**
+     * Next in the property list.
+     */
     public zprop_list_t pl_next;
     public boolean pl_all;
     public NativeLong pl_width;
