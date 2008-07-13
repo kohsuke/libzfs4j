@@ -331,7 +331,14 @@ String zfs_prop_column_name(zfs_prop_t prop);
 boolean zfs_prop_align_right(zfs_prop_t prop);
 
 String zfs_prop_to_name(zfs_prop_t prop);
-int zfs_prop_set(zfs_handle_t handle, String propertyName, String propertyValue);
+
+    /**
+     * Sets a property on a ZFS data set.
+     *
+     * <p>
+     * This method can set both native properties and user-defined properties.
+     */
+    int zfs_prop_set(zfs_handle_t handle, String propertyName, String propertyValue);
 int zfs_prop_get(zfs_handle_t handle, zfs_prop_t prop, char[] buf, NativeLong cbSize,
     /*zprop_source_t* */ IntByReference _5, char[] _6, NativeLong _7, boolean _8);
 int zfs_prop_get_numeric(zfs_handle_t handle, zfs_prop_t prop, LongByReference r,
