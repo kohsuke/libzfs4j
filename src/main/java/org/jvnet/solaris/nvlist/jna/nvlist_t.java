@@ -30,7 +30,7 @@ import static org.jvnet.solaris.nvlist.jna.libnvpair.LIBNVPAIR;
  * @author Kohsuke Kawaguchi
  */
 public class nvlist_t extends PointerType {
-    private boolean disposed;
+    private boolean owner;
     /**
      * Allocates a new {@link nvlist_t}.
      */
@@ -38,7 +38,9 @@ public class nvlist_t extends PointerType {
         PtrByReference<nvlist_t> buf = new PtrByReference<nvlist_t>();
         if(LIBNVPAIR.nvlist_alloc(buf,nvflag,0)!=0)
             throw new NVListException();
-        return buf.getValue(nvlist_t.class);
+        nvlist_t r = buf.getValue(nvlist_t.class);
+        r.owner = true;
+        return r;
     }
 
     public void put(String key, String value) {
@@ -60,8 +62,8 @@ public class nvlist_t extends PointerType {
     }
 
     private synchronized void dispose() {
-        if(!disposed)
+        if(owner)
             LIBNVPAIR.nvlist_free(this);
-        disposed = true;
+        owner = false;
     }
 }
