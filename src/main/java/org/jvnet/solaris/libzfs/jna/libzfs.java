@@ -201,7 +201,7 @@ int zpool_iter(libzfs_handle_t lib, zpool_iter_f callback, Pointer arg);
 /*
  * Functions to create and destroy pools
  */
-int zpool_create(libzfs_handle_t lib, String name, nvlist_t _1, nvlist_t _2);
+int zpool_create(libzfs_handle_t lib, String poolName, nvlist_t nvroot, nvlist_t props);
 int zpool_destroy(zpool_handle_t pool);
 int zpool_add(zpool_handle_t pool, nvlist_t _1);
 
