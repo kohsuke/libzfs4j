@@ -135,6 +135,14 @@ public class ZFSObject {
         return target;
     }
 
+    /**
+     * Sets a user-defined property.
+     */
+    public void setProperty(String key, String value) {
+        if(LIBZFS.zfs_prop_set(handle, key, value)!=0)
+            throw new ZFSException();
+    }
+
     @Override
     public final boolean equals(Object o) {
         if (this == o) return true;
