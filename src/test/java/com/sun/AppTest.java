@@ -67,4 +67,10 @@ public class AppTest
         o.unmount();
         o.destory();
     }
+
+    public void testPropGet() {
+        LibZFS zfs = new LibZFS();
+        ZFSObject o = zfs.open("rpool");
+        System.out.println("Property is "+o.getUserProperty("my:test"));
+    }
 }
