@@ -21,8 +21,26 @@
 
 package org.jvnet.solaris.libzfs;
 
+import org.jvnet.solaris.libzfs.jna.libzfs;
+import org.jvnet.solaris.libzfs.jna.libzfs_handle_t;
+
 /**
  * @author Kohsuke Kawaguchi
  */
 public class ZFSException extends RuntimeException {
+    public ZFSException() {
+    }
+
+    /*package*/ ZFSException(LibZFS zfs) {
+        super(getErrorMessage(zfs));        
+    }
+
+    private static String getErrorMessage(LibZFS zfs) {
+        libzfs_handle_t h = zfs.getHandle();
+
+        int code = libzfs.LIBZFS.libzfs_errno(h);
+        String description = libzfs.LIBZFS.libzfs_error_description(h);
+
+        return code+" : "+description;
+    }
 }
