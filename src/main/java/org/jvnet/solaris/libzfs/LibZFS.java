@@ -58,7 +58,7 @@ public class LibZFS {
         final List<ZFSPool> r = new ArrayList<ZFSPool>();
         LIBZFS.zfs_iter_root(handle,new libzfs.zfs_iter_f() {
             public int callback(zfs_handle_t handle, Pointer arg) {
-                r.add(new ZFSPool(handle));
+                r.add(new ZFSPool(LibZFS.this,handle));
                 return 0;
             }
         }, null);

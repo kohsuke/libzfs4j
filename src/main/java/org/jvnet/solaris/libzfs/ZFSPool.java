@@ -27,7 +27,7 @@ import org.jvnet.solaris.libzfs.jna.zfs_handle_t;
  * @author Kohsuke Kawaguchi
  */
 public final class ZFSPool extends ZFSObject {
-    ZFSPool(zfs_handle_t handle) {
-        super(handle);
+    ZFSPool(LibZFS parent, zfs_handle_t handle) {
+        super(parent,handle);
     }
 }
