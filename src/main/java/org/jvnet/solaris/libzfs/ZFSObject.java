@@ -43,7 +43,7 @@ public class ZFSObject {
     ZFSObject(LibZFS parent, zfs_handle_t handle) {
         this.parent = parent;
         if(handle==null)
-            throw new ZFSException();
+            throw new ZFSException(parent);
         this.handle = handle;
     }
 
@@ -64,12 +64,12 @@ public class ZFSObject {
 
     public void mount() {
         if(LIBZFS.zfs_mount(handle, null, 0)!=0)
-            throw new ZFSException();
+            throw new ZFSException(parent);
     }
 
     public void share() {
         if(LIBZFS.zfs_share(handle)!=0)
-            throw new ZFSException();
+            throw new ZFSException(parent);
     }
 
     /**
@@ -77,7 +77,7 @@ public class ZFSObject {
      */
     public void unmount() {
         if(LIBZFS.zfs_unmount(handle, null, 0)!=0)
-            throw new ZFSException();
+            throw new ZFSException(parent);
     }
 
     /**
@@ -85,7 +85,7 @@ public class ZFSObject {
      */
     public void destory() {
         if(LIBZFS.zfs_destroy(handle)!=0)
-            throw new ZFSException();
+            throw new ZFSException(parent);
     }
 
     /**
@@ -115,7 +115,7 @@ public class ZFSObject {
     public ZFSObject createSnapshot(String snapshotName, boolean recursive) {
         String fullName = getName() + '@' + snapshotName;
         if(LIBZFS.zfs_snapshot(parent.getHandle(), fullName,recursive)!=0)
-            throw new ZFSException();
+            throw new ZFSException(parent);
 
         return parent.open(fullName,zfs_type_t.SNAPSHOT);
     }
@@ -127,7 +127,7 @@ public class ZFSObject {
      */
     public ZFSObject clone(String fullDestinationName) {
         if(LIBZFS.zfs_clone(handle,fullDestinationName,null)!=0)
-            throw new ZFSException();
+            throw new ZFSException(parent);
         ZFSObject target = parent.open(fullDestinationName);
         // this behavior mimics "zfs clone"
         target.mount();
@@ -140,7 +140,7 @@ public class ZFSObject {
      */
     public void setProperty(String key, String value) {
         if(LIBZFS.zfs_prop_set(handle, key, value)!=0)
-            throw new ZFSException();
+            throw new ZFSException(parent);
     }
 
     public String getUserProperty(String key) {

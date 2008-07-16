@@ -100,7 +100,7 @@ public class LibZFS {
         }
 
         if(LIBZFS.zfs_create(handle,name,type.code,nvl)!=0)
-            throw new ZFSException();
+            throw new ZFSException(this);
 
         return open(name);
     }
