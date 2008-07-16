@@ -23,6 +23,8 @@ package org.jvnet.solaris.nvlist.jna;
 
 import com.sun.jna.Library;
 import com.sun.jna.Native;
+import com.sun.jna.Pointer;
+import com.sun.jna.ptr.PointerByReference;
 import org.jvnet.solaris.jna.PtrByReference;
 
 /**
@@ -170,7 +172,7 @@ int nvlist_alloc(PtrByReference<nvlist_t> result, int nvflag, int kmflag);
 //    int nvlist_lookup_uint32(nvlist_t list, String name, uint32_t *);
 //    int nvlist_lookup_int64(nvlist_t list, String name, int64_t *);
 //    int nvlist_lookup_uint64(nvlist_t list, String name, uint64_t *);
-//    int nvlist_lookup_string(nvlist_t list, String name, char **);
+    int nvlist_lookup_string(nvlist_t list, String name, PointerByReference result);
     int nvlist_lookup_nvlist(nvlist_t list, String name, PtrByReference<nvlist_t> result);
 //    int nvlist_lookup_boolean_array(nvlist_t list, String name,
 //        boolean_t **, uint_t *);

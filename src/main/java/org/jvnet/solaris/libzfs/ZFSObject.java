@@ -25,12 +25,11 @@ import com.sun.jna.Pointer;
 import org.jvnet.solaris.libzfs.jna.libzfs;
 import static org.jvnet.solaris.libzfs.jna.libzfs.LIBZFS;
 import org.jvnet.solaris.libzfs.jna.zfs_handle_t;
-import org.jvnet.solaris.libzfs.jna.libzfs_handle_t;
 import org.jvnet.solaris.libzfs.jna.zfs_type_t;
+import org.jvnet.solaris.nvlist.jna.nvlist_t;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Represents ZFS snapshot, file system, volume, or pool.
@@ -144,8 +143,13 @@ public class ZFSObject {
             throw new ZFSException();
     }
 
-    public Map<String,String> getUserProperties() {
-        
+    public String getUserProperty(String key) {
+        // don't we need to release userProps later?
+        nvlist_t userProps = LIBZFS.zfs_get_user_props(handle);
+        nvlist_t v = userProps.getNVList(key);
+        if(v==null)      return null;
+
+        return v.getString("value");
     }
 
     @Override

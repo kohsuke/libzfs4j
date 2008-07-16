@@ -22,6 +22,8 @@
 package org.jvnet.solaris.nvlist.jna;
 
 import com.sun.jna.PointerType;
+import com.sun.jna.Pointer;
+import com.sun.jna.ptr.PointerByReference;
 import org.jvnet.solaris.jna.PtrByReference;
 import static org.jvnet.solaris.nvlist.jna.libnvpair.LIBNVPAIR;
 
@@ -48,11 +50,18 @@ public class nvlist_t extends PointerType {
             throw new NVListException();
     }
 
+    public String getString(String key) {
+        PointerByReference r = new PointerByReference();
+        if(LIBNVPAIR.nvlist_lookup_string(this,key,r)!=0)
+            return null;
+        return r.getValue().getString(0);
+    }
+
     public nvlist_t getNVList(String key) {
         PtrByReference<nvlist_t> r = new PtrByReference<nvlist_t>();
         if(LIBNVPAIR.nvlist_lookup_nvlist(this,key,r)!=0)
             return null;
-        return r.getValue(nvlist_t.class);
+        return r.getValue(nvlist_t.class);  // don't set the owner flag
     }
 
     @Override
