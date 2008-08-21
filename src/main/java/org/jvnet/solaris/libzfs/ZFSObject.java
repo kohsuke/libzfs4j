@@ -21,7 +21,10 @@
 
 package org.jvnet.solaris.libzfs;
 
+import com.sun.jna.Memory;
+import com.sun.jna.NativeLong;
 import com.sun.jna.Pointer;
+import com.sun.jna.ptr.IntByReference;
 import org.jvnet.solaris.libzfs.jna.libzfs;
 import static org.jvnet.solaris.libzfs.jna.libzfs.LIBZFS;
 import org.jvnet.solaris.libzfs.jna.zfs_handle_t;
@@ -29,14 +32,22 @@ import org.jvnet.solaris.libzfs.jna.zfs_type_t;
 import org.jvnet.solaris.nvlist.jna.nvlist_t;
 
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Hashtable;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
+import org.jvnet.solaris.jna.EnumByReference;
+import org.jvnet.solaris.libzfs.jna.zfs_prop_t;
+import org.jvnet.solaris.libzfs.jna.zpool_handle_t;
+import org.jvnet.solaris.libzfs.jna.zpool_prop_t;
 
 /**
  * Represents ZFS snapshot, file system, volume, or pool.
  *
  * @author Kohsuke Kawaguchi
  */
-public class ZFSObject {
+public class ZFSObject implements Comparator {
     private final LibZFS parent;
     private zfs_handle_t handle;
 
@@ -47,19 +58,76 @@ public class ZFSObject {
         this.handle = handle;
     }
 
+    public int compare(Object o1, Object o2) {
+      if (o1 instanceof ZFSObject && o2 instanceof ZFSObject ) {
+        long a = Long.parseLong(((ZFSObject)o1).getZfsProperty(zfs_prop_t.ZFS_PROP_CREATETXG));
+        long b = Long.parseLong(((ZFSObject)o2).getZfsProperty(zfs_prop_t.ZFS_PROP_CREATETXG));
+
+        if ( a > b ) return 1;
+        if ( a < b ) return -1;
+        return 0;
+      }
+      throw new UnsupportedOperationException("Not supported yet.");
+    }
+  
+    public boolean equals(Object a, Object b) {
+      if ( a == b ) return true;
+      return false;
+    }
+  
     public String getName() {
         return LIBZFS.zfs_get_name(handle);
     }
 
     public List<ZFSObject> children() {
-        final List<ZFSObject> r = new ArrayList<ZFSObject>();
-        LIBZFS.zfs_iter_children(handle, new libzfs.zfs_iter_f() {
+      final List<ZFSObject> list = new ArrayList<ZFSObject>();
+      return children(list,this);
+    }
+    
+    public List<ZFSObject> children(List<ZFSObject> list, ZFSObject zfs) {
+      for(ZFSObject snap : zfs.snapshots()) {
+          list.add(snap);
+        }
+      for(ZFSObject child : zfs.getChildren()) {
+        if (!child.getName().contains("@")) {
+          list.add(child);
+          children(list,child);
+        }
+      }
+      return list;
+    }
+    
+    private List<ZFSObject> getChildren() {
+      final List<ZFSObject> list = new ArrayList<ZFSObject>();
+      LIBZFS.zfs_iter_children(handle, new libzfs.zfs_iter_f() {
+        public int callback(zfs_handle_t handle, Pointer arg) {
+          list.add(new ZFSObject(parent, handle));
+          return 0;
+        }
+      }, null );
+      return list;
+    }
+    
+    public List<ZFSObject> filesystems() {
+      final List<ZFSObject> r = new ArrayList<ZFSObject>();
+      LIBZFS.zfs_iter_filesystems(handle, new libzfs.zfs_iter_f() {
             public int callback(zfs_handle_t handle, Pointer arg) {
                 r.add(new ZFSObject(parent,handle));
                 return 0;
             }
         }, null );
         return r;
+    }
+    
+    public Set<ZFSObject> snapshots() {
+      final Set<ZFSObject> set = new TreeSet<ZFSObject>(this);      
+      LIBZFS.zfs_iter_snapshots(handle, new libzfs.zfs_iter_f() {
+            public int callback(zfs_handle_t handle, Pointer arg) {
+                set.add(new ZFSObject(parent,handle));
+                return 0;
+            }
+        }, null );
+        return set;
     }
 
     public void mount() {
@@ -143,6 +211,56 @@ public class ZFSObject {
             throw new ZFSException(parent);
     }
 
+    public Hashtable<zfs_prop_t,String> getZfsProperty(List<zfs_prop_t> props) {
+      Memory propbuf = new Memory(libzfs.ZFS_MAXPROPLEN);
+      char[] buf        = null;
+      IntByReference ibr = null;
+      int ret = 0;
+      
+      Hashtable<zfs_prop_t,String> map = new Hashtable<zfs_prop_t,String>();
+      for ( zfs_prop_t prop : props) {
+        ret = LIBZFS.zfs_prop_get(handle, new NativeLong(prop.ordinal()),
+          (Pointer)propbuf, libzfs.ZFS_MAXPROPLEN, ibr, buf, new NativeLong(0), true);
+          map.put(prop,(ret!=0)?"-":propbuf.getString(0));
+      }
+      return map;
+    }
+    
+    public String getZfsProperty(zfs_prop_t prop) {
+      Memory propbuf = new Memory(libzfs.ZFS_MAXPROPLEN);
+      char[] buf        = null;
+      IntByReference ibr = null;
+      
+      int ret = LIBZFS.zfs_prop_get(handle, new NativeLong(prop.ordinal()),
+        (Pointer)propbuf, libzfs.ZFS_MAXPROPLEN, ibr, buf, new NativeLong(0), true);
+      
+      return ((ret!=0)?"-":propbuf.getString(0));
+    }
+    
+    public String getZpoolProperty(zpool_prop_t prop) {
+      Memory propbuf = new Memory(libzfs.ZPOOL_MAXPROPLEN);
+      char[] buf        = null;
+      EnumByReference ebr = null;
+      
+      zpool_handle_t zpool_handle = LIBZFS.zpool_open(parent.getHandle(), this.getName());
+      int ret = LIBZFS.zpool_get_prop(zpool_handle, new NativeLong(prop.ordinal()),
+        (Pointer)propbuf, new NativeLong(libzfs.ZPOOL_MAXPROPLEN), ebr);      
+      return ((ret!=0)?"-":propbuf.getString(0));
+    }
+    
+    public Hashtable<String,String> getUserProperty(List<String> keys) {
+        // don't we need to release userProps later?
+        Hashtable<String,String> map = new Hashtable<String,String>();
+        
+        nvlist_t userProps = LIBZFS.zfs_get_user_props(handle);
+        for(String key : keys) {
+          nvlist_t v = userProps.getNVList(key);
+          if(v==null)      return null;
+          map.put(key,v.getString("value"));
+        }
+        return map;
+    }
+        
     public String getUserProperty(String key) {
         // don't we need to release userProps later?
         nvlist_t userProps = LIBZFS.zfs_get_user_props(handle);
@@ -152,6 +270,15 @@ public class ZFSObject {
         return v.getString("value");
     }
 
+    public void inheritProperty(String key) {
+      // Note: create new object after calling this method to reflect inherited property.
+      System.out.println("key "+key+" = "+getUserProperty(key));
+      if(LIBZFS.zfs_prop_inherit(handle, key)!=0)
+            throw new ZFSException(parent);
+      for(int i=0; i < 100; i++)
+        System.out.println("key "+key+" = "+getUserProperty(key));
+    }
+    
     @Override
     public final boolean equals(Object o) {
         if (this == o) return true;

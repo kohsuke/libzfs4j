@@ -22,6 +22,7 @@
 package org.jvnet.solaris.libzfs;
 
 import com.sun.jna.Pointer;
+import java.io.File;
 import org.jvnet.solaris.libzfs.jna.libzfs;
 import static org.jvnet.solaris.libzfs.jna.libzfs.LIBZFS;
 import org.jvnet.solaris.libzfs.jna.libzfs_handle_t;
@@ -99,8 +100,19 @@ public class LibZFS {
             nvl.put(e.getKey(),e.getValue());
         }
 
-        if(LIBZFS.zfs_create(handle,name,type.code,nvl)!=0)
-            throw new ZFSException(this);
+        /* create intermediate directories */
+        String[] dirs = name.split(File.separator);
+        StringBuffer sb = new StringBuffer(dirs[0]);
+        for(int i=1; i < dirs.length; i++) {
+          sb.append(File.separator+dirs[i]);
+          System.out.println("Checking exists "+sb.toString());
+          if ( !exists(sb.toString(), ZFSType.FILESYSTEM)) {
+            System.out.println("filesystem "+name+" does not exist");
+            if(LIBZFS.zfs_create(handle,sb.toString(),type.code,nvl)!=0) {
+              throw new ZFSException(this); 
+            }
+          }
+        }
 
         return open(name);
     }

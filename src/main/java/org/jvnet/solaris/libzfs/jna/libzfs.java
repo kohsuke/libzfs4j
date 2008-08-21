@@ -153,7 +153,8 @@ int zpool_label_disk(libzfs_handle_t lib, zpool_handle_t pool, String label);
  * Functions to manage pool properties
  */
 int zpool_set_prop(zpool_handle_t pool, String name, String value);
-int zpool_get_prop(zpool_handle_t pool, zpool_prop_t prop, char[] buf, NativeLong proplen, EnumByReference<zprop_source_t> _5);
+int zpool_get_prop(zpool_handle_t pool, /* zpool_prop_t */ NativeLong prop, /*char[] */ Pointer buf,
+    NativeLong proplen, EnumByReference<zprop_source_t> _5);
 long zpool_get_prop_int(zpool_handle_t pool, zpool_prop_t prop, EnumByReference<zprop_source_t> _3);
 
 String zpool_prop_to_name(zpool_prop_t prop);
@@ -264,7 +265,7 @@ String zfs_prop_to_name(zfs_prop_t prop);
      * This method can set both native properties and user-defined properties.
      */
     int zfs_prop_set(zfs_handle_t handle, String propertyName, String propertyValue);
-int zfs_prop_get(zfs_handle_t handle, zfs_prop_t prop, char[] buf, NativeLong cbSize,
+int zfs_prop_get(zfs_handle_t handle, /* zfs_prop_t */ NativeLong prop, Pointer _4, int cbSize,
     /*zprop_source_t* */ IntByReference _5, char[] _6, NativeLong _7, boolean _8);
 int zfs_prop_get_numeric(zfs_handle_t handle, zfs_prop_t prop, LongByReference r,
     /*zprop_source_t* */ IntByReference _4, char[] _5, NativeLong _6);
