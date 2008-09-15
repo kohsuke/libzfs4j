@@ -331,7 +331,14 @@ int zfs_create_ancestors(libzfs_handle_t lib, String _2);
 int zfs_destroy(zfs_handle_t handle);
 int zfs_destroy_snaps(zfs_handle_t handle, String name);
 int zfs_clone(zfs_handle_t handle, String name, nvlist_t _3);
-int zfs_snapshot(libzfs_handle_t lib, String fullNameWithAtSnapShot, boolean recursive);
+/*
+ * nv96 prototype:
+ * int zfs_snapshot(libzfs_handle_t lib, String fullNameWithAtSnapShot, boolean recursive, nvlist_t props);
+ * pre-nv96:
+ * int zfs_snapshot(libzfs_handle_t lib, String fullNameWithAtSnapShot, boolean recursive);
+*/
+int zfs_snapshot(libzfs_handle_t lib, String fullNameWithAtSnapShot, boolean recursive, nvlist_t props);
+        
 int zfs_rollback(zfs_handle_t handle1, zfs_handle_t handle2, boolean _3);
 int zfs_rename(zfs_handle_t handle, String name, boolean _3);
 int zfs_send(zfs_handle_t handle, String _2, String _3, boolean _4, boolean _5, boolean _6, boolean _7, int _8);

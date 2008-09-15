@@ -70,15 +70,6 @@ public class ZFSObject implements Comparator {
       throw new UnsupportedOperationException("Not supported yet.");
     }
   
-    public boolean equals(Object a, Object b) {
-      if ( a == b ) return true;
-      return false;
-    }
-  
-    public String getName() {
-        return LIBZFS.zfs_get_name(handle);
-    }
-
     public List<ZFSObject> children() {
       final List<ZFSObject> list = new ArrayList<ZFSObject>();
       return children(list,this);
@@ -96,66 +87,22 @@ public class ZFSObject implements Comparator {
       }
       return list;
     }
-    
-    private List<ZFSObject> getChildren() {
-      final List<ZFSObject> list = new ArrayList<ZFSObject>();
-      LIBZFS.zfs_iter_children(handle, new libzfs.zfs_iter_f() {
-        public int callback(zfs_handle_t handle, Pointer arg) {
-          list.add(new ZFSObject(parent, handle));
-          return 0;
-        }
-      }, null );
-      return list;
-    }
-    
-    public List<ZFSObject> filesystems() {
-      final List<ZFSObject> r = new ArrayList<ZFSObject>();
-      LIBZFS.zfs_iter_filesystems(handle, new libzfs.zfs_iter_f() {
-            public int callback(zfs_handle_t handle, Pointer arg) {
-                r.add(new ZFSObject(parent,handle));
-                return 0;
-            }
-        }, null );
-        return r;
-    }
-    
-    public Set<ZFSObject> snapshots() {
-      final Set<ZFSObject> set = new TreeSet<ZFSObject>(this);      
-      LIBZFS.zfs_iter_snapshots(handle, new libzfs.zfs_iter_f() {
-            public int callback(zfs_handle_t handle, Pointer arg) {
-                set.add(new ZFSObject(parent,handle));
-                return 0;
-            }
-        }, null );
-        return set;
-    }
-
-    public void mount() {
-        if(LIBZFS.zfs_mount(handle, null, 0)!=0)
-            throw new ZFSException(parent);
-    }
-
-    public void share() {
-        if(LIBZFS.zfs_share(handle)!=0)
-            throw new ZFSException(parent);
-    }
-
+  
     /**
-     * Unmounts this dataset.
+     * Creates a clone from this snapshot.
+     *
+     * This method fails if this {@link ZFSObject} is not a snapshot.
      */
-    public void unmount() {
-        if(LIBZFS.zfs_unmount(handle, null, 0)!=0)
+    public ZFSObject clone(String fullDestinationName) {
+        if(LIBZFS.zfs_clone(handle,fullDestinationName,null)!=0)
             throw new ZFSException(parent);
+        ZFSObject target = parent.open(fullDestinationName);
+        // this behavior mimics "zfs clone"
+        target.mount();
+        target.share();
+        return target;
     }
-
-    /**
-     * Wipes out the dataset and all its data. Very dangerous.
-     */
-    public void destory() {
-        if(LIBZFS.zfs_destroy(handle)!=0)
-            throw new ZFSException(parent);
-    }
-
+    
     /**
      * Takes a snapshot of this ZFS filesystem|volume.
      *
@@ -182,33 +129,77 @@ public class ZFSObject implements Comparator {
      */
     public ZFSObject createSnapshot(String snapshotName, boolean recursive) {
         String fullName = getName() + '@' + snapshotName;
-        if(LIBZFS.zfs_snapshot(parent.getHandle(), fullName,recursive)!=0)
+        /*
+         * nv96 prototype:
+         * if(LIBZFS.zfs_snapshot(parent.getHandle(), fullName,recursive, null)!=0)
+         * pre-nv96 prototype:
+         * if(LIBZFS.zfs_snapshot(parent.getHandle(), fullName,recursive)!=0)
+         */
+        if(LIBZFS.zfs_snapshot(parent.getHandle(), fullName,recursive,null)!=0)
             throw new ZFSException(parent);
 
         return parent.open(fullName,zfs_type_t.SNAPSHOT);
     }
 
     /**
-     * Creates a clone from this snapshot.
-     *
-     * This method fails if this {@link ZFSObject} is not a snapshot.
+     * Wipes out the dataset and all its data. Very dangerous.
      */
-    public ZFSObject clone(String fullDestinationName) {
-        if(LIBZFS.zfs_clone(handle,fullDestinationName,null)!=0)
+    public void destory() {
+        if(LIBZFS.zfs_destroy(handle)!=0)
             throw new ZFSException(parent);
-        ZFSObject target = parent.open(fullDestinationName);
-        // this behavior mimics "zfs clone"
-        target.mount();
-        target.share();
-        return target;
+    }
+    
+    public synchronized void dispose() {
+        if(handle!=null)
+            LIBZFS.zfs_close(handle);
+        handle = null;
     }
 
-    /**
-     * Sets a user-defined property.
-     */
-    public void setProperty(String key, String value) {
-        if(LIBZFS.zfs_prop_set(handle, key, value)!=0)
-            throw new ZFSException(parent);
+    public boolean equals(Object a, Object b) {
+      if ( a == b ) return true;
+      return false;
+    }
+        
+    @Override
+    public final boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        ZFSObject zfsObject = (ZFSObject) o;
+        return handle.equals(zfsObject.handle);
+
+    }
+       
+    public List<ZFSObject> filesystems() {
+      final List<ZFSObject> r = new ArrayList<ZFSObject>();
+      LIBZFS.zfs_iter_filesystems(handle, new libzfs.zfs_iter_f() {
+            public int callback(zfs_handle_t handle, Pointer arg) {
+                r.add(new ZFSObject(parent,handle));
+                return 0;
+            }
+        }, null );
+        return r;
+    }
+ 
+    @Override
+    protected void finalize() throws Throwable {
+        dispose();
+        super.finalize();
+    }
+          
+    public List<ZFSObject> getChildren() {
+      final List<ZFSObject> list = new ArrayList<ZFSObject>();
+      LIBZFS.zfs_iter_children(handle, new libzfs.zfs_iter_f() {
+        public int callback(zfs_handle_t handle, Pointer arg) {
+          list.add(new ZFSObject(parent, handle));
+          return 0;
+        }
+      }, null );
+      return list;
+    }
+
+    public String getName() {
+        return LIBZFS.zfs_get_name(handle);
     }
 
     public Hashtable<zfs_prop_t,String> getZfsProperty(List<zfs_prop_t> props) {
@@ -269,40 +260,90 @@ public class ZFSObject implements Comparator {
 
         return v.getString("value");
     }
-
-    public void inheritProperty(String key) {
-      // Note: create new object after calling this method to reflect inherited property.
-      System.out.println("key "+key+" = "+getUserProperty(key));
-      if(LIBZFS.zfs_prop_inherit(handle, key)!=0)
-            throw new ZFSException(parent);
-      for(int i=0; i < 100; i++)
-        System.out.println("key "+key+" = "+getUserProperty(key));
-    }
     
-    @Override
-    public final boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        ZFSObject zfsObject = (ZFSObject) o;
-        return handle.equals(zfsObject.handle);
-
-    }
-
     @Override
     public final int hashCode() {
         return handle.hashCode();
     }
 
-    public synchronized void dispose() {
-        if(handle!=null)
-            LIBZFS.zfs_close(handle);
-        handle = null;
+    public void inheritProperty(String key) {
+      // Note: create new object after calling this method to reflect inherited property.
+      // System.out.println("key "+key+" = "+getUserProperty(key));
+      if(LIBZFS.zfs_prop_inherit(handle, key)!=0)
+            throw new ZFSException(parent);
     }
+          
+    public void mount() {
+        if(LIBZFS.zfs_mount(handle, null, 0)!=0)
+            throw new ZFSException(parent);
+    }
+    
+    public ZFSObject rename(String fullName, int /* zfs_type_t */ type, boolean recursive) {
+      if(LIBZFS.zfs_rename(handle, fullName,recursive)!=0)
+            throw new ZFSException(parent);
 
-    @Override
-    protected void finalize() throws Throwable {
-        dispose();
-        super.finalize();
+        return parent.open(fullName,type);
+    }
+ 
+    public ZFSObject rollback(boolean recursive) {
+      String filesystem = getName().substring(0,getName().indexOf("@"));
+      ZFSObject fs = parent.open(filesystem);
+      if ( recursive ) {
+        /* first pass - check for clones */
+        List<ZFSObject> list = fs.getChildren();
+        for(ZFSObject child : list ) {
+          if ( !child.getName().startsWith(filesystem+"@") ) {
+            return child;
+          }
+        }
+        /* second pass - find snapshot index, destroy later snapshots */
+        boolean found = false;
+        for(ZFSObject snap : fs.snapshots()) {
+          String name = snap.getName();
+          if ( name.equals(getName()) ) {
+            found = true;
+            continue;
+          }
+          if ( found ) {
+            snap.destory();
+          }
+        }
+      }
+      if(LIBZFS.zfs_rollback(fs.handle, handle, recursive)!=0)
+            throw new ZFSException(parent);
+
+      return parent.open(filesystem);
+    }
+    
+    /**
+     * Sets a user-defined property.
+     */
+    public void setProperty(String key, String value) {
+        if(LIBZFS.zfs_prop_set(handle, key, value)!=0)
+            throw new ZFSException(parent);
+    }
+       
+    public void share() {
+        if(LIBZFS.zfs_share(handle)!=0)
+            throw new ZFSException(parent);
+    }
+    
+    public Set<ZFSObject> snapshots() {
+      final Set<ZFSObject> set = new TreeSet<ZFSObject>(this);      
+      LIBZFS.zfs_iter_snapshots(handle, new libzfs.zfs_iter_f() {
+            public int callback(zfs_handle_t handle, Pointer arg) {
+                set.add(new ZFSObject(parent,handle));
+                return 0;
+            }
+        }, null );
+        return set;
+    }
+    
+    /**
+     * Unmounts this dataset.
+     */
+    public void unmount() {
+        if(LIBZFS.zfs_unmount(handle, null, 0)!=0)
+            throw new ZFSException(parent);
     }
 }

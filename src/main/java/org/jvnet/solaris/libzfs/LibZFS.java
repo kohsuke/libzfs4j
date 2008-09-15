@@ -105,9 +105,7 @@ public class LibZFS {
         StringBuffer sb = new StringBuffer(dirs[0]);
         for(int i=1; i < dirs.length; i++) {
           sb.append(File.separator+dirs[i]);
-          System.out.println("Checking exists "+sb.toString());
           if ( !exists(sb.toString(), ZFSType.FILESYSTEM)) {
-            System.out.println("filesystem "+name+" does not exist");
             if(LIBZFS.zfs_create(handle,sb.toString(),type.code,nvl)!=0) {
               throw new ZFSException(this); 
             }
@@ -124,7 +122,7 @@ public class LibZFS {
         return open(name,zfs_type_t.DATASET);
     }
 
-    /*package*/ ZFSObject open(String name, int/*zfs_type_t*/ mask ) {
+    public ZFSObject open(String name, int /*zfs_type_t*/ mask ) {
         return new ZFSObject(this,LIBZFS.zfs_open(handle,name, mask));
     }
 
