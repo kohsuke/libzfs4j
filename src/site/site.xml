@@ -13,7 +13,7 @@
       <item name="Download" href="http://maven.dyndns.org/2/org/jvnet/libzfs/libzfs/"/>
 
       <item name="Mailing lists" href="servlets/ProjectMailingListList"/>
-      <item name="Source code" href="source/browse/trunk/libzfs/"/>
+      <item name="Source code" href="source/browse/zfs/"/>
       <item name="Issues" href="servlets/ProjectIssues"/>
     </menu>
     ${reports}

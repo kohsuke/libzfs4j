@@ -14,9 +14,10 @@ newFS.mount();
   ... or to destroy it:
 
 ------------------
-ZFSObject fs = zfs.open("rpool/kohsuke/test");
-fs.unmount();
-fs.destory();
+LibZFS zfs = new LibZFS();
+ZFSObject existingFS = zfs.open("rpool/kohsuke/test");
+existingFS.unmount();
+existingFS.destory();
 ------------------
 
   ... or any other things you can do with <<<libzfs>>>, like querying file system information, create snapshots and/or
