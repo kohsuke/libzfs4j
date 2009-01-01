@@ -39,7 +39,17 @@ import org.jvnet.solaris.libzfs.jna.zpool_prop_t;
 public class AppTest 
     extends TestCase
 {
-    
+
+    private static final String ZFS_TEST_POOL_OVERRIDE_PROPERTY = "libzfs.test.pool";
+
+    private static final String ZFS_TEST_POOL_BASENAME_DEFAULT = "rpool/kohsuke/";
+
+    private String ZFS_TEST_POOL_BASENAME;
+
+    public void setUp() {
+        ZFS_TEST_POOL_BASENAME = System.getProperty(ZFS_TEST_POOL_OVERRIDE_PROPERTY, ZFS_TEST_POOL_BASENAME_DEFAULT);
+    }
+
     public void testApp()
     {
         LibZFS zfs = new LibZFS();
@@ -78,29 +88,28 @@ public class AppTest
 
     public void testCreate() {
         LibZFS zfs = new LibZFS();
-        ZFSObject o = zfs.create("rpool/kohsuke/test", ZFSType.FILESYSTEM);
+        ZFSObject o = zfs.create(ZFS_TEST_POOL_BASENAME + "test", ZFSType.FILESYSTEM);
         o.mount();
         o.share();
     }
 
     public void testDestroy() {
         LibZFS zfs = new LibZFS();
-        ZFSObject o = zfs.open("rpool/kohsuke/test");
-        o.unmount();
-        o.destory();
-        o = zfs.open("rpool/kohsuke");
+        ZFSObject o = zfs.open(ZFS_TEST_POOL_BASENAME + "test");
         o.unmount();
         o.destory();
     }
 
     public void testUserProperty() {
         LibZFS zfs = new LibZFS();
-        ZFSObject o = zfs.open("rpool");
+        zfs.create(ZFS_TEST_POOL_BASENAME + "testUserProperty", ZFSType.FILESYSTEM);
+
+        ZFSObject o = zfs.open(ZFS_TEST_POOL_BASENAME + "testUserProperty");
         String property = "my:test";
         o.setProperty(property, String.valueOf(System.currentTimeMillis()));
         System.out.println("Property "+property+" is "+o.getUserProperty(property));
     }
-    
+
     public void testGetZfsProperties() {
         LibZFS zfs = new LibZFS();
         for (ZFSPool pool : zfs.roots()) {
@@ -131,14 +140,17 @@ public class AppTest
     
     public void testInheritProperty() {
       LibZFS zfs = new LibZFS();
-     
-      ZFSObject o = zfs.open("rpool");
+      zfs.create(ZFS_TEST_POOL_BASENAME + "testInheritProperty", ZFSType.FILESYSTEM);
+      zfs.create(ZFS_TEST_POOL_BASENAME + "testInheritProperty/child", ZFSType.FILESYSTEM);
+
+      ZFSObject o = zfs.open(ZFS_TEST_POOL_BASENAME + "testInheritProperty");
       String property = "my:test";
       o.setProperty(property, String.valueOf(System.currentTimeMillis()));
       System.out.println("set test: Property "+property+" is "+o.getUserProperty(property));
       o.inheritProperty(property);
-      
-      ZFSObject o2 = zfs.open("rpool");
+
+      ZFSObject o2 = zfs.open(ZFS_TEST_POOL_BASENAME + "testInheritProperty/child");
       System.out.println("inherit test: Property "+property+" is "+o2.getUserProperty(property));
     }
+
 }
