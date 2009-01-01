@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.jvnet.libzfs</groupId>
@@ -9,8 +10,9 @@
   <url>https://zfs.dev.java.net/</url>
 
   <scm>
-    <connection>scm:svn:https://svn.dev.java.net/svn/zfs/trunk/libzfs/</connection>
-    <developerConnection>scm:svn:https://svn.dev.java.net/svn/zfs/trunk/libzfs/</developerConnection>
+    <connection>scm:svn:https://zfs.dev.java.net/svn/zfs/trunk/libzfs/</connection>
+    <developerConnection>scm:svn:https://zfs.dev.java.net/svn/zfs/trunk/libzfs/</developerConnection>
+    <url>https://zfs.dev.java.net/source/browse/zfs/</url>
   </scm>
 
   <distributionManagement>
@@ -30,8 +32,8 @@
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
         <configuration>
-          <source>1.5</source>
-          <target>1.5</target>
+          <source>${javaSource}</source>
+          <target>${javaTarget}</target>
         </configuration>
       </plugin>
       <plugin>
@@ -47,7 +49,7 @@
         <artifactId>wagon-svn</artifactId>
         <version>1.8</version>
       </extension>
-    </extensions>    
+    </extensions>
   </build>
 
   <dependencies>
@@ -94,8 +96,14 @@
       <id>release</id>
       <properties>
         <!-- so that I can release from Linux -->
-        <maven.test.skip>true</maven.test.skip>
+        <maven.test.skip.exec>true</maven.test.skip.exec>
       </properties>
     </profile>
   </profiles>
+
+  <properties>
+    <javaSource>1.5</javaSource>
+    <javaTarget>${javaSource}</javaTarget>
+  </properties>
+
 </project>
