@@ -112,18 +112,27 @@ public class AppTest
 
     public void testGetZfsProperties() {
         LibZFS zfs = new LibZFS();
-        for (ZFSPool pool : zfs.roots()) {
-            System.out.println("pool    :"+pool.getName());
 
-            ArrayList<zfs_prop_t> list = new ArrayList<zfs_prop_t>();
-            for (zfs_prop_t prop : EnumSet.allOf(zfs_prop_t.class) ) {
-              list.add(prop);
+        List<zfs_prop_t> props = new ArrayList<zfs_prop_t>();
+        for (zfs_prop_t prop : EnumSet.allOf(zfs_prop_t.class)) {
+            props.add(prop);
+        }
+
+        for (ZFSPool pool : zfs.roots()) {
+            System.out.println("pool    :" + pool.getName());
+
+            Hashtable<zfs_prop_t, String> zfsPoolProps = pool.getZfsProperty(props);
+            for (zfs_prop_t prop : zfsPoolProps.keySet()) {
+                System.out.println("zfs_prop_t " + prop + "(" + prop.ordinal() + ") = " + zfsPoolProps.get(prop));
             }
-        
-            Hashtable<zfs_prop_t,String> map = pool.getZfsProperty(list);
-            for( zfs_prop_t prop : map.keySet() ) {
-              System.out.println("zfs_prop_t "+prop+"("+prop.ordinal()+") = "+map.get(prop));
-            }
+        }
+
+        ZFSObject o = zfs.open("rpool/kohsuke");
+        System.out.println("pool    :" + o.getName());
+
+        Hashtable<zfs_prop_t, String> zfsPoolProps = o.getZfsProperty(props);
+        for (zfs_prop_t prop : zfsPoolProps.keySet()) {
+            System.out.println("zfs_prop_t " + prop + "(" + prop.ordinal() + ") = " + zfsPoolProps.get(prop));
         }
     }
 
