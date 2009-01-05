@@ -18,7 +18,6 @@
  *
  * CDDL HEADER END
  */
-
 package org.jvnet.solaris.libzfs;
 
 import com.sun.jna.Memory;
@@ -198,8 +197,14 @@ public class ZFSObject implements Comparator {
       return list;
     }
 
+    /**
+     * Gets the name of the dataset.
+     *
+     * @return the name of the dataset.
+     */
     public String getName() {
-        return LIBZFS.zfs_get_name(handle);
+        String zfsName = LIBZFS.zfs_get_name(handle);
+        return zfsName;
     }
 
     public Hashtable<zfs_prop_t,String> getZfsProperty(List<zfs_prop_t> props) {
@@ -272,12 +277,24 @@ public class ZFSObject implements Comparator {
       if(LIBZFS.zfs_prop_inherit(handle, key)!=0)
             throw new ZFSException(parent);
     }
-          
-    public void mount() {
-        if(LIBZFS.zfs_mount(handle, null, 0)!=0)
-            throw new ZFSException(parent);
+
+    /**
+     * Is this dataset shared.
+     */
+    public boolean isShared() {
+        final boolean isShared = LIBZFS.zfs_is_shared(handle);
+        return isShared;
     }
-    
+
+    /**
+     * Mounts this dataset.
+     */
+    public void mount() {
+        if (LIBZFS.zfs_mount(handle, null, 0) != 0) {
+            throw new ZFSException(parent);
+        }
+    }
+
     public ZFSObject rename(String fullName, int /* zfs_type_t */ type, boolean recursive) {
       if(LIBZFS.zfs_rename(handle, fullName,recursive)!=0)
             throw new ZFSException(parent);
@@ -322,12 +339,16 @@ public class ZFSObject implements Comparator {
         if(LIBZFS.zfs_prop_set(handle, key, value)!=0)
             throw new ZFSException(parent);
     }
-       
+
+    /**
+     * Share this dataset.
+     */
     public void share() {
-        if(LIBZFS.zfs_share(handle)!=0)
+        if (LIBZFS.zfs_share(handle) != 0) {
             throw new ZFSException(parent);
+        }
     }
-    
+
     public Set<ZFSObject> snapshots() {
       final Set<ZFSObject> set = new TreeSet<ZFSObject>(this);      
       LIBZFS.zfs_iter_snapshots(handle, new libzfs.zfs_iter_f() {
@@ -338,12 +359,23 @@ public class ZFSObject implements Comparator {
         }, null );
         return set;
     }
-    
+
     /**
      * Unmounts this dataset.
      */
     public void unmount() {
-        if(LIBZFS.zfs_unmount(handle, null, 0)!=0)
+        if (LIBZFS.zfs_unmount(handle, null, 0) !=0) {
             throw new ZFSException(parent);
+        }
     }
+
+    /**
+     * Unshare this dataset.
+     */
+    public void unshare() {
+        if (LIBZFS.zfs_unshare(handle) != 0) {
+            throw new ZFSException(parent);
+        }
+    }
+
 }

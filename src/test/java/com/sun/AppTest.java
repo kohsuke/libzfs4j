@@ -88,16 +88,49 @@ public class AppTest
 
     public void testCreate() {
         LibZFS zfs = new LibZFS();
-        ZFSObject o = zfs.create(ZFS_TEST_POOL_BASENAME + "test", ZFSType.FILESYSTEM);
-        o.mount();
-        o.share();
+
+        final String dataSet = ZFS_TEST_POOL_BASENAME + "testCreate" + System.currentTimeMillis();
+
+        assertFalse("Prerequisite Failed, DataSet already exists [" + dataSet + "] ", zfs.exists(dataSet));
+
+        try {
+            ZFSObject fs = zfs.create(dataSet, ZFSType.FILESYSTEM);
+
+            assertNotNull("ZFSObject was null for DataSet [" + dataSet + "]", fs);
+            assertEquals("ZFSObject doesn't match name specified at create", dataSet, fs.getName());
+            assertTrue("ZFS exists doesn't report ZFS's creation", zfs.exists(dataSet));
+
+        }finally {
+            ZFSObject fs = zfs.open(dataSet);
+            fs.destory();
+
+            assertFalse("Tidy Up Failed, DataSet still exists [" + dataSet + "] ", zfs.exists(dataSet));
+        }
     }
 
     public void testDestroy() {
         LibZFS zfs = new LibZFS();
-        ZFSObject o = zfs.open(ZFS_TEST_POOL_BASENAME + "test");
-        o.unmount();
-        o.destory();
+
+        final String dataSet = ZFS_TEST_POOL_BASENAME + "testDestroy" + System.currentTimeMillis();
+
+        zfs.create(dataSet, ZFSType.FILESYSTEM);
+
+        assertTrue("Prerequisite Failed, Test DataSet [" + dataSet + "] didn't create", zfs.exists(dataSet));
+
+        try {
+            ZFSObject fs = zfs.open(dataSet);
+
+            assertNotNull("ZFSObject was null for DataSet [" + dataSet + "]", fs);
+            assertEquals("ZFSObject doesn't match name specified at open", dataSet, fs.getName());
+            assertTrue("ZFS exists doesn't report ZFS", zfs.exists(dataSet));
+
+            fs.destory();
+
+            assertFalse("ZFS exists doesn't report ZFS as destroyed", zfs.exists(dataSet));
+
+        }finally {
+            assertFalse("Tidy Up Failed, DataSet still exists [" + dataSet + "] ", zfs.exists(dataSet));
+        }
     }
 
     public void testUserProperty() {
