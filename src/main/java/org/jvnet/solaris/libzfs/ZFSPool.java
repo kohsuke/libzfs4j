@@ -18,7 +18,6 @@
  *
  * CDDL HEADER END
  */
-
 package org.jvnet.solaris.libzfs;
 
 import org.jvnet.solaris.libzfs.jna.zfs_handle_t;
@@ -27,7 +26,9 @@ import org.jvnet.solaris.libzfs.jna.zfs_handle_t;
  * @author Kohsuke Kawaguchi
  */
 public final class ZFSPool extends ZFSObject {
-    ZFSPool(LibZFS parent, zfs_handle_t handle) {
-        super(parent,handle);
+
+    ZFSPool(final LibZFS parent, final zfs_handle_t handle) {
+        super(parent, handle);
     }
+
 }

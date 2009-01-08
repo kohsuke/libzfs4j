@@ -18,7 +18,6 @@
  *
  * CDDL HEADER END
  */
-
 package org.jvnet.solaris.libzfs;
 
 import org.jvnet.solaris.libzfs.jna.zfs_type_t;
@@ -28,14 +27,16 @@ import org.jvnet.solaris.libzfs.jna.zfs_type_t;
  * @see zfs_type_t
  */
 public enum ZFSType {
+
     FILESYSTEM(1),
     SNAPSHOT(2),
     VOLUME(4),
     POOL(8);
 
-    ZFSType(int code) {
+    ZFSType(final int code) {
         this.code = code;
     }
 
     public final int code;
+
 }

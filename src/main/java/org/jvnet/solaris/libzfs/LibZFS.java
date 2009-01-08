@@ -18,7 +18,6 @@
  *
  * CDDL HEADER END
  */
-
 package org.jvnet.solaris.libzfs;
 
 import com.sun.jna.Pointer;
@@ -42,6 +41,7 @@ import java.util.Collections;
  * @author Kohsuke Kawaguchi
  */
 public class LibZFS {
+
     private libzfs_handle_t handle;
 
     public LibZFS() {
@@ -50,16 +50,16 @@ public class LibZFS {
 
     /**
      * List up all the root pools and return them.
-     *
+     * 
      * TODO: are they roots that are not pools?
-     * @return
-     *      can be empty but never null.
+     * 
+     * @return can be empty but never null.
      */
     public List<ZFSPool> roots() {
         final List<ZFSPool> r = new ArrayList<ZFSPool>();
-        LIBZFS.zfs_iter_root(handle,new libzfs.zfs_iter_f() {
+        LIBZFS.zfs_iter_root(handle, new libzfs.zfs_iter_f() {
             public int callback(zfs_handle_t handle, Pointer arg) {
-                r.add(new ZFSPool(LibZFS.this,handle));
+                r.add(new ZFSPool(LibZFS.this, handle));
                 return 0;
             }
         }, null);
@@ -68,70 +68,132 @@ public class LibZFS {
 
     /**
      * Does a zfs dataset of the given name exist?
+     * 
+     * @param dataSetName
+     *            the dataset name of check for.
+     * @return does the dataset exist?
      */
-    public boolean exists(String name) {
-        return exists(name,EnumSet.allOf(ZFSType.class));
+    public boolean exists(final String dataSetName) {
+        final boolean exists = exists(dataSetName, EnumSet.allOf(ZFSType.class));
+        return exists;
     }
 
     /**
-     * Does a zfs dataset of the given name and the given type exist?
+     * Does a zfs dataset of the given name and the given types exist?
+     * 
+     * @param name
+     *            the dataset name of check for.
+     * @param typeMask
+     *            the specific zfs types to check for.
+     * @return does the dataset exist?
      */
-    public boolean exists(String name, Set<ZFSType> typeMask) {
+    public boolean exists(final String name, final Set<ZFSType> typeMask) {
         int mask = 0;
-        for (ZFSType t : typeMask)
+        for (ZFSType t : typeMask) {
             mask |= t.code;
-        return LIBZFS.zfs_dataset_exists(handle,name,mask);
+        }
+
+        final boolean exists = LIBZFS.zfs_dataset_exists(handle, name, mask);
+        return exists;
     }
 
     /**
      * Does a zfs dataset of the given name and the given type exist?
+     * 
+     * @param dataSetName
+     *            the dataset name of check for.
+     * @param type
+     *            the specific zfs type to check for.
+     * @return does the dataset exist?
      */
-    public boolean exists(String name, ZFSType type) {
-        return exists(name,EnumSet.of(type));
+    public boolean exists(final String dataSetName, final ZFSType type) {
+        final boolean exists = exists(dataSetName, EnumSet.of(type));
+        return exists;
     }
 
-    public ZFSObject create(String name, ZFSType type) {
-        return create(name,type, Collections.<String,String>emptyMap());
+    /**
+     * Create a ZFS Data Set of a given name and zfs type.
+     * 
+     * @param dataSetName
+     *            name of the dataset to create.
+     * @param type
+     *            the zfs type of dataset to create.
+     * @return created dataset.
+     */
+    public ZFSObject create(final String dataSetName, final ZFSType type) {
+        final ZFSObject dataSet = create(dataSetName, type, Collections
+                .<String, String> emptyMap());
+        return dataSet;
     }
 
-    public ZFSObject create(String name, ZFSType type, Map<String,String> props) {
-        nvlist_t nvl = nvlist_t.alloc(libnvpair.NV_UNIQUE_NAME);
+    /**
+     * Create a ZFS Data Set of a given name, zfs type and properties.
+     * 
+     * @param dataSetName
+     *            name of the dataset to create.
+     * @param type
+     *            the zfs type of dataset to create.
+     * @param props
+     *            zfs dataset properties.
+     * @return created dataset.
+     */
+    public ZFSObject create(final String dataSetName, final ZFSType type,
+            final Map<String, String> props) {
+        final nvlist_t nvl = nvlist_t.alloc(libnvpair.NV_UNIQUE_NAME);
         for (Map.Entry<String, String> e : props.entrySet()) {
-            nvl.put(e.getKey(),e.getValue());
+            nvl.put(e.getKey(), e.getValue());
         }
 
         /* create intermediate directories */
-        String[] dirs = name.split(File.separator);
-        StringBuffer sb = new StringBuffer(dirs[0]);
-        for(int i=1; i < dirs.length; i++) {
-          sb.append(File.separator+dirs[i]);
-          if ( !exists(sb.toString(), ZFSType.FILESYSTEM)) {
-            if(LIBZFS.zfs_create(handle,sb.toString(),type.code,nvl)!=0) {
-              throw new ZFSException(this); 
+        final String[] dirs = dataSetName.split(File.separator);
+        final StringBuffer sb = new StringBuffer(dirs[0]);
+        for (int i = 1; i < dirs.length; i++) {
+            sb.append(File.separator + dirs[i]);
+            if (!exists(sb.toString(), ZFSType.FILESYSTEM)) {
+                if (LIBZFS.zfs_create(handle, sb.toString(), type.code, nvl) != 0) {
+                    throw new ZFSException(this);
+                }
             }
-          }
         }
 
-        return open(name);
+        final ZFSObject dataSet = open(dataSetName);
+        return dataSet;
     }
 
     /**
-     * Opens a ZFS data set of the given name.
+     * Open a ZFS Data Set of a given name.
+     * 
+     * @param dataSetName
+     *            name of the dataset to open.
+     * @return opened dataset.
      */
-    public ZFSObject open(String name) {
-        return open(name,zfs_type_t.DATASET);
+    public ZFSObject open(final String dataSetName) {
+        final ZFSObject dataSet = open(dataSetName, zfs_type_t.DATASET);
+        return dataSet;
     }
 
-    public ZFSObject open(String name, int /*zfs_type_t*/ mask ) {
-        return new ZFSObject(this,LIBZFS.zfs_open(handle,name, mask));
+    /**
+     * Open a ZFS Data Set of a given name and type.
+     * 
+     * @param dataSetName
+     *            name of the dataset to open.
+     * @param mask
+     *            the zfs type of dataset to open.
+     * @return opened dataset.
+     */
+    public ZFSObject open(final String dataSetName,
+            final int /* zfs_type_t */mask) {
+        zfs_handle_t zfsHandle = LIBZFS.zfs_open(handle, dataSetName, mask);
+        final ZFSObject dataSet = new ZFSObject(this, zfsHandle);
+        return dataSet;
     }
 
     /**
      * Returns {@link libzfs_handle_t} that this object wraps.
      * <p>
-     * If the caller wants to use methods that don't yet have a high-level binding,
-     * the returned {@link libzfs_handle_t} can be used directly in conjunction with
-     * {@link libzfs#LIBZFS}.
+     * If the caller wants to use methods that don't yet have a high-level
+     * binding, the returned {@link libzfs_handle_t} can be used directly in
+     * conjunction with {@link libzfs#LIBZFS}.
      */
     public libzfs_handle_t getHandle() {
         return handle;
@@ -148,9 +210,10 @@ public class LibZFS {
      * instead of waiting for GC to take care of it.
      */
     public synchronized void dispose() {
-        if(handle!=null) {
+        if (handle != null) {
             LIBZFS.libzfs_fini(handle);
             handle = null;
         }
     }
+
 }
