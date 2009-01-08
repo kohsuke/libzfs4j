@@ -305,13 +305,24 @@ public class ZFSObject implements Comparator<ZFSObject> {
     }
 
     /**
+     * Is this dataset mounted.
+     * 
+     * @return is dataset mounted.
+     */
+    public boolean isMounted() {
+        final boolean isMounted = LIBZFS.zfs_is_mounted(handle, null);
+        return isMounted;
+    }
+
+    /**
      * Is this dataset shared.
      * 
      * @return is dataset shared.
      */
     public boolean isShared() {
-        final boolean isShared = LIBZFS.zfs_is_shared(handle);
-        return isShared;
+        throw new UnsupportedOperationException("Not supported yet.");
+        // final boolean isShared = LIBZFS.zfs_is_shared(handle);
+        // return isShared;
     }
 
     /**
