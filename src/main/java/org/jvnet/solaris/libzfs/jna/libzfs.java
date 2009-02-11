@@ -237,6 +237,8 @@ int zfs_ioctl(libzfs_handle_t lib, int _2, zfs_cmd cmd);
 /*
  * Basic handle manipulations.  These functions do not create or destroy the
  * underlying datasets, only the references to them.
+ *
+ * See http://src.opensolaris.org/source/xref/onnv/onnv-gate/usr/src/lib/libzfs/common/libzfs_dataset.c
  */
 zfs_handle_t zfs_open(libzfs_handle_t lib, String name, int/*zfs_type_t*/ typeMask);
 void zfs_close(zfs_handle_t handle);
