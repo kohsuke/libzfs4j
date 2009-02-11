@@ -44,7 +44,7 @@ import java.util.TreeSet;
  * 
  * @author Kohsuke Kawaguchi
  */
-public abstract class ZFSObject implements Comparator<ZFSObject> {
+public abstract class ZFSObject implements Comparator<ZFSObject>, ZFSContainer {
 
     /*package*/ final LibZFS parent;
     /*package*/ zfs_handle_t handle;
@@ -85,32 +85,14 @@ public abstract class ZFSObject implements Comparator<ZFSObject> {
         return 0;
     }
 
-    /**
-     * List the children of this ZFS object (but not recursively.)
-     *
-     * @return
-     *      Never null. Sorted by the in-order of the traversal.
-     */
     public List<ZFSObject> children() {
         return children(ZFSObject.class);
     }
 
-    /**
-     * List the specific kind of children of this ZFS object (but not recursively.)
-     *
-     * @return
-     *      Never null. Sorted by the in-order of the traversal.
-     */
     public <T extends ZFSObject> List<T> children(Class<T> type) {
         return children(type, new ArrayList<T>(), false);
     }
 
-    /**
-     * List the children of this ZFS object recursively, excluding the 'this' object itself.
-     *
-     * @return
-     *      Never null. Sorted by the in-order of the traversal.
-     */
     public List<ZFSObject> descendants() {
         return children(ZFSObject.class);
     }

@@ -34,13 +34,15 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Collections;
+import java.io.File;
 
 /**
  * Entry point to ZFS functionality in Java.
  * 
  * @author Kohsuke Kawaguchi
  */
-public class LibZFS {
+public class LibZFS implements ZFSContainer {
 
     private libzfs_handle_t handle;
 
@@ -191,6 +193,53 @@ public class LibZFS {
         zfs_handle_t zfsHandle = LIBZFS.zfs_open(handle, dataSetName, mask);
         final ZFSObject dataSet = ZFSObject.create(this, zfsHandle);
         return dataSet;
+    }
+
+    /**
+     * Opens a ZFS dataset of the given name and type.
+     */
+    public <T extends ZFSObject> T open(String dataSetName, Class<T> type) {
+        zfs_handle_t zfsHandle = LIBZFS.zfs_open(handle, dataSetName, ZFSType.fromType(type).code);
+        return type.cast(ZFSObject.create(this, zfsHandle));
+    }
+
+    /**
+     * Gets a {@link ZFSFileSystem} mounted at the given directory.
+     *
+     * @return
+     *      null if no such file system exists.
+     */
+    public ZFSFileSystem getFileSystemByMountPoint(File dir) {
+        dir = dir.getAbsoluteFile();
+        for (ZFSFileSystem f : descendants(ZFSFileSystem.class)) {
+            File mp = f.getMountPoint();
+            if(mp!=null && mp.equals(dir))
+                return f;
+        }
+        return null;
+    }
+
+    public List<ZFSPool> children() {
+        return roots();
+    }
+
+    public <T extends ZFSObject> List<T> children(Class<T> type) {
+        if(type.isAssignableFrom(ZFSPool.class))
+            return (List)roots();
+        else
+            return Collections.emptyList();
+    }
+
+    public List<ZFSObject> descendants() {
+        return children(ZFSObject.class);
+    }
+
+    public <T extends ZFSObject> List<T> descendants(Class<T> type) {
+        ArrayList<T> r = new ArrayList<T>();
+        r.addAll(children(type));
+        for (ZFSPool p : roots())
+            r.addAll(p.descendants(type));
+        return r;
     }
 
     /**
