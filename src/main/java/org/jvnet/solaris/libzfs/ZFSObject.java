@@ -74,21 +74,35 @@ public class ZFSObject implements Comparator<ZFSObject> {
         return 0;
     }
 
+    /**
+     * List the children of this ZFS object (but not recursively.)
+     *
+     * @return
+     *      Never null. Sorted by the in-order of the traversal.
+     */
     public List<ZFSObject> children() {
-        final List<ZFSObject> list = new ArrayList<ZFSObject>();
-        final List<ZFSObject> children = children(list, this);
-        return children;
+        return children(new ArrayList<ZFSObject>(), this, false);
     }
 
-    // todo should this be static/private as only uses method parameters
-    public List<ZFSObject> children(List<ZFSObject> list, ZFSObject zfs) {
+    /**
+     * List the children of this ZFS object recursively, excluding the 'this' object itself.
+     *
+     * @return
+     *      Never null. Sorted by the in-order of the traversal.
+     */
+    public List<ZFSObject> descendants() {
+        return children(new ArrayList<ZFSObject>(), this, true);
+    }
+
+    private List<ZFSObject> children(List<ZFSObject> list, ZFSObject zfs, boolean recursive) {
         for (ZFSObject snap : zfs.snapshots()) {
             list.add(snap);
         }
         for (ZFSObject child : zfs.getChildren()) {
             if (!child.getName().contains("@")) {
                 list.add(child);
-                children(list, child);
+                if(recursive)
+                    children(list, child, recursive);
             }
         }
         return list;

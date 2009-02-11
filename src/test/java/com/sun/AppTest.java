@@ -92,7 +92,7 @@ public class AppTest extends TestCase {
         System.out.println("Iterating roots");
         for (ZFSPool pool : zfs.roots()) {
             System.out.println(pool.getName());
-            for (ZFSObject child : pool.children()) {
+            for (ZFSObject child : pool.descendants()) {
                 System.out.println("- " + child.getName());
             }
         }
@@ -106,8 +106,7 @@ public class AppTest extends TestCase {
         ZFSObject filesystem = zfs.open("rpool");
         if (filesystem != null) {
             System.out.println("single tree: " + filesystem.getName());
-            List<ZFSObject> clist = new ArrayList<ZFSObject>();
-            for (ZFSObject child : filesystem.children(clist, filesystem)) {
+            for (ZFSObject child : filesystem.children()) {
                 if (child.getName().contains("@")) {
                     System.out.println("snapshot  :" + child.getName());
                 } else {
