@@ -141,8 +141,8 @@ public abstract class ZFSObject implements Comparator<ZFSObject> {
      * @param props
      *      ZFS properties to be attached to the new file system. Can be null.
      */
-    public ZFSObject createFileSystem(final String name, final Map<String, String> props) {
-        return parent.create(getName()+'/'+name, ZFSType.FILESYSTEM,props);
+    public ZFSFileSystem createFileSystem(final String name, final Map<String, String> props) {
+        return (ZFSFileSystem)parent.create(getName()+'/'+name, ZFSType.FILESYSTEM,props);
     }
 
     /**
@@ -153,8 +153,8 @@ public abstract class ZFSObject implements Comparator<ZFSObject> {
      *            'before-test'.
      * @return the created snapshot.
      */
-    public ZFSObject createSnapshot(final String snapshotName) {
-        final ZFSObject dataSet = createSnapshot(snapshotName, false);
+    public ZFSSnapshot createSnapshot(final String snapshotName) {
+        final ZFSSnapshot dataSet = createSnapshot(snapshotName, false);
         return dataSet;
     }
 
@@ -171,7 +171,7 @@ public abstract class ZFSObject implements Comparator<ZFSObject> {
      *            recursive snapshots correspond to the same moment in time.
      * @return the created snapshot of this dataset.
      */
-    public ZFSObject createSnapshot(final String snapshotName,
+    public ZFSSnapshot createSnapshot(final String snapshotName,
             final boolean recursive) {
         String fullName = getName() + '@' + snapshotName;
         /*
@@ -183,7 +183,7 @@ public abstract class ZFSObject implements Comparator<ZFSObject> {
             throw new ZFSException(parent);
         }
 
-        final ZFSObject dataSet = parent.open(fullName, zfs_type_t.SNAPSHOT);
+        final ZFSSnapshot dataSet = (ZFSSnapshot)parent.open(fullName, zfs_type_t.SNAPSHOT);
         return dataSet;
     }
 
