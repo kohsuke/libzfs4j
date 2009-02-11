@@ -38,13 +38,13 @@ public enum ZFSType {
      * standards  conformance  might  fail  due  to nonstandard
      * behavior when checking file system free space.
      */
-    FILESYSTEM(1),
+    FILESYSTEM(1,ZFSFileSystem.class),
     /**
      * A read-only version of a file  system  or  volume  at  a
      * given  point in time. It is specified as filesystem@name
      * or volume@name.
      */
-    SNAPSHOT(2),
+    SNAPSHOT(2,ZFSSnapshot.class),
     /**
      * A logical volume exported as a raw or block device. This
      * type  of  dataset should only be used under special cir-
@@ -52,24 +52,35 @@ public enum ZFSType {
      * environments.  Volumes  cannot  be  used in a non-global
      * zone.
      */
-    VOLUME(4),
+    VOLUME(4,ZFSVolume.class),
     /**
      * Pool is a storage abstraction in which filesysems, snapshots,
      * and volumes are stored.
      *
      * TODO: find an official documentation and replace this.
      */
-    POOL(8);
+    POOL(8,ZFSPool.class);
 
-    ZFSType(final int code) {
+    ZFSType(int code, Class<? extends ZFSObject> type) {
         this.code = code;
+        this.type = type;
     }
 
     public final int code;
 
+    public final Class<? extends ZFSObject> type;
+
+
     /*package*/ static ZFSType fromCode(int n) {
         for( ZFSType t : ZFSType.class.getEnumConstants() )
             if(t.code==n)
+                return t;
+        return null;
+    }
+
+    /*package*/ static ZFSType fromType(Class<? extends ZFSObject> subType) {
+        for( ZFSType t : ZFSType.class.getEnumConstants() )
+            if(t.type==subType)
                 return t;
         return null;
     }
