@@ -244,13 +244,20 @@ public class ZFSObject implements Comparator<ZFSObject> {
     }
 
     /**
-     * Gets the name of the dataset.
+     * Gets the name of the dataset like "rpool/foo/bar".
      * 
      * @return the name of the dataset.
      */
     public String getName() {
         final String zfsName = LIBZFS.zfs_get_name(handle);
         return zfsName;
+    }
+
+    /**
+     * Gets the type of this {@link ZFSObject}.
+     */
+    public ZFSType getType() {
+        return ZFSType.fromCode(LIBZFS.zfs_get_type(handle));
     }
 
     public Hashtable<zfs_prop_t, String> getZfsProperty(List<zfs_prop_t> props) {

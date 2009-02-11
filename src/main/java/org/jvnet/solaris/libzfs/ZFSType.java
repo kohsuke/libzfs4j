@@ -67,4 +67,10 @@ public enum ZFSType {
 
     public final int code;
 
+    /*package*/ static ZFSType fromCode(int n) {
+        for( ZFSType t : ZFSType.class.getEnumConstants() )
+            if(t.code==n)
+                return t;
+        return null;
+    }
 }

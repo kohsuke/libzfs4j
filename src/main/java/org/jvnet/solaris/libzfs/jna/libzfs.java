@@ -240,7 +240,7 @@ int zfs_ioctl(libzfs_handle_t lib, int _2, zfs_cmd cmd);
  */
 zfs_handle_t zfs_open(libzfs_handle_t lib, String name, int/*zfs_type_t*/ typeMask);
 void zfs_close(zfs_handle_t handle);
-zfs_type_t zfs_get_type(zfs_handle_t handle);
+int/*zfs_type_t*/ zfs_get_type(zfs_handle_t handle);
 String zfs_get_name(zfs_handle_t handle);
 
 /*
