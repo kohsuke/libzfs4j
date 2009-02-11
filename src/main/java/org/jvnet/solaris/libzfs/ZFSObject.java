@@ -36,6 +36,7 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.Map;
 import java.io.File;
 
 import org.jvnet.solaris.jna.EnumByReference;
@@ -123,6 +124,16 @@ public class ZFSObject implements Comparator<ZFSObject> {
         target.mount();
         target.share();
         return target;
+    }
+
+    /**
+     * Creates a nested file system.
+     *
+     * @param props
+     *      ZFS properties to be attached to the new file system. Can be null.
+     */
+    public ZFSObject createFileSystem(final String name, final Map<String, String> props) {
+        return parent.create(getName()+'/'+name, ZFSType.FILESYSTEM,props);
     }
 
     /**
