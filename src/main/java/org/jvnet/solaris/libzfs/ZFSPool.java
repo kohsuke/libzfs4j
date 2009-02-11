@@ -23,6 +23,8 @@ package org.jvnet.solaris.libzfs;
 import org.jvnet.solaris.libzfs.jna.zfs_handle_t;
 
 /**
+ * ZFS pool, which is a top-level object of the ZFS data sets.
+ *
  * @author Kohsuke Kawaguchi
  */
 public final class ZFSPool extends ZFSObject {
