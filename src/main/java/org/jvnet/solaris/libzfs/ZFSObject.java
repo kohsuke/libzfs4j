@@ -92,7 +92,17 @@ public abstract class ZFSObject implements Comparator<ZFSObject> {
      *      Never null. Sorted by the in-order of the traversal.
      */
     public List<ZFSObject> children() {
-        return children(new ArrayList<ZFSObject>(), this, false);
+        return children(ZFSObject.class);
+    }
+
+    /**
+     * List the specific kind of children of this ZFS object (but not recursively.)
+     *
+     * @return
+     *      Never null. Sorted by the in-order of the traversal.
+     */
+    public <T extends ZFSObject> List<T> children(Class<T> type) {
+        return children(type, new ArrayList<T>(), false);
     }
 
     /**
@@ -102,18 +112,24 @@ public abstract class ZFSObject implements Comparator<ZFSObject> {
      *      Never null. Sorted by the in-order of the traversal.
      */
     public List<ZFSObject> descendants() {
-        return children(new ArrayList<ZFSObject>(), this, true);
+        return children(ZFSObject.class);
     }
 
-    private List<ZFSObject> children(List<ZFSObject> list, ZFSObject zfs, boolean recursive) {
-        for (ZFSObject snap : zfs.snapshots()) {
-            list.add(snap);
+    public <T extends ZFSObject> List<T> descendants(Class<T> type) {
+        return children(type, new ArrayList<T>(), true);
+    }
+
+    private <T extends ZFSObject> List<T> children(Class<T> type, List<T> list, boolean recursive) {
+        for (ZFSObject snap : snapshots()) {
+            if(type.isInstance(snap))
+                list.add(type.cast(snap));
         }
-        for (ZFSObject child : zfs.getChildren()) {
+        for (ZFSObject child : getChildren()) {
             if (!child.getName().contains("@")) {
-                list.add(child);
+                if(type.isInstance(child))
+                    list.add(type.cast(child));
                 if(recursive)
-                    children(list, child, recursive);
+                    child.children(type,list,recursive);
             }
         }
         return list;

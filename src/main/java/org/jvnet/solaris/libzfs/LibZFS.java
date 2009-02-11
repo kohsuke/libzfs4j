@@ -125,6 +125,10 @@ public class LibZFS {
         return dataSet;
     }
 
+    public <T extends ZFSObject> T create(String dataSetName, Class<T> type) {
+        return type.cast(create(dataSetName, ZFSType.fromType(type), null));
+    }
+
     /**
      * Create a ZFS Data Set of a given name, zfs type and properties.
      * 
