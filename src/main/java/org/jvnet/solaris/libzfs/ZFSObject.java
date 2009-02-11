@@ -27,29 +27,25 @@ import com.sun.jna.ptr.IntByReference;
 import org.jvnet.solaris.libzfs.jna.libzfs;
 import static org.jvnet.solaris.libzfs.jna.libzfs.LIBZFS;
 import org.jvnet.solaris.libzfs.jna.zfs_handle_t;
+import org.jvnet.solaris.libzfs.jna.zfs_prop_t;
 import org.jvnet.solaris.libzfs.jna.zfs_type_t;
 import org.jvnet.solaris.nvlist.jna.nvlist_t;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.Map;
-import java.io.File;
-
-import org.jvnet.solaris.jna.EnumByReference;
-import org.jvnet.solaris.libzfs.jna.zfs_prop_t;
-import org.jvnet.solaris.libzfs.jna.zpool_handle_t;
-import org.jvnet.solaris.libzfs.jna.zpool_prop_t;
 
 /**
  * Represents ZFS snapshot, file system, volume, or pool.
  * 
  * @author Kohsuke Kawaguchi
  */
-public class ZFSObject implements Comparator<ZFSObject> {
+public abstract class ZFSObject implements Comparator<ZFSObject> {
 
     /*package*/ final LibZFS parent;
     private zfs_handle_t handle;
@@ -60,6 +56,19 @@ public class ZFSObject implements Comparator<ZFSObject> {
             throw new ZFSException(parent);
         }
         this.handle = handle;
+    }
+
+    /**
+     * Instantiate the right subtype.
+     */
+    /*package*/ static ZFSObject create(LibZFS parent, zfs_handle_t handle) {
+        switch (ZFSType.fromCode(LIBZFS.zfs_get_type(handle))) {
+        case FILESYSTEM:    return new ZFSFileSystem(parent,handle);
+        case POOL:          return new ZFSPool(parent,handle);
+        case SNAPSHOT:      return new ZFSSnapshot(parent,handle);
+        case VOLUME:        return new ZFSVolume(parent,handle);
+        default:            throw new AssertionError();
+        }
     }
 
     public int compare(ZFSObject o1, ZFSObject o2) {
@@ -219,7 +228,7 @@ public class ZFSObject implements Comparator<ZFSObject> {
         final List<ZFSObject> r = new ArrayList<ZFSObject>();
         LIBZFS.zfs_iter_filesystems(handle, new libzfs.zfs_iter_f() {
             public int callback(zfs_handle_t handle, Pointer arg) {
-                r.add(new ZFSObject(parent, handle));
+                r.add(ZFSObject.create(parent, handle));
                 return 0;
             }
         }, null);
@@ -236,7 +245,7 @@ public class ZFSObject implements Comparator<ZFSObject> {
         final List<ZFSObject> list = new ArrayList<ZFSObject>();
         LIBZFS.zfs_iter_children(handle, new libzfs.zfs_iter_f() {
             public int callback(zfs_handle_t handle, Pointer arg) {
-                list.add(new ZFSObject(parent, handle));
+                list.add(ZFSObject.create(parent, handle));
                 return 0;
             }
         }, null);
@@ -442,7 +451,7 @@ public class ZFSObject implements Comparator<ZFSObject> {
         final Set<ZFSObject> set = new TreeSet<ZFSObject>(this);
         LIBZFS.zfs_iter_snapshots(handle, new libzfs.zfs_iter_f() {
             public int callback(zfs_handle_t handle, Pointer arg) {
-                set.add(new ZFSObject(parent, handle));
+                set.add(ZFSObject.create(parent, handle));
                 return 0;
             }
         }, null);

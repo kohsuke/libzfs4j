@@ -21,7 +21,6 @@
 package org.jvnet.solaris.libzfs;
 
 import com.sun.jna.Pointer;
-import java.io.File;
 import org.jvnet.solaris.libzfs.jna.libzfs;
 import static org.jvnet.solaris.libzfs.jna.libzfs.LIBZFS;
 import org.jvnet.solaris.libzfs.jna.libzfs_handle_t;
@@ -31,11 +30,10 @@ import org.jvnet.solaris.nvlist.jna.libnvpair;
 import org.jvnet.solaris.nvlist.jna.nvlist_t;
 
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Map;
-import java.util.Collections;
+import java.util.Set;
 
 /**
  * Entry point to ZFS functionality in Java.
@@ -187,7 +185,7 @@ public class LibZFS {
     public ZFSObject open(final String dataSetName,
             final int /* zfs_type_t */mask) {
         zfs_handle_t zfsHandle = LIBZFS.zfs_open(handle, dataSetName, mask);
-        final ZFSObject dataSet = new ZFSObject(this, zfsHandle);
+        final ZFSObject dataSet = ZFSObject.create(this, zfsHandle);
         return dataSet;
     }
 
