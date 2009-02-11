@@ -38,6 +38,8 @@ import java.util.Map;
 import java.util.Collections;
 
 /**
+ * Entry point to ZFS functionality in Java.
+ * 
  * @author Kohsuke Kawaguchi
  */
 public class LibZFS {
