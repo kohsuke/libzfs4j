@@ -372,7 +372,7 @@ void zfs_deleg_permissions();
  */
 boolean is_mounted(libzfs_handle_t lib, String special, /*char ***/PointerByReference _2);
 boolean zfs_is_mounted(zfs_handle_t handle, /*char ***/PointerByReference _3);
-int zfs_mount(zfs_handle_t handle, String _2, int mountFlags);
+int zfs_mount(zfs_handle_t handle, String options, int mountFlags);
 
     /**
      *
