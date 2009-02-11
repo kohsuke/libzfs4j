@@ -51,7 +51,7 @@ import org.jvnet.solaris.libzfs.jna.zpool_prop_t;
  */
 public class ZFSObject implements Comparator<ZFSObject> {
 
-    private final LibZFS parent;
+    /*package*/ final LibZFS parent;
     private zfs_handle_t handle;
 
     ZFSObject(final LibZFS parent, final zfs_handle_t handle) {
@@ -277,16 +277,6 @@ public class ZFSObject implements Comparator<ZFSObject> {
                 propbuf, libzfs.ZFS_MAXPROPLEN, ibr, buf,
                 new NativeLong(0), true);
 
-        return ((ret != 0) ? null : propbuf.getString(0));
-    }
-
-    public String getZpoolProperty(zpool_prop_t prop) {
-        Memory propbuf = new Memory(libzfs.ZPOOL_MAXPROPLEN);
-        zpool_handle_t zpool_handle = LIBZFS.zpool_open(parent.getHandle(),
-                this.getName());
-        int ret = LIBZFS.zpool_get_prop(zpool_handle, new NativeLong(prop
-                .ordinal()), propbuf, new NativeLong(
-                libzfs.ZPOOL_MAXPROPLEN), null);
         return ((ret != 0) ? null : propbuf.getString(0));
     }
 
