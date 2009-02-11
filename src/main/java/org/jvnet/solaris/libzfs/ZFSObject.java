@@ -257,12 +257,11 @@ public class ZFSObject implements Comparator<ZFSObject> {
         Memory propbuf = new Memory(libzfs.ZFS_MAXPROPLEN);
         char[] buf = null;
         IntByReference ibr = null;
-        int ret = 0;
 
         Hashtable<zfs_prop_t, String> map = new Hashtable<zfs_prop_t, String>();
         for (zfs_prop_t prop : props) {
-            ret = LIBZFS.zfs_prop_get(handle, new NativeLong(prop.ordinal()),
-                    (Pointer) propbuf, libzfs.ZFS_MAXPROPLEN, ibr, buf,
+            int ret = LIBZFS.zfs_prop_get(handle, new NativeLong(prop.ordinal()),
+                    propbuf, libzfs.ZFS_MAXPROPLEN, ibr, buf,
                     new NativeLong(0), true);
             map.put(prop, (ret != 0) ? "-" : propbuf.getString(0));
         }
@@ -275,7 +274,7 @@ public class ZFSObject implements Comparator<ZFSObject> {
         IntByReference ibr = null;
 
         int ret = LIBZFS.zfs_prop_get(handle, new NativeLong(prop.ordinal()),
-                (Pointer) propbuf, libzfs.ZFS_MAXPROPLEN, ibr, buf,
+                propbuf, libzfs.ZFS_MAXPROPLEN, ibr, buf,
                 new NativeLong(0), true);
 
         return ((ret != 0) ? "-" : propbuf.getString(0));
@@ -283,13 +282,12 @@ public class ZFSObject implements Comparator<ZFSObject> {
 
     public String getZpoolProperty(zpool_prop_t prop) {
         Memory propbuf = new Memory(libzfs.ZPOOL_MAXPROPLEN);
-        char[] buf = null;
         EnumByReference ebr = null;
 
         zpool_handle_t zpool_handle = LIBZFS.zpool_open(parent.getHandle(),
                 this.getName());
         int ret = LIBZFS.zpool_get_prop(zpool_handle, new NativeLong(prop
-                .ordinal()), (Pointer) propbuf, new NativeLong(
+                .ordinal()), propbuf, new NativeLong(
                 libzfs.ZPOOL_MAXPROPLEN), ebr);
         return ((ret != 0) ? "-" : propbuf.getString(0));
     }
