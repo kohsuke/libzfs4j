@@ -140,6 +140,13 @@ public abstract class ZFSObject implements Comparable<ZFSObject>, ZFSContainer {
     }
 
     /**
+     * Opens a nested file system.
+     */
+    public ZFSFileSystem openFileSystem(String name) {
+        return parent.open(getName()+'/'+name,ZFSFileSystem.class);
+    }
+
+    /**
      * Take a snapshot of this ZFS dataset.
      * 
      * @param snapshotName
@@ -395,7 +402,7 @@ public abstract class ZFSObject implements Comparable<ZFSObject>, ZFSContainer {
      * @return all snapshot datasets.
      */
     public Set<ZFSObject> snapshots() {
-        final Set<ZFSObject> set = new TreeSet<ZFSObject>(this);
+        final Set<ZFSObject> set = new TreeSet<ZFSObject>();
         LIBZFS.zfs_iter_snapshots(handle, new libzfs.zfs_iter_f() {
             public int callback(zfs_handle_t handle, Pointer arg) {
                 set.add(ZFSObject.create(parent, handle));
