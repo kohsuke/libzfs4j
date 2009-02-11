@@ -45,13 +45,13 @@ import java.util.TreeSet;
  */
 public abstract class ZFSObject implements Comparable<ZFSObject>, ZFSContainer {
 
-    /*package*/ final LibZFS parent;
+    /*package*/ final LibZFS library;
     /*package*/ zfs_handle_t handle;
 
-    ZFSObject(final LibZFS parent, final zfs_handle_t handle) {
-        this.parent = parent;
+    ZFSObject(final LibZFS library, final zfs_handle_t handle) {
+        this.library = library;
         if (handle == null) {
-            throw new ZFSException(parent);
+            throw new ZFSException(library);
         }
         this.handle = handle;
     }
@@ -67,6 +67,10 @@ public abstract class ZFSObject implements Comparable<ZFSObject>, ZFSContainer {
         case VOLUME:        return new ZFSVolume(parent,handle);
         default:            throw new AssertionError();
         }
+    }
+
+    public LibZFS getLibrary() {
+        return library;
     }
 
     public int compareTo(ZFSObject that) {
@@ -121,8 +125,8 @@ public abstract class ZFSObject implements Comparable<ZFSObject>, ZFSContainer {
      */
     public ZFSFileSystem clone(String fullDestinationName) {
         if (LIBZFS.zfs_clone(handle, fullDestinationName, null) != 0)
-            throw new ZFSException(parent);
-        ZFSFileSystem target = (ZFSFileSystem)parent.open(fullDestinationName);
+            throw new ZFSException(library);
+        ZFSFileSystem target = (ZFSFileSystem) library.open(fullDestinationName);
         // this behavior mimics "zfs clone"
         target.mount();
         target.share();
@@ -136,14 +140,14 @@ public abstract class ZFSObject implements Comparable<ZFSObject>, ZFSContainer {
      *      ZFS properties to be attached to the new file system. Can be null.
      */
     public ZFSFileSystem createFileSystem(final String name, final Map<String, String> props) {
-        return (ZFSFileSystem)parent.create(getName()+'/'+name, ZFSType.FILESYSTEM,props);
+        return (ZFSFileSystem) library.create(getName()+'/'+name, ZFSType.FILESYSTEM,props);
     }
 
     /**
      * Opens a nested file system.
      */
     public ZFSFileSystem openFileSystem(String name) {
-        return parent.open(getName()+'/'+name,ZFSFileSystem.class);
+        return library.open(getName()+'/'+name,ZFSFileSystem.class);
     }
 
     /**
@@ -176,15 +180,15 @@ public abstract class ZFSObject implements Comparable<ZFSObject>, ZFSContainer {
             final boolean recursive) {
         String fullName = getName() + '@' + snapshotName;
         /*
-         * nv96 prototype: if(LIBZFS.zfs_snapshot(parent.getHandle(),
+         * nv96 prototype: if(LIBZFS.zfs_snapshot(library.getHandle(),
          * fullName,recursive, null)!=0) pre-nv96 prototype:
-         * if(LIBZFS.zfs_snapshot(parent.getHandle(), fullName,recursive)!=0)
+         * if(LIBZFS.zfs_snapshot(library.getHandle(), fullName,recursive)!=0)
          */
-        if (LIBZFS.zfs_snapshot(parent.getHandle(), fullName, recursive, null) != 0) {
-            throw new ZFSException(parent);
+        if (LIBZFS.zfs_snapshot(library.getHandle(), fullName, recursive, null) != 0) {
+            throw new ZFSException(library);
         }
 
-        final ZFSSnapshot dataSet = (ZFSSnapshot)parent.open(fullName, zfs_type_t.SNAPSHOT);
+        final ZFSSnapshot dataSet = (ZFSSnapshot) library.open(fullName, zfs_type_t.SNAPSHOT);
         return dataSet;
     }
 
@@ -193,7 +197,7 @@ public abstract class ZFSObject implements Comparable<ZFSObject>, ZFSContainer {
      */
     public void destory() {
         if (LIBZFS.zfs_destroy(handle) != 0)
-            throw new ZFSException(parent);
+            throw new ZFSException(library);
     }
 
     public synchronized void dispose() {
@@ -229,7 +233,7 @@ public abstract class ZFSObject implements Comparable<ZFSObject>, ZFSContainer {
         final List<ZFSObject> r = new ArrayList<ZFSObject>();
         LIBZFS.zfs_iter_filesystems(handle, new libzfs.zfs_iter_f() {
             public int callback(zfs_handle_t handle, Pointer arg) {
-                r.add(ZFSObject.create(parent, handle));
+                r.add(ZFSObject.create(library, handle));
                 return 0;
             }
         }, null);
@@ -246,7 +250,7 @@ public abstract class ZFSObject implements Comparable<ZFSObject>, ZFSContainer {
         final List<ZFSObject> list = new ArrayList<ZFSObject>();
         LIBZFS.zfs_iter_children(handle, new libzfs.zfs_iter_f() {
             public int callback(zfs_handle_t handle, Pointer arg) {
-                list.add(ZFSObject.create(parent, handle));
+                list.add(ZFSObject.create(library, handle));
                 return 0;
             }
         }, null);
@@ -331,7 +335,7 @@ public abstract class ZFSObject implements Comparable<ZFSObject>, ZFSContainer {
         // inherited property.
         // System.out.println("key "+key+" = "+getUserProperty(key));
         if (LIBZFS.zfs_prop_inherit(handle, key) != 0)
-            throw new ZFSException(parent);
+            throw new ZFSException(library);
     }
 
     /**
@@ -353,14 +357,14 @@ public abstract class ZFSObject implements Comparable<ZFSObject>, ZFSContainer {
      */
     public ZFSObject rename(String fullName, boolean recursive) {
         if (LIBZFS.zfs_rename(handle, fullName, recursive) != 0)
-            throw new ZFSException(parent);
+            throw new ZFSException(library);
 
-        return parent.open(fullName);
+        return library.open(fullName);
     }
 
     public ZFSObject rollback(boolean recursive) {
         String filesystem = getName().substring(0, getName().indexOf("@"));
-        ZFSObject fs = parent.open(filesystem);
+        ZFSObject fs = library.open(filesystem);
         if (recursive) {
             /* first pass - check for clones */
             List<ZFSObject> list = fs.getChildren();
@@ -383,9 +387,9 @@ public abstract class ZFSObject implements Comparable<ZFSObject>, ZFSContainer {
             }
         }
         if (LIBZFS.zfs_rollback(fs.handle, handle, recursive) != 0)
-            throw new ZFSException(parent);
+            throw new ZFSException(library);
 
-        return parent.open(filesystem);
+        return library.open(filesystem);
     }
 
     /**
@@ -393,7 +397,7 @@ public abstract class ZFSObject implements Comparable<ZFSObject>, ZFSContainer {
      */
     public void setProperty(String key, String value) {
         if (LIBZFS.zfs_prop_set(handle, key, value) != 0)
-            throw new ZFSException(parent);
+            throw new ZFSException(library);
     }
 
     /**
@@ -405,7 +409,7 @@ public abstract class ZFSObject implements Comparable<ZFSObject>, ZFSContainer {
         final Set<ZFSSnapshot> set = new TreeSet<ZFSSnapshot>();
         LIBZFS.zfs_iter_snapshots(handle, new libzfs.zfs_iter_f() {
             public int callback(zfs_handle_t handle, Pointer arg) {
-                set.add((ZFSSnapshot)ZFSObject.create(parent, handle));
+                set.add((ZFSSnapshot)ZFSObject.create(library, handle));
                 return 0;
             }
         }, null);

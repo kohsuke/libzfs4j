@@ -86,7 +86,7 @@ public final class ZFSFileSystem extends ZFSObject {
      */
     public void mount(int flags) {
         if (LIBZFS.zfs_mount(handle, null, flags) != 0) {
-            throw new ZFSException(parent);
+            throw new ZFSException(library);
         }
     }
 
@@ -105,7 +105,7 @@ public final class ZFSFileSystem extends ZFSObject {
      */
     public void unmount(int flags) {
         if (LIBZFS.zfs_unmount(handle, null, flags) != 0) {
-            throw new ZFSException(parent);
+            throw new ZFSException(library);
         }
     }
 
@@ -114,7 +114,7 @@ public final class ZFSFileSystem extends ZFSObject {
      */
     public void share() {
         if (LIBZFS.zfs_share(handle) != 0) {
-            throw new ZFSException(parent);
+            throw new ZFSException(library);
         }
     }
 
@@ -123,7 +123,7 @@ public final class ZFSFileSystem extends ZFSObject {
      */
     public void unshare() {
         if (LIBZFS.zfs_unshare(handle) != 0) {
-            throw new ZFSException(parent);
+            throw new ZFSException(library);
         }
     }
 }
