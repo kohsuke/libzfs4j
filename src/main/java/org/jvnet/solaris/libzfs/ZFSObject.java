@@ -342,6 +342,16 @@ public class ZFSObject implements Comparator<ZFSObject> {
     }
 
     /**
+     * Sets the mount point of this data set.
+     *
+     * <p>
+     * The dataset won't be remounted until you manually do so (TODO: verify)
+     */
+    public void setMountPoint(File loc) {
+        setProperty("mountpoint",loc.getAbsolutePath());
+    }
+
+    /**
      * Is this dataset shared.
      * 
      * @return is dataset shared.
