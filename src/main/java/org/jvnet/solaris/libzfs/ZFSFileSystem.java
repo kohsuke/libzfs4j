@@ -21,6 +21,10 @@
 package org.jvnet.solaris.libzfs;
 
 import org.jvnet.solaris.libzfs.jna.zfs_handle_t;
+import org.jvnet.solaris.libzfs.jna.zfs_prop_t;
+import static org.jvnet.solaris.libzfs.jna.libzfs.LIBZFS;
+
+import java.io.File;
 
 /**
  * ZFS file system.
@@ -30,5 +34,75 @@ import org.jvnet.solaris.libzfs.jna.zfs_handle_t;
 public final class ZFSFileSystem extends ZFSObject {
     /*package*/ ZFSFileSystem(LibZFS parent, zfs_handle_t handle) {
         super(parent, handle);
+    }
+
+    /**
+     * Is this dataset mounted.
+     *
+     * @return is dataset mounted.
+     */
+    public boolean isMounted() {
+        final boolean isMounted = LIBZFS.zfs_is_mounted(handle, null);
+        return isMounted;
+    }
+
+    /**
+     * Gets the mount point of this data set, as indicated by the 'mountpoint' property.
+     *
+     * @return
+     *      null if the mount point is none or legacy, in which case zfs doesn't know
+     *      where this is supposed to be mounted.
+     */
+    public File getMountPoint() {
+        String mp = getZfsProperty(zfs_prop_t.ZFS_PROP_MOUNTPOINT);
+        if(mp==null || mp.equals("legacy") || mp.equals("none"))
+            return null;
+        return new File(mp);
+    }
+
+    /**
+     * Sets the mount point of this data set.
+     *
+     * <p>
+     * The dataset won't be remounted until you manually do so (TODO: verify)
+     */
+    public void setMountPoint(File loc) {
+        setProperty("mountpoint",loc.getAbsolutePath());
+    }
+
+    /**
+     * Mounts this dataset.
+     */
+    public void mount() {
+        if (LIBZFS.zfs_mount(handle, null, 0) != 0) {
+            throw new ZFSException(parent);
+        }
+    }
+
+    /**
+     * Unmounts this dataset.
+     */
+    public void unmount() {
+        if (LIBZFS.zfs_unmount(handle, null, 0) != 0) {
+            throw new ZFSException(parent);
+        }
+    }
+
+    /**
+     * Share this dataset.
+     */
+    public void share() {
+        if (LIBZFS.zfs_share(handle) != 0) {
+            throw new ZFSException(parent);
+        }
+    }
+
+    /**
+     * Unshare this dataset.
+     */
+    public void unshare() {
+        if (LIBZFS.zfs_unshare(handle) != 0) {
+            throw new ZFSException(parent);
+        }
     }
 }

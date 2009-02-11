@@ -31,7 +31,6 @@ import org.jvnet.solaris.libzfs.jna.zfs_prop_t;
 import org.jvnet.solaris.libzfs.jna.zfs_type_t;
 import org.jvnet.solaris.nvlist.jna.nvlist_t;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Hashtable;
@@ -48,7 +47,7 @@ import java.util.TreeSet;
 public abstract class ZFSObject implements Comparator<ZFSObject> {
 
     /*package*/ final LibZFS parent;
-    private zfs_handle_t handle;
+    /*package*/ zfs_handle_t handle;
 
     ZFSObject(final LibZFS parent, final zfs_handle_t handle) {
         this.parent = parent;
@@ -125,10 +124,10 @@ public abstract class ZFSObject implements Comparator<ZFSObject> {
      * 
      * This method fails if this {@link ZFSObject} is not a snapshot.
      */
-    public ZFSObject clone(String fullDestinationName) {
+    public ZFSFileSystem clone(String fullDestinationName) {
         if (LIBZFS.zfs_clone(handle, fullDestinationName, null) != 0)
             throw new ZFSException(parent);
-        ZFSObject target = parent.open(fullDestinationName);
+        ZFSFileSystem target = (ZFSFileSystem)parent.open(fullDestinationName);
         // this behavior mimics "zfs clone"
         target.mount();
         target.share();
@@ -334,40 +333,6 @@ public abstract class ZFSObject implements Comparator<ZFSObject> {
     }
 
     /**
-     * Is this dataset mounted.
-     * 
-     * @return is dataset mounted.
-     */
-    public boolean isMounted() {
-        final boolean isMounted = LIBZFS.zfs_is_mounted(handle, null);
-        return isMounted;
-    }
-
-    /**
-     * Gets the mount point of this data set, as indicated by the 'mountpoint' property.
-     *
-     * @return
-     *      null if the mount point is none or legacy, in which case zfs doesn't know
-     *      where this is supposed to be mounted.
-     */
-    public File getMountPoint() {
-        String mp = getZfsProperty(zfs_prop_t.ZFS_PROP_MOUNTPOINT);
-        if(mp==null || mp.equals("legacy") || mp.equals("none"))
-            return null;
-        return new File(mp);
-    }
-
-    /**
-     * Sets the mount point of this data set.
-     *
-     * <p>
-     * The dataset won't be remounted until you manually do so (TODO: verify)
-     */
-    public void setMountPoint(File loc) {
-        setProperty("mountpoint",loc.getAbsolutePath());
-    }
-
-    /**
      * Is this dataset shared.
      * 
      * @return is dataset shared.
@@ -376,15 +341,6 @@ public abstract class ZFSObject implements Comparator<ZFSObject> {
         throw new UnsupportedOperationException("Not supported yet.");
         // final boolean isShared = LIBZFS.zfs_is_shared(handle);
         // return isShared;
-    }
-
-    /**
-     * Mounts this dataset.
-     */
-    public void mount() {
-        if (LIBZFS.zfs_mount(handle, null, 0) != 0) {
-            throw new ZFSException(parent);
-        }
     }
 
     /**
@@ -439,15 +395,6 @@ public abstract class ZFSObject implements Comparator<ZFSObject> {
     }
 
     /**
-     * Share this dataset.
-     */
-    public void share() {
-        if (LIBZFS.zfs_share(handle) != 0) {
-            throw new ZFSException(parent);
-        }
-    }
-
-    /**
      * Obtain all snapshots for this dataset.
      * 
      * @return all snapshot datasets.
@@ -461,24 +408,6 @@ public abstract class ZFSObject implements Comparator<ZFSObject> {
             }
         }, null);
         return set;
-    }
-
-    /**
-     * Unmounts this dataset.
-     */
-    public void unmount() {
-        if (LIBZFS.zfs_unmount(handle, null, 0) != 0) {
-            throw new ZFSException(parent);
-        }
-    }
-
-    /**
-     * Unshare this dataset.
-     */
-    public void unshare() {
-        if (LIBZFS.zfs_unshare(handle) != 0) {
-            throw new ZFSException(parent);
-        }
     }
 
     /**
