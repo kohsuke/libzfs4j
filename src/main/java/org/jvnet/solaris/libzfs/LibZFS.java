@@ -172,7 +172,7 @@ public class LibZFS implements ZFSContainer {
      * 
      * @param dataSetName
      *            name of the dataset to open.
-     * @return opened dataset.
+     * @return opened dataset, or null if no such dataset exists.
      */
     public ZFSObject open(final String dataSetName) {
         final ZFSObject dataSet = open(dataSetName, zfs_type_t.DATASET);
@@ -185,22 +185,24 @@ public class LibZFS implements ZFSContainer {
      * @param dataSetName
      *            name of the dataset to open.
      * @param mask
-     *            the zfs type of dataset to open.
-     * @return opened dataset.
+     *            the zfs type mask of dataset to open.
+     * @return opened dataset, or null if no such dataset exists.
      */
-    public ZFSObject open(final String dataSetName,
-            final int /* zfs_type_t */mask) {
-        zfs_handle_t zfsHandle = LIBZFS.zfs_open(handle, dataSetName, mask);
-        final ZFSObject dataSet = ZFSObject.create(this, zfsHandle);
-        return dataSet;
+    public ZFSObject open(final String dataSetName, final int /* zfs_type_t */mask) {
+        zfs_handle_t h = LIBZFS.zfs_open(handle, dataSetName, mask);
+        if(h==null) {
+            int err = LIBZFS.libzfs_errno(handle);
+            if(err==0)  return null;
+            throw new ZFSException(this);
+        }
+        return ZFSObject.create(this,h);
     }
 
     /**
      * Opens a ZFS dataset of the given name and type.
      */
     public <T extends ZFSObject> T open(String dataSetName, Class<T> type) {
-        zfs_handle_t zfsHandle = LIBZFS.zfs_open(handle, dataSetName, ZFSType.fromType(type).code);
-        return type.cast(ZFSObject.create(this, zfsHandle));
+        return type.cast(open(dataSetName,ZFSType.fromType(type).code));
     }
 
     /**
