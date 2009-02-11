@@ -74,4 +74,4 @@ public enum zfs_prop_t {
 	ZFS_PROP_REFQUOTA,
 	ZFS_PROP_REFRESERVATION,
 	ZFS_NUM_PROPS
-};
+}
