@@ -453,4 +453,11 @@ public class ZFSObject implements Comparator<ZFSObject> {
         }
     }
 
+    /**
+     * Returns {@link #getName() the name}.
+     */
+    @Override
+    public String toString() {
+        return getName();
+    }
 }
