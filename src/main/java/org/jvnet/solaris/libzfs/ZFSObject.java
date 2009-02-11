@@ -36,6 +36,8 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
+import java.io.File;
+
 import org.jvnet.solaris.jna.EnumByReference;
 import org.jvnet.solaris.libzfs.jna.zfs_prop_t;
 import org.jvnet.solaris.libzfs.jna.zpool_handle_t;
@@ -326,6 +328,20 @@ public class ZFSObject implements Comparator<ZFSObject> {
     public boolean isMounted() {
         final boolean isMounted = LIBZFS.zfs_is_mounted(handle, null);
         return isMounted;
+    }
+
+    /**
+     * Gets the mount point of this data set, as indicated by the 'mountpoint' property.
+     *
+     * @return
+     *      null if the mount point is none or legacy, in which case zfs doesn't know
+     *      where this is supposed to be mounted.
+     */
+    public File getMountPoint() {
+        String mp = getZfsProperty(zfs_prop_t.ZFS_PROP_MOUNTPOINT);
+        if(mp==null || mp.equals("legacy") || mp.equals("none"))
+            return null;
+        return new File(mp);
     }
 
     /**
