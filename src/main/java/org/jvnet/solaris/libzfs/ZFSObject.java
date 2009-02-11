@@ -387,12 +387,17 @@ public abstract class ZFSObject implements Comparator<ZFSObject> {
         }
     }
 
-    public ZFSObject rename(String fullName, int /* zfs_type_t */type,
-            boolean recursive) {
+    /**
+     * Renames this data set to another name.
+     *
+     * @return
+     *      {@link ZFSObject} representing the new renamed dataset.
+     */
+    public ZFSObject rename(String fullName, boolean recursive) {
         if (LIBZFS.zfs_rename(handle, fullName, recursive) != 0)
             throw new ZFSException(parent);
 
-        return parent.open(fullName, type);
+        return parent.open(fullName);
     }
 
     public ZFSObject rollback(boolean recursive) {
