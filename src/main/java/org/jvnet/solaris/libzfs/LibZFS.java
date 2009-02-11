@@ -123,8 +123,7 @@ public class LibZFS {
      * @return created dataset.
      */
     public ZFSObject create(final String dataSetName, final ZFSType type) {
-        final ZFSObject dataSet = create(dataSetName, type, Collections
-                .<String, String> emptyMap());
+        final ZFSObject dataSet = create(dataSetName, type, null);
         return dataSet;
     }
 
@@ -132,26 +131,28 @@ public class LibZFS {
      * Create a ZFS Data Set of a given name, zfs type and properties.
      * 
      * @param dataSetName
-     *            name of the dataset to create.
+     *            Full name of the dataset to create, like "rpool/abc/def".
      * @param type
-     *            the zfs type of dataset to create.
+     *            the zfs type of dataset to create. Either {@link ZFSType#FILESYSTEM} or {@link ZFSType#VOLUME}.
      * @param props
-     *            zfs dataset properties.
+     *            zfs dataset properties. Can be null.
      * @return created dataset.
      */
     public ZFSObject create(final String dataSetName, final ZFSType type,
             final Map<String, String> props) {
         final nvlist_t nvl = nvlist_t.alloc(libnvpair.NV_UNIQUE_NAME);
-        for (Map.Entry<String, String> e : props.entrySet()) {
-            nvl.put(e.getKey(), e.getValue());
+        if(props!=null) {
+            for (Map.Entry<String, String> e : props.entrySet()) {
+                nvl.put(e.getKey(), e.getValue());
+            }
         }
 
         /* create intermediate directories */
-        final String[] dirs = dataSetName.split(File.separator);
-        final StringBuffer sb = new StringBuffer(dirs[0]);
+        final String[] dirs = dataSetName.split("/");
+        final StringBuilder sb = new StringBuilder(dirs[0]);
         for (int i = 1; i < dirs.length; i++) {
-            sb.append(File.separator + dirs[i]);
-            if (!exists(sb.toString(), ZFSType.FILESYSTEM)) {
+            sb.append('/').append(dirs[i]);
+            if (!exists(sb.toString())) {
                 if (LIBZFS.zfs_create(handle, sb.toString(), type.code, nvl) != 0) {
                     throw new ZFSException(this);
                 }
