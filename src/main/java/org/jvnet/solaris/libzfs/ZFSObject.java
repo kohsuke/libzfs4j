@@ -32,7 +32,6 @@ import org.jvnet.solaris.libzfs.jna.zfs_type_t;
 import org.jvnet.solaris.nvlist.jna.nvlist_t;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
@@ -44,7 +43,7 @@ import java.util.TreeSet;
  * 
  * @author Kohsuke Kawaguchi
  */
-public abstract class ZFSObject implements Comparator<ZFSObject>, ZFSContainer {
+public abstract class ZFSObject implements Comparable<ZFSObject>, ZFSContainer {
 
     /*package*/ final LibZFS parent;
     /*package*/ zfs_handle_t handle;
@@ -70,11 +69,9 @@ public abstract class ZFSObject implements Comparator<ZFSObject>, ZFSContainer {
         }
     }
 
-    public int compare(ZFSObject o1, ZFSObject o2) {
-        long a = Long.parseLong(o1
-                .getZfsProperty(zfs_prop_t.ZFS_PROP_CREATETXG));
-        long b = Long.parseLong(o2
-                .getZfsProperty(zfs_prop_t.ZFS_PROP_CREATETXG));
+    public int compareTo(ZFSObject that) {
+        long a = Long.parseLong(this.getZfsProperty(zfs_prop_t.ZFS_PROP_CREATETXG));
+        long b = Long.parseLong(that.getZfsProperty(zfs_prop_t.ZFS_PROP_CREATETXG));
 
         if (a > b) {
             return 1;
