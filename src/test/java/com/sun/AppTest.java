@@ -29,6 +29,7 @@ import org.jvnet.solaris.libzfs.LibZFS;
 import org.jvnet.solaris.libzfs.ZFSObject;
 import org.jvnet.solaris.libzfs.ZFSPool;
 import org.jvnet.solaris.libzfs.ZFSType;
+import org.jvnet.solaris.libzfs.ZFSFileSystem;
 import org.jvnet.solaris.libzfs.jna.zfs_prop_t;
 import org.jvnet.solaris.libzfs.jna.zpool_prop_t;
 
@@ -66,7 +67,7 @@ public class AppTest extends TestCase {
                     + "]");
 
             if (zfs.exists(tearDownDataSet)) {
-                final ZFSObject fs = zfs.open(tearDownDataSet);
+                final ZFSFileSystem fs = zfs.open(tearDownDataSet,ZFSFileSystem.class);
                 fs.unshare();
                 fs.unmount();
                 fs.destory();
@@ -302,7 +303,7 @@ public class AppTest extends TestCase {
         assertFalse("Prerequisite Failed, DataSet already exists [" + dataSet
                 + "] ", zfs.exists(dataSet));
 
-        final ZFSObject fs = zfs.create(dataSet, ZFSType.FILESYSTEM);
+        final ZFSFileSystem fs = zfs.create(dataSet, ZFSFileSystem.class);
 
         assertNotNull("Prerequisite Failed ZFS dataset created was null ["
                 + dataSet + "]", fs);
@@ -337,7 +338,7 @@ public class AppTest extends TestCase {
         assertFalse("Prerequisite Failed, DataSet already exists [" + dataSet
                 + "] ", zfs.exists(dataSet));
 
-        final ZFSObject fs = zfs.create(dataSet, ZFSType.FILESYSTEM);
+        final ZFSFileSystem fs = zfs.create(dataSet, ZFSFileSystem.class);
 
         assertNotNull("Prerequisite Failed ZFS dataset created was null ["
                 + dataSet + "]", fs);
