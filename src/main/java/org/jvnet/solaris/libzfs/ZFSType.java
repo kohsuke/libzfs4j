@@ -23,14 +23,42 @@ package org.jvnet.solaris.libzfs;
 import org.jvnet.solaris.libzfs.jna.zfs_type_t;
 
 /**
+ * Type of {@link ZFSObject}.
+ *
  * @author Kohsuke Kawaguchi
  * @see zfs_type_t
  */
 public enum ZFSType {
-
+    /**
+     * A ZFS dataset of type "filesystem" that can  be  mounted
+     * within  the  standard  system namespace and behaves like
+     * other file systems. While ZFS file systems are  designed
+     * to  be  POSIX compliant, known issues exist that prevent
+     * compliance in some cases. Applications  that  depend  on
+     * standards  conformance  might  fail  due  to nonstandard
+     * behavior when checking file system free space.
+     */
     FILESYSTEM(1),
+    /**
+     * A read-only version of a file  system  or  volume  at  a
+     * given  point in time. It is specified as filesystem@name
+     * or volume@name.
+     */
     SNAPSHOT(2),
+    /**
+     * A logical volume exported as a raw or block device. This
+     * type  of  dataset should only be used under special cir-
+     * cumstances. File systems  are  typically  used  in  most
+     * environments.  Volumes  cannot  be  used in a non-global
+     * zone.
+     */
     VOLUME(4),
+    /**
+     * Pool is a storage abstraction in which filesysems, snapshots,
+     * and volumes are stored.
+     *
+     * TODO: find an official documentation and replace this.
+     */
     POOL(8);
 
     ZFSType(final int code) {
