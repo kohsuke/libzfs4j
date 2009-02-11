@@ -53,7 +53,7 @@ public class LibZFS {
     /**
      * List up all the root pools and return them.
      * 
-     * TODO: are they roots that are not pools?
+     * TODO: are there roots that are not pools?
      * 
      * @return can be empty but never null.
      */
