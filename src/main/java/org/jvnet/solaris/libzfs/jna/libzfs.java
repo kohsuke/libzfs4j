@@ -35,7 +35,7 @@ import org.jvnet.solaris.avl.avl_tree_t;
 import org.jvnet.solaris.jna.BooleanByReference;
 import org.jvnet.solaris.jna.EnumByReference;
 import org.jvnet.solaris.nvlist.jna.nvlist_t;
-import org.jvnet.solaris.mount.UmountFlags;
+import org.jvnet.solaris.mount.MountFlags;
 
 /**
  * @author Kohsuke Kawaguchi
@@ -377,7 +377,7 @@ int zfs_mount(zfs_handle_t handle, String options, int mountFlags);
     /**
      *
      * @param umountFlags
-     *      Bit combinations from {@link UmountFlags}
+     *      Bit combinations from {@link MountFlags}
      */
     int zfs_unmount(zfs_handle_t handle, String _2, int umountFlags);
     int zfs_unmountall(zfs_handle_t handle, int umountFlags);

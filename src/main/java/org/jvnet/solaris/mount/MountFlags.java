@@ -24,7 +24,7 @@ package org.jvnet.solaris.mount;
 /**
  * Flag bits passed to mount(2).
  */
-public class UmountFlags {
+public class MountFlags {
     /**
      * Read-only
      */
