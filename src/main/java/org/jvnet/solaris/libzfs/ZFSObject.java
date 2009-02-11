@@ -263,7 +263,7 @@ public class ZFSObject implements Comparator<ZFSObject> {
             int ret = LIBZFS.zfs_prop_get(handle, new NativeLong(prop.ordinal()),
                     propbuf, libzfs.ZFS_MAXPROPLEN, ibr, buf,
                     new NativeLong(0), true);
-            map.put(prop, (ret != 0) ? "-" : propbuf.getString(0));
+            map.put(prop, (ret != 0) ? null : propbuf.getString(0));
         }
         return map;
     }
@@ -277,19 +277,17 @@ public class ZFSObject implements Comparator<ZFSObject> {
                 propbuf, libzfs.ZFS_MAXPROPLEN, ibr, buf,
                 new NativeLong(0), true);
 
-        return ((ret != 0) ? "-" : propbuf.getString(0));
+        return ((ret != 0) ? null : propbuf.getString(0));
     }
 
     public String getZpoolProperty(zpool_prop_t prop) {
         Memory propbuf = new Memory(libzfs.ZPOOL_MAXPROPLEN);
-        EnumByReference ebr = null;
-
         zpool_handle_t zpool_handle = LIBZFS.zpool_open(parent.getHandle(),
                 this.getName());
         int ret = LIBZFS.zpool_get_prop(zpool_handle, new NativeLong(prop
                 .ordinal()), propbuf, new NativeLong(
-                libzfs.ZPOOL_MAXPROPLEN), ebr);
-        return ((ret != 0) ? "-" : propbuf.getString(0));
+                libzfs.ZPOOL_MAXPROPLEN), null);
+        return ((ret != 0) ? null : propbuf.getString(0));
     }
 
     public Hashtable<String, String> getUserProperty(List<String> keys) {
