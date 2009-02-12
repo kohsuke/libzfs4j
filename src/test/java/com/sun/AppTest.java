@@ -20,21 +20,18 @@
  */
 package com.sun;
 
-import java.util.ArrayList;
-import java.util.EnumSet;
-import java.util.Hashtable;
-import java.util.List;
-import java.util.Map;
-
 import junit.framework.TestCase;
+import org.jvnet.solaris.libzfs.ACLBuilder;
 import org.jvnet.solaris.libzfs.LibZFS;
+import org.jvnet.solaris.libzfs.ZFSFileSystem;
 import org.jvnet.solaris.libzfs.ZFSObject;
 import org.jvnet.solaris.libzfs.ZFSPool;
 import org.jvnet.solaris.libzfs.ZFSType;
-import org.jvnet.solaris.libzfs.ZFSFileSystem;
-import org.jvnet.solaris.libzfs.ACLBuilder;
 import org.jvnet.solaris.libzfs.jna.zfs_prop_t;
 import org.jvnet.solaris.libzfs.jna.zpool_prop_t;
+
+import java.util.EnumSet;
+import java.util.Map;
 
 /**
  * Unit test for simple App.
