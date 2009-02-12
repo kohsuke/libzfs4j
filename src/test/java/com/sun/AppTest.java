@@ -78,7 +78,7 @@ public class AppTest extends TestCase {
                 final ZFSFileSystem fs = zfs.open(dataSet,ZFSFileSystem.class);
                 fs.unshare();
                 fs.unmount();
-                fs.destory();
+                fs.destory(true);
             }
         }
     }
