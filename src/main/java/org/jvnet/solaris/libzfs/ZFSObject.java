@@ -206,14 +206,6 @@ public abstract class ZFSObject implements Comparable<ZFSObject>, ZFSContainer {
         handle = null;
     }
 
-    public boolean equals(Object a, Object b) {
-        // todo would using zfs_prop_t.ZFS_PROP_CREATETXG be more accurate?
-        if (a == b) {
-            return true;
-        }
-        return false;
-    }
-
     @Override
     public final boolean equals(Object o) {
         // todo would using zfs_prop_t.ZFS_PROP_CREATETXG be more accurate?
