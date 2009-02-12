@@ -30,6 +30,7 @@ import org.jvnet.solaris.libzfs.ZFSObject;
 import org.jvnet.solaris.libzfs.ZFSPool;
 import org.jvnet.solaris.libzfs.ZFSType;
 import org.jvnet.solaris.libzfs.ZFSFileSystem;
+import org.jvnet.solaris.libzfs.ACLBuilder;
 import org.jvnet.solaris.libzfs.jna.zfs_prop_t;
 import org.jvnet.solaris.libzfs.jna.zpool_prop_t;
 
@@ -185,6 +186,14 @@ public class AppTest extends TestCase {
                     + " used:"
                     + o.getZpoolProperty(zpool_prop_t.ZPOOL_PROP_USED));
         }
+    }
+
+    public void testAllow() {
+        ZFSFileSystem fs = zfs.create(dataSet, ZFSFileSystem.class);
+        ACLBuilder acl = new ACLBuilder();
+        acl.everyone().withEverything();
+        fs.allow(acl);
+        fs.unallow(acl);
     }
 
     public void testInheritProperty() {

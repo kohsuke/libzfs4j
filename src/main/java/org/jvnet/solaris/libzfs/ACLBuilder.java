@@ -98,6 +98,11 @@ public class ACLBuilder {
         protected abstract String format(char ch);
 
         private void toNativeFormat(nvlist_t nv) {
+            // if none is specified, assume it's on this dataset and its descendants.
+            // this is consistent with zfs CLI.
+            if(inheritanceBits==0)
+                inheritanceBits = 3;
+
             for(int i=0; i<3; i++) {
                 if((inheritanceBits&(1<<i))!=0) {
                     nvlist_t perms = nvlist_t.allocMap();
