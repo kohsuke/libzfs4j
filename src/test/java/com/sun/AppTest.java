@@ -61,6 +61,8 @@ public class AppTest extends TestCase {
                         ZFS_TEST_POOL_BASENAME_DEFAULT);
 
         dataSet = ZFS_TEST_POOL_BASENAME + getName();
+
+        assertFalse("Prerequisite Failed, DataSet already exists [" + dataSet+ "] ", zfs.exists(dataSet));
     }
 
     public void tearDown() throws Exception {
@@ -108,58 +110,34 @@ public class AppTest extends TestCase {
     }
 
     public void testCreate() {
-        final String dataSet = ZFS_TEST_POOL_BASENAME + "testCreate"
-                + System.currentTimeMillis();
+        ZFSObject fs = zfs.create(dataSet, ZFSType.FILESYSTEM);
 
-        assertFalse("Prerequisite Failed, DataSet already exists [" + dataSet
-                + "] ", zfs.exists(dataSet));
-
-        try {
-            ZFSObject fs = zfs.create(dataSet, ZFSType.FILESYSTEM);
-
-            assertNotNull("ZFSObject was null for DataSet [" + dataSet + "]",
-                    fs);
-            assertEquals("ZFSObject doesn't match name specified at create",
-                    dataSet, fs.getName());
-            assertTrue("ZFS exists doesn't report ZFS's creation", zfs
-                    .exists(dataSet));
-
-        } finally {
-            ZFSObject fs = zfs.open(dataSet);
-            fs.destory();
-
-            assertFalse("Tidy Up Failed, DataSet still exists [" + dataSet
-                    + "] ", zfs.exists(dataSet));
-        }
+        assertNotNull("ZFSObject was null for DataSet [" + dataSet + "]",
+                fs);
+        assertEquals("ZFSObject doesn't match name specified at create",
+                dataSet, fs.getName());
+        assertTrue("ZFS exists doesn't report ZFS's creation", zfs
+                .exists(dataSet));
     }
 
     public void testDestroy() {
-        final String dataSet = ZFS_TEST_POOL_BASENAME + "testDestroy"
-                + System.currentTimeMillis();
-
         zfs.create(dataSet, ZFSType.FILESYSTEM);
 
         assertTrue("Prerequisite Failed, Test DataSet [" + dataSet
                 + "] didn't create", zfs.exists(dataSet));
 
-        try {
-            ZFSObject fs = zfs.open(dataSet);
+        ZFSObject fs = zfs.open(dataSet);
 
-            assertNotNull("ZFSObject was null for DataSet [" + dataSet + "]",
-                    fs);
-            assertEquals("ZFSObject doesn't match name specified at open",
-                    dataSet, fs.getName());
-            assertTrue("ZFS exists doesn't report ZFS", zfs.exists(dataSet));
+        assertNotNull("ZFSObject was null for DataSet [" + dataSet + "]",
+                fs);
+        assertEquals("ZFSObject doesn't match name specified at open",
+                dataSet, fs.getName());
+        assertTrue("ZFS exists doesn't report ZFS", zfs.exists(dataSet));
 
-            fs.destory();
+        fs.destory();
 
-            assertFalse("ZFS exists doesn't report ZFS as destroyed", zfs
-                    .exists(dataSet));
-
-        } finally {
-            assertFalse("Tidy Up Failed, DataSet still exists [" + dataSet
-                    + "] ", zfs.exists(dataSet));
-        }
+        assertFalse("ZFS exists doesn't report ZFS as destroyed", zfs
+                .exists(dataSet));
     }
 
     public void testUserProperty() {
@@ -229,10 +207,6 @@ public class AppTest extends TestCase {
     }
 
     public void test_zfsObject_exists() {
-        // Prerequisite
-        assertFalse("Prerequisite Failed, DataSet already exists [" + dataSet
-                + "] ", zfs.exists(dataSet));
-
         final ZFSObject fs1 = zfs.create(dataSet, ZFSType.FILESYSTEM);
 
         assertNotNull("Prerequisite Failed ZFS dataset created was null ["
@@ -267,10 +241,6 @@ public class AppTest extends TestCase {
     }
 
     public void test_zfsObject_isMounted() {
-        // Prerequisite
-        assertFalse("Prerequisite Failed, DataSet already exists [" + dataSet
-                + "] ", zfs.exists(dataSet));
-
         final ZFSFileSystem fs = zfs.create(dataSet, ZFSFileSystem.class);
 
         assertNotNull("Prerequisite Failed ZFS dataset created was null ["
@@ -297,10 +267,6 @@ public class AppTest extends TestCase {
     }
 
     public void xtest_zfsObject_isShared() {
-        // Prerequisite
-        assertFalse("Prerequisite Failed, DataSet already exists [" + dataSet
-                + "] ", zfs.exists(dataSet));
-
         final ZFSFileSystem fs = zfs.create(dataSet, ZFSFileSystem.class);
 
         assertNotNull("Prerequisite Failed ZFS dataset created was null ["
