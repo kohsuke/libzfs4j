@@ -32,8 +32,8 @@
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
         <configuration>
-          <source>${javaSource}</source>
-          <target>${javaTarget}</target>
+          <source>1.5</source>
+          <target>1.5</target>
         </configuration>
       </plugin>
       <plugin>
@@ -100,10 +100,4 @@
       </properties>
     </profile>
   </profiles>
-
-  <properties>
-    <javaSource>1.5</javaSource>
-    <javaTarget>${javaSource}</javaTarget>
-  </properties>
-
 </project>
