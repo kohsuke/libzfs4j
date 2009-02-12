@@ -56,8 +56,13 @@ public class nvlist_t extends PointerType {
     }
 
     public void put(String key, boolean value) {
-        if(LIBNVPAIR.nvlist_add_boolean_value(this,key,value)!=0)
-            throw new NVListException();
+        if(value) {
+            if(LIBNVPAIR.nvlist_add_boolean(this,key)!=0)
+                throw new NVListException();
+        } else {
+            if(LIBNVPAIR.nvlist_add_boolean_value(this,key,value)!=0)
+                throw new NVListException();
+        }
     }
 
     public void put(String key, nvlist_t value) {
