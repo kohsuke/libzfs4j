@@ -213,7 +213,7 @@ public abstract class ZFSObject implements Comparable<ZFSObject>, ZFSContainer {
     public void destory(boolean recursive) {
         if(recursive) {
             for (ZFSObject child : children())
-                child.destroy(recursive);
+                child.destory(recursive);
         }
         destory();
     }
