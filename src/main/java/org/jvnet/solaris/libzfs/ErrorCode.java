@@ -98,7 +98,11 @@ public enum ErrorCode {
     }
 
     public static ErrorCode fromCode(final int c) {
-        return ErrorCode.values()[c - 2000];
+        try {
+            return ErrorCode.values()[c - 2000];
+        } catch (ArrayIndexOutOfBoundsException e) {
+            return EZFS_UNKNOWN;
+        }
     }
 
 }
