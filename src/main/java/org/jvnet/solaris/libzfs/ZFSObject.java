@@ -274,7 +274,7 @@ public abstract class ZFSObject implements Comparable<ZFSObject>, ZFSContainer {
         return ZFSType.fromCode(LIBZFS.zfs_get_type(handle));
     }
 
-    public Hashtable<zfs_prop_t, String> getZfsProperty(List<zfs_prop_t> props) {
+    public Map<zfs_prop_t,String> getZfsProperty(List<zfs_prop_t> props) {
         Memory propbuf = new Memory(libzfs.ZFS_MAXPROPLEN);
         char[] buf = null;
         IntByReference ibr = null;
@@ -284,7 +284,8 @@ public abstract class ZFSObject implements Comparable<ZFSObject>, ZFSContainer {
             int ret = LIBZFS.zfs_prop_get(handle, new NativeLong(prop.ordinal()),
                     propbuf, libzfs.ZFS_MAXPROPLEN, ibr, buf,
                     new NativeLong(0), true);
-            map.put(prop, (ret != 0) ? null : propbuf.getString(0));
+            if(ret==0)
+                map.put(prop, propbuf.getString(0));
         }
         return map;
     }
