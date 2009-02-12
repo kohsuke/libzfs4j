@@ -354,9 +354,8 @@ public abstract class ZFSObject implements Comparable<ZFSObject>, ZFSContainer {
      * @return is dataset shared.
      */
     public boolean isShared() {
-        throw new UnsupportedOperationException("Not supported yet.");
-        // final boolean isShared = LIBZFS.zfs_is_shared(handle);
-        // return isShared;
+        final boolean isShared = LIBZFS.zfs_is_shared(handle);
+        return isShared;
     }
 
     /**
