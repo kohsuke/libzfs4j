@@ -144,13 +144,15 @@ public class AppTest extends TestCase {
     }
 
     public void testUserProperty() {
-        zfs.create(ZFS_TEST_POOL_BASENAME + "testUserProperty",ZFSFileSystem.class);
+        ZFSFileSystem o = zfs.create(dataSet,ZFSFileSystem.class);
 
-        ZFSObject o = zfs.open(ZFS_TEST_POOL_BASENAME + "testUserProperty");
         String property = "my:test";
-        o.setProperty(property, String.valueOf(System.currentTimeMillis()));
-        System.out.println("Property " + property + " is "
-                + o.getUserProperty(property));
+        String time = String.valueOf(System.currentTimeMillis());
+        o.setProperty(property, time);
+
+        String v = o.getUserProperty(property);
+        System.out.println("Property " + property + " is "+ v);
+        assertEquals(v,time);
     }
 
     public void testGetZfsProperties() {
