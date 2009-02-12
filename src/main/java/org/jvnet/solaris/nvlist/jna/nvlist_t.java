@@ -26,6 +26,7 @@ import com.sun.jna.Pointer;
 import com.sun.jna.ptr.PointerByReference;
 import org.jvnet.solaris.jna.PtrByReference;
 import static org.jvnet.solaris.nvlist.jna.libnvpair.LIBNVPAIR;
+import static org.jvnet.solaris.nvlist.jna.libnvpair.NV_UNIQUE_NAME;
 
 /**
  * Opaque handle type that represents name/value pair list.
@@ -45,8 +46,17 @@ public class nvlist_t extends PointerType {
         return r;
     }
 
+    public static nvlist_t allocMap() {
+        return alloc(NV_UNIQUE_NAME);
+    }
+
     public void put(String key, String value) {
         if(LIBNVPAIR.nvlist_add_string(this,key,value)!=0)
+            throw new NVListException();
+    }
+
+    public void put(String key, boolean value) {
+        if(LIBNVPAIR.nvlist_add_boolean_value(this,key,value)!=0)
             throw new NVListException();
     }
 

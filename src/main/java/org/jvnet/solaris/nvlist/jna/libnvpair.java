@@ -131,8 +131,8 @@ int nvlist_alloc(PtrByReference<nvlist_t> result, int nvflag, int kmflag);
 //    nv_alloc_t *nvlist_lookup_nv_alloc(nvlist_t list);
 //
 //    int nvlist_add_nvpair(nvlist_t list, nvpair_t *);
-//    int nvlist_add_boolean(nvlist_t list, const char *);
-//    int nvlist_add_boolean_value(nvlist_t list, String name, boolean_t);
+    int nvlist_add_boolean(nvlist_t list, String name);
+    int nvlist_add_boolean_value(nvlist_t list, String name, boolean value);
 //    int nvlist_add_byte(nvlist_t list, String name, uchar_t);
 //    int nvlist_add_int8(nvlist_t list, String name, int8_t);
 //    int nvlist_add_uint8(nvlist_t list, String name, uint8_t);
