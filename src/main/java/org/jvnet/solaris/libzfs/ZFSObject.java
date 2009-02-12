@@ -345,11 +345,12 @@ public abstract class ZFSObject implements Comparable<ZFSObject>, ZFSContainer {
      * Clears the given property on this dataset, causing it to be inherited from its parent.
      */
     public void inheritProperty(String key) {
-        // Note: create new object after calling this method to reflect
-        // inherited property.
-        // System.out.println("key "+key+" = "+getUserProperty(key));
         if (LIBZFS.zfs_prop_inherit(handle, key) != 0)
             throw new ZFSException(library);
+
+        // libzfs doesn't show us a new value until we reopen the handle, so do it now
+        dispose();
+        handle = LIBZFS.zfs_open(library.getHandle(), name, zfs_type_t.DATASET);
     }
 
     /**
