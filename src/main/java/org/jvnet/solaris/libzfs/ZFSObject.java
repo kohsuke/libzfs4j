@@ -210,7 +210,7 @@ public abstract class ZFSObject implements Comparable<ZFSObject>, ZFSContainer {
     /**
      * Wipes out this dataset and all its data, optionally recursively.
      */
-    public void destroy(boolean recursive) {
+    public void destory(boolean recursive) {
         if(recursive) {
             for (ZFSObject child : children())
                 child.destroy(recursive);
