@@ -44,27 +44,33 @@ public class AppTest extends TestCase {
 
     private String ZFS_TEST_POOL_BASENAME;
 
-    private String tearDownDataSet;
+    private final LibZFS zfs = new LibZFS();
+
+    /**
+     * The dataset name that can be created in a test.
+     * This will be automatically destroyed at the end.
+     */
+    private String dataSet;
 
     public void setUp() throws Exception {
         super.setUp();
 
         /* allows override of zfs pool used in testing */
-        ZFS_TEST_POOL_BASENAME = System
+       ZFS_TEST_POOL_BASENAME = System
                 .getProperty(ZFS_TEST_POOL_OVERRIDE_PROPERTY,
                         ZFS_TEST_POOL_BASENAME_DEFAULT);
+
+        dataSet = ZFS_TEST_POOL_BASENAME + getName();
     }
 
     public void tearDown() throws Exception {
         super.tearDown();
 
-        final LibZFS zfs = new LibZFS();
+        if (dataSet != null) {
+            System.out.println("TearDown test dataset [" + dataSet + "]");
 
-        if (tearDownDataSet != null) {
-            System.out.println("TearDown test dataset [" + tearDownDataSet+ "]");
-
-            if (zfs.exists(tearDownDataSet)) {
-                final ZFSFileSystem fs = zfs.open(tearDownDataSet,ZFSFileSystem.class);
+            if (zfs.exists(dataSet)) {
+                final ZFSFileSystem fs = zfs.open(dataSet,ZFSFileSystem.class);
                 fs.unshare();
                 fs.unmount();
                 fs.destory();
@@ -72,19 +78,7 @@ public class AppTest extends TestCase {
         }
     }
 
-    public void defineTestTearDown(final String dataSet) {
-        tearDownDataSet = dataSet;
-    }
-
-    public String defineTestDataSetName() {
-        final String dataSet = ZFS_TEST_POOL_BASENAME + getName();
-        System.out.println("Test DataSet [" + dataSet + "]");
-        return dataSet;
-    }
-
     public void testApp() {
-        LibZFS zfs = new LibZFS();
-
         System.out.println("Iterating roots");
         for (ZFSPool pool : zfs.roots()) {
             System.out.println(pool.getName());
@@ -95,7 +89,6 @@ public class AppTest extends TestCase {
     }
 
     public void testGetFilesystemTree() {
-        LibZFS zfs = new LibZFS();
         // List<ZFSPool> pools = zfs.roots();
         // if ( pools.size() > 0 ) {
         // ZFSObject filesystem = pools.get(0);
@@ -115,8 +108,6 @@ public class AppTest extends TestCase {
     }
 
     public void testCreate() {
-        LibZFS zfs = new LibZFS();
-
         final String dataSet = ZFS_TEST_POOL_BASENAME + "testCreate"
                 + System.currentTimeMillis();
 
@@ -143,8 +134,6 @@ public class AppTest extends TestCase {
     }
 
     public void testDestroy() {
-        LibZFS zfs = new LibZFS();
-
         final String dataSet = ZFS_TEST_POOL_BASENAME + "testDestroy"
                 + System.currentTimeMillis();
 
@@ -174,7 +163,6 @@ public class AppTest extends TestCase {
     }
 
     public void testUserProperty() {
-        LibZFS zfs = new LibZFS();
         zfs.create(ZFS_TEST_POOL_BASENAME + "testUserProperty",
                 ZFSType.FILESYSTEM);
 
@@ -186,8 +174,6 @@ public class AppTest extends TestCase {
     }
 
     public void testGetZfsProperties() {
-        LibZFS zfs = new LibZFS();
-
         List<zfs_prop_t> props = new ArrayList<zfs_prop_t>();
         for (zfs_prop_t prop : EnumSet.allOf(zfs_prop_t.class)) {
             props.add(prop);
@@ -215,8 +201,6 @@ public class AppTest extends TestCase {
     }
 
     public void testGetZpoolProperties() {
-        LibZFS zfs = new LibZFS();
-
         for (ZFSPool o : zfs.roots()) {
             System.out.println("name:" + o.getName() + " size:"
                     + o.getZpoolProperty(zpool_prop_t.ZPOOL_PROP_SIZE)
@@ -226,7 +210,6 @@ public class AppTest extends TestCase {
     }
 
     public void testInheritProperty() {
-        LibZFS zfs = new LibZFS();
         zfs.create(ZFS_TEST_POOL_BASENAME + "testInheritProperty",
                 ZFSType.FILESYSTEM);
         zfs.create(ZFS_TEST_POOL_BASENAME + "testInheritProperty/child",
@@ -246,11 +229,6 @@ public class AppTest extends TestCase {
     }
 
     public void test_zfsObject_exists() {
-        final String dataSet = defineTestDataSetName();
-        defineTestTearDown(dataSet);
-
-        final LibZFS zfs = new LibZFS();
-
         // Prerequisite
         assertFalse("Prerequisite Failed, DataSet already exists [" + dataSet
                 + "] ", zfs.exists(dataSet));
@@ -289,11 +267,6 @@ public class AppTest extends TestCase {
     }
 
     public void test_zfsObject_isMounted() {
-        final String dataSet = defineTestDataSetName();
-        defineTestTearDown(dataSet);
-
-        final LibZFS zfs = new LibZFS();
-
         // Prerequisite
         assertFalse("Prerequisite Failed, DataSet already exists [" + dataSet
                 + "] ", zfs.exists(dataSet));
@@ -324,11 +297,6 @@ public class AppTest extends TestCase {
     }
 
     public void xtest_zfsObject_isShared() {
-        final String dataSet = defineTestDataSetName();
-        defineTestTearDown(dataSet);
-
-        final LibZFS zfs = new LibZFS();
-
         // Prerequisite
         assertFalse("Prerequisite Failed, DataSet already exists [" + dataSet
                 + "] ", zfs.exists(dataSet));
