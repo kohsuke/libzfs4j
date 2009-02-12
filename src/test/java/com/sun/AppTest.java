@@ -196,20 +196,20 @@ public class AppTest extends TestCase {
     }
 
     public void testInheritProperty() {
-        zfs.create(ZFS_TEST_POOL_BASENAME + "testInheritProperty",ZFSFileSystem.class);
-        zfs.create(ZFS_TEST_POOL_BASENAME + "testInheritProperty/child",ZFSFileSystem.class);
+        ZFSFileSystem o  = zfs.create(dataSet, ZFSFileSystem.class);
+        ZFSFileSystem o2 = zfs.create(dataSet+"/child",ZFSFileSystem.class);
 
-        ZFSObject o = zfs.open(ZFS_TEST_POOL_BASENAME + "testInheritProperty");
         String property = "my:test";
-        o.setProperty(property, String.valueOf(System.currentTimeMillis()));
-        System.out.println("set test: Property " + property + " is "
-                + o.getUserProperty(property));
+        String time = String.valueOf(System.currentTimeMillis());
+        o.setProperty(property, time);
+        String v = o.getUserProperty(property);
+        assertEquals(time,v);
+        System.out.println("set test: Property " + property + " is " + v);
         o.inheritProperty(property);
 
-        ZFSObject o2 = zfs.open(ZFS_TEST_POOL_BASENAME
-                + "testInheritProperty/child");
-        System.out.println("inherit test: Property " + property + " is "
-                + o2.getUserProperty(property));
+        v = o2.getUserProperty(property);
+        System.out.println("inherit test: Property " + property + " is "+ v);
+        assertEquals(time,v);
     }
 
     public void test_zfsObject_exists() {
