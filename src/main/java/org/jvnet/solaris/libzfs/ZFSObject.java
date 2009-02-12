@@ -340,6 +340,9 @@ public abstract class ZFSObject implements Comparable<ZFSObject>, ZFSContainer {
         return handle.hashCode();
     }
 
+    /**
+     * Clears the given property on this dataset, causing it to be inherited from its parent.
+     */
     public void inheritProperty(String key) {
         // Note: create new object after calling this method to reflect
         // inherited property.
