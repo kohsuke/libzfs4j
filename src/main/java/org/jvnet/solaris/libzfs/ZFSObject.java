@@ -397,7 +397,7 @@ public abstract class ZFSObject implements Comparable<ZFSObject>, ZFSContainer {
      */
     public void setProperty(String key, String value) {
         if (LIBZFS.zfs_prop_set(handle, key, value) != 0)
-            throw new ZFSException(library);
+            throw new ZFSException(library,"Failed to set property "+key+" on "+getName());
     }
 
     /**
