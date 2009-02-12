@@ -202,6 +202,7 @@ public class AppTest extends TestCase {
         assertEquals(time,v);
 
         o2.inheritProperty(property);
+        o2.dispose();
         o2 = zfs.open(dataSet+"/child",ZFSFileSystem.class);
 
         v = o2.getUserProperty(property);
