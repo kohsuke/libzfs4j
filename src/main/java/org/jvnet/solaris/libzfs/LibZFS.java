@@ -120,7 +120,8 @@ public class LibZFS implements ZFSContainer {
      *            name of the dataset to create.
      * @param type
      *            the zfs type of dataset to create.
-     * @return created dataset.
+     * @return
+     *      Never null. Created dataset.
      */
     public <T extends ZFSObject> T create(String dataSetName, Class<T> type) {
         return type.cast(create(dataSetName, ZFSType.fromType(type), null));

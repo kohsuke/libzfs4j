@@ -197,10 +197,25 @@ public abstract class ZFSObject implements Comparable<ZFSObject>, ZFSContainer {
 
     /**
      * Wipes out the dataset and all its data. Very dangerous.
+     *
+     * <p>
+     * If this dataset contains nested datasets, this method fails with
+     * {@link ErrorCode#EZFS_EXISTS}.
      */
     public void destory() {
         if (LIBZFS.zfs_destroy(handle) != 0)
             throw new ZFSException(library,"Failed to destroy "+getName());
+    }
+
+    /**
+     * Wipes out this dataset and all its data, optionally recursively.
+     */
+    public void destroy(boolean recursive) {
+        if(recursive) {
+            for (ZFSObject child : children())
+                child.destroy(recursive);
+        }
+        destory();
     }
 
     public synchronized void dispose() {

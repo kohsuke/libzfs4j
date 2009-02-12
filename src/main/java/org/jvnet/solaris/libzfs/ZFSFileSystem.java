@@ -85,9 +85,8 @@ public final class ZFSFileSystem extends ZFSObject {
      *      See {@link MountFlags}.
      */
     public void mount(int flags) {
-        if (LIBZFS.zfs_mount(handle, null, flags) != 0) {
-            throw new ZFSException(library);
-        }
+        if (LIBZFS.zfs_mount(handle, null, flags) != 0)
+            throw new ZFSException(library,"Failed to mount "+getName());
     }
 
     /**
@@ -105,7 +104,7 @@ public final class ZFSFileSystem extends ZFSObject {
      */
     public void unmount(int flags) {
         if (LIBZFS.zfs_unmount(handle, null, flags) != 0) {
-            throw new ZFSException(library);
+            throw new ZFSException(library,"Failed to unmount "+getName());
         }
     }
 
