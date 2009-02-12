@@ -60,6 +60,11 @@ public class nvlist_t extends PointerType {
             throw new NVListException();
     }
 
+    public void put(String key, nvlist_t value) {
+        if(LIBNVPAIR.nvlist_add_nvlist(this,key,value)!=0)
+            throw new NVListException();
+    }
+
     public String getString(String key) {
         PointerByReference r = new PointerByReference();
         if(LIBNVPAIR.nvlist_lookup_string(this,key,r)!=0)

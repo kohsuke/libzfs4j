@@ -143,7 +143,7 @@ int nvlist_alloc(PtrByReference<nvlist_t> result, int nvflag, int kmflag);
 //    int nvlist_add_int64(nvlist_t list, String name, int64_t);
 //    int nvlist_add_uint64(nvlist_t list, String name, uint64_t);
     int nvlist_add_string(nvlist_t list, String key, String value);
-//    int nvlist_add_nvlist(nvlist_t list, String name, nvlist_t list);
+    int nvlist_add_nvlist(nvlist_t list, String key, nvlist_t value);
 //    int nvlist_add_boolean_array(nvlist_t list, String name, boolean_t *, uint_t);
 //    int nvlist_add_byte_array(nvlist_t list, String name, uchar_t *, uint_t);
 //    int nvlist_add_int8_array(nvlist_t list, String name, int8_t *, uint_t);

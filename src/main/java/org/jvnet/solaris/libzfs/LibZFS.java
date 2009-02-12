@@ -28,6 +28,7 @@ import org.jvnet.solaris.libzfs.jna.zfs_handle_t;
 import org.jvnet.solaris.libzfs.jna.zfs_type_t;
 import org.jvnet.solaris.nvlist.jna.libnvpair;
 import org.jvnet.solaris.nvlist.jna.nvlist_t;
+import static org.jvnet.solaris.nvlist.jna.libnvpair.NV_UNIQUE_NAME;
 
 import java.util.ArrayList;
 import java.util.EnumSet;
@@ -144,7 +145,7 @@ public class LibZFS implements ZFSContainer {
      */
     public ZFSObject create(final String dataSetName, final ZFSType type,
             final Map<String, String> props) {
-        final nvlist_t nvl = nvlist_t.alloc(libnvpair.NV_UNIQUE_NAME);
+        final nvlist_t nvl = nvlist_t.alloc(NV_UNIQUE_NAME);
         if(props!=null) {
             for (Map.Entry<String, String> e : props.entrySet()) {
                 nvl.put(e.getKey(), e.getValue());
