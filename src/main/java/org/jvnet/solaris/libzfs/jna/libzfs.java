@@ -34,6 +34,7 @@ import org.jvnet.solaris.avl.avl_node_t;
 import org.jvnet.solaris.avl.avl_tree_t;
 import org.jvnet.solaris.jna.BooleanByReference;
 import org.jvnet.solaris.jna.EnumByReference;
+import org.jvnet.solaris.jna.PtrByReference;
 import org.jvnet.solaris.nvlist.jna.nvlist_t;
 import org.jvnet.solaris.mount.MountFlags;
 
@@ -361,10 +362,29 @@ int zfs_spa_version(zfs_handle_t handle, IntByReference r);
 /*
  * dataset permission functions.
  */
-int zfs_perm_set(zfs_handle_t handle, nvlist_t _2);
-int zfs_perm_remove(zfs_handle_t handle, nvlist_t _2);
-int zfs_build_perms(zfs_handle_t handle, /*char* */String _2, /*char * */String _3,
-    zfs_deleg_who_type_t _4, zfs_deleg_inherit_t _5, /*nvlist_t ** */ PointerByReference _6);
+int zfs_perm_set(zfs_handle_t handle, nvlist_t perms);
+int zfs_perm_remove(zfs_handle_t handle, nvlist_t perms);
+
+
+    /**
+     * Build a ZFS permission into a {@link nvlist_t} format that it internally uses.
+     *
+     * @param who
+     *      To whom the permission concerns.
+     *      User name, if {@code who_type} is {@link zfs_deleg_who_type_t#ZFS_DELEG_USER},
+     *      Group name if {@code who_type} is {@link zfs_deleg_who_type_t#ZFS_DELEG_GROUP}.
+     *      If {@code who_type} is {@link zfs_deleg_who_type_t#ZFS_DELEG_WHO_UNKNOWN}, then
+     *      this is interpreted preferentially as the keyword "everyone", then as a user name,
+     *      and lastly as a group name.
+     * @param who_type
+     *      One of the constants from {@link zfs_deleg_who_type_t}.
+     * @param deleg_type
+     *      Inheritance type from {@link zfs_deleg_inherit_t}. Its ordinal should be passed.
+     * @param ppchNVList
+     *      Receives nvlist_t upon a completion.
+     */
+    int zfs_build_perms(zfs_handle_t handle, String who, String perms,
+        /*zfs_deleg_who_type_t*/ int who_type, /*zfs_deleg_inherit_t*/ int deleg_type, PtrByReference<nvlist_t> ppchNVList);
 int zfs_perm_get(zfs_handle_t handle, /*zfs_allow_t ***/ PointerByReference _2);
 void zfs_free_allows(zfs_allow_t p);
 void zfs_deleg_permissions();

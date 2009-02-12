@@ -29,6 +29,7 @@ import static org.jvnet.solaris.libzfs.jna.libzfs.LIBZFS;
 import org.jvnet.solaris.libzfs.jna.zfs_handle_t;
 import org.jvnet.solaris.libzfs.jna.zfs_prop_t;
 import org.jvnet.solaris.libzfs.jna.zfs_type_t;
+import org.jvnet.solaris.libzfs.ACLBuilder.PermissionBuilder;
 import org.jvnet.solaris.nvlist.jna.nvlist_t;
 
 import java.util.ArrayList;
@@ -432,16 +433,20 @@ public abstract class ZFSObject implements Comparable<ZFSObject>, ZFSContainer {
      * Grants the specified set of permissions to this dataset.
      */
     public void allow(ACLBuilder acl) {
-        if(LIBZFS.zfs_perm_set(handle,acl.toNativeFormat())!=0)
-            throw new ZFSException(library);
+        for (PermissionBuilder b : acl.builders) {
+            if(LIBZFS.zfs_perm_set(handle,b.toNativeFormat(this))!=0)
+                throw new ZFSException(library);
+        }
     }
 
     /**
      * Revokes the specified set of permissions to this dataset.
      */
     public void unallow(ACLBuilder acl) {
-        if(LIBZFS.zfs_perm_set(handle,acl.toNativeFormat())!=0)
-            throw new ZFSException(library);
+        for (PermissionBuilder b : acl.builders) {
+            if(LIBZFS.zfs_perm_remove(handle,b.toNativeFormat(this))!=0)
+                throw new ZFSException(library);
+        }
     }
 
 

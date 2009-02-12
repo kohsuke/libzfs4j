@@ -21,12 +21,17 @@
 package org.jvnet.solaris.libzfs;
 
 import org.jvnet.solaris.nvlist.jna.nvlist_t;
+import org.jvnet.solaris.libzfs.jna.libzfs;
+import org.jvnet.solaris.libzfs.jna.zfs_deleg_who_type_t;
+import org.jvnet.solaris.jna.PtrByReference;
 
 import java.util.Set;
 import java.util.HashSet;
 import java.util.EnumSet;
 import java.util.Arrays;
 import java.util.Collection;
+
+import com.sun.jna.ptr.PointerByReference;
 
 /**
  * Access control list for ZFS dataset.
@@ -43,14 +48,16 @@ import java.util.Collection;
  * @author Kohsuke Kawaguchi
  */
 public class ACLBuilder {
-    private final Set<PermissionBuilder> builders = new HashSet<PermissionBuilder>();
+    /*package*/ final Set<PermissionBuilder> builders = new HashSet<PermissionBuilder>();
 
-    public abstract class PermissionBuilder {
+    public class PermissionBuilder {
+        private final zfs_deleg_who_type_t whoType;
         protected char inheritanceBits=0;
 
         private final Set<ZFSPermission> permissions = EnumSet.noneOf(ZFSPermission.class);
 
-        private PermissionBuilder() {
+        private PermissionBuilder(zfs_deleg_who_type_t whoType) {
+            this.whoType = whoType;
         }
 
         /**
@@ -95,22 +102,26 @@ public class ACLBuilder {
             return with(EnumSet.allOf(ZFSPermission.class));
         }
 
-        protected abstract String format(char ch);
+        protected String who() { return null; }
 
-        private void toNativeFormat(nvlist_t nv) {
+        protected nvlist_t toNativeFormat(ZFSObject dataset) {
+            StringBuilder buf = new StringBuilder();
+            for (ZFSPermission p : permissions) {
+                if(buf.length()>0)  buf.append(',');
+                buf.append(p);
+            }
+
             // if none is specified, assume it's on this dataset and its descendants.
             // this is consistent with zfs CLI.
             if(inheritanceBits==0)
                 inheritanceBits = 3;
 
-            for(int i=0; i<3; i++) {
-                if((inheritanceBits&(1<<i))!=0) {
-                    nvlist_t perms = nvlist_t.allocMap();
-                    for (ZFSPermission p : permissions)
-                        perms.put(p.name().toLowerCase(),true);
-                    nv.put(format(((char)(1<<i))),perms);
-                }
-            }
+            PtrByReference<nvlist_t> r = new PtrByReference<nvlist_t>();
+            if(libzfs.LIBZFS.zfs_build_perms(dataset.handle,
+                    who(), buf.toString().toLowerCase(), whoType.code, inheritanceBits, r)!=0)
+                throw new ZFSException(dataset.library);
+
+            return r.getValue(nvlist_t.class);
         }
     }
 
@@ -118,20 +129,16 @@ public class ACLBuilder {
      * For everyone.
      */
     public PermissionBuilder everyone() {
-        return add(new PermissionBuilder() {
-            protected String format(char ch) {
-                return "e"+ch+"$";
-            }
-        });
+        return add(new PermissionBuilder(zfs_deleg_who_type_t.ZFS_DELEG_EVERYONE));
     }
 
     /**
      * For user
      */
-    public PermissionBuilder user(final int uid) {
-        return add(new PermissionBuilder() {
-            protected String format(char ch) {
-                return "u"+ch+"$"+String.valueOf(uid);
+    public PermissionBuilder user(final String userName) {
+        return add(new PermissionBuilder(zfs_deleg_who_type_t.ZFS_DELEG_USER) {
+            protected String who() {
+                return userName;
             }
         });
     }
@@ -139,10 +146,10 @@ public class ACLBuilder {
     /**
      * For group
      */
-    public PermissionBuilder group(final int gid) {
-        return add(new PermissionBuilder() {
-            protected String format(char ch) {
-                return "g"+ch+"$"+String.valueOf(gid);
+    public PermissionBuilder group(final String groupName) {
+        return add(new PermissionBuilder(zfs_deleg_who_type_t.ZFS_DELEG_GROUP) {
+            protected String who() {
+                return groupName;
             }
         });
     }
@@ -150,15 +157,5 @@ public class ACLBuilder {
     private PermissionBuilder add(PermissionBuilder pb) {
         builders.add(pb);
         return pb;
-    }
-
-    /**
-     * Builds up the native nvlist format to be passed to libzfs.
-     */
-    protected nvlist_t toNativeFormat() {
-        nvlist_t nv = nvlist_t.allocMap();
-        for (PermissionBuilder builder : builders)
-            builder.toNativeFormat(nv);
-        return nv;
     }
 }
