@@ -24,6 +24,8 @@ import static org.jvnet.solaris.libzfs.jna.libzfs.LIBZFS;
 import org.jvnet.solaris.libzfs.jna.libzfs_handle_t;
 
 /**
+ * Indicates an error in ZFS operation.
+ *
  * @author Kohsuke Kawaguchi
  */
 public class ZFSException extends RuntimeException {
@@ -39,6 +41,13 @@ public class ZFSException extends RuntimeException {
 
         final libzfs_handle_t h = zfs.getHandle();
         code = ErrorCode.fromCode(LIBZFS.libzfs_errno(h));
+    }
+
+    /**
+     * Gets the ZFS error code.
+     */
+    public ErrorCode getCode() {
+        return code;
     }
 
     public String toString() {
