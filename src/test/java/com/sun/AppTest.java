@@ -199,11 +199,10 @@ public class AppTest extends TestCase {
         o.setProperty(property, time);
         String v = o.getUserProperty(property);
         assertEquals(time,v);
-        System.out.println("set test: Property " + property + " is " + v);
-        o.inheritProperty(property);
+
+        o2.inheritProperty(property);
 
         v = o2.getUserProperty(property);
-        System.out.println("inherit test: Property " + property + " is "+ v);
         assertEquals(time,v);
     }
 
