@@ -26,7 +26,6 @@ import static org.jvnet.solaris.libzfs.jna.libzfs.LIBZFS;
 import org.jvnet.solaris.libzfs.jna.libzfs_handle_t;
 import org.jvnet.solaris.libzfs.jna.zfs_handle_t;
 import org.jvnet.solaris.libzfs.jna.zfs_type_t;
-import org.jvnet.solaris.nvlist.jna.libnvpair;
 import org.jvnet.solaris.nvlist.jna.nvlist_t;
 import static org.jvnet.solaris.nvlist.jna.libnvpair.NV_UNIQUE_NAME;
 
@@ -154,7 +153,7 @@ public class LibZFS implements ZFSContainer {
             sb.append('/').append(dirs[i]);
             if (!exists(sb.toString())) {
                 if (LIBZFS.zfs_create(handle, sb.toString(), type.code, nvl) != 0) {
-                    throw new ZFSException(this);
+                    throw new ZFSException(this,"Failed to create "+dataSetName);
                 }
             }
         }

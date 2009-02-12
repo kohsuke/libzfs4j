@@ -30,8 +30,12 @@ public class ZFSException extends RuntimeException {
 
     private final ErrorCode code;
 
-    /* package */ZFSException(final LibZFS zfs) {
-        super(LIBZFS.libzfs_error_description(zfs.getHandle()));
+    /* package */ZFSException(LibZFS zfs) {
+        this(zfs,null);
+    }
+
+    /*package*/ ZFSException(LibZFS zfs, String message) {
+        super((message==null?"":message+" : ")+LIBZFS.libzfs_error_description(zfs.getHandle()));
 
         final libzfs_handle_t h = zfs.getHandle();
         code = ErrorCode.fromCode(LIBZFS.libzfs_errno(h));
