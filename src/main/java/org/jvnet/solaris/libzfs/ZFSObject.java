@@ -47,6 +47,7 @@ public abstract class ZFSObject implements Comparable<ZFSObject>, ZFSContainer {
 
     /*package*/ final LibZFS library;
     /*package*/ zfs_handle_t handle;
+    private final String name;
 
     ZFSObject(final LibZFS library, final zfs_handle_t handle) {
         this.library = library;
@@ -54,6 +55,7 @@ public abstract class ZFSObject implements Comparable<ZFSObject>, ZFSContainer {
             throw new ZFSException(library);
         }
         this.handle = handle;
+        this.name = LIBZFS.zfs_get_name(this.handle);
     }
 
     /**
@@ -178,7 +180,7 @@ public abstract class ZFSObject implements Comparable<ZFSObject>, ZFSContainer {
      */
     public ZFSSnapshot createSnapshot(final String snapshotName,
             final boolean recursive) {
-        String fullName = getName() + '@' + snapshotName;
+        String fullName = name + '@' + snapshotName;
         /*
          * nv96 prototype: if(LIBZFS.zfs_snapshot(library.getHandle(),
          * fullName,recursive, null)!=0) pre-nv96 prototype:
@@ -197,7 +199,7 @@ public abstract class ZFSObject implements Comparable<ZFSObject>, ZFSContainer {
      */
     public void destory() {
         if (LIBZFS.zfs_destroy(handle) != 0)
-            throw new ZFSException(library);
+            throw new ZFSException(library,"Failed to destroy "+getName());
     }
 
     public synchronized void dispose() {
@@ -255,8 +257,7 @@ public abstract class ZFSObject implements Comparable<ZFSObject>, ZFSContainer {
      * @return the name of the dataset.
      */
     public String getName() {
-        final String zfsName = LIBZFS.zfs_get_name(handle);
-        return zfsName;
+        return name;
     }
 
     /**
@@ -356,7 +357,7 @@ public abstract class ZFSObject implements Comparable<ZFSObject>, ZFSContainer {
     }
 
     public ZFSObject rollback(boolean recursive) {
-        String filesystem = getName().substring(0, getName().indexOf("@"));
+        String filesystem = name.substring(0, getName().indexOf("@"));
         ZFSObject fs = library.open(filesystem);
         if (recursive) {
             /* first pass - check for clones */
