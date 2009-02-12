@@ -37,6 +37,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.Collection;
 
 /**
  * Represents ZFS snapshot, file system, volume, or pool.
@@ -267,7 +268,7 @@ public abstract class ZFSObject implements Comparable<ZFSObject>, ZFSContainer {
         return ZFSType.fromCode(LIBZFS.zfs_get_type(handle));
     }
 
-    public Map<zfs_prop_t,String> getZfsProperty(List<zfs_prop_t> props) {
+    public Map<zfs_prop_t,String> getZfsProperty(Collection<zfs_prop_t> props) {
         Memory propbuf = new Memory(libzfs.ZFS_MAXPROPLEN);
         char[] buf = null;
         IntByReference ibr = null;
@@ -295,7 +296,7 @@ public abstract class ZFSObject implements Comparable<ZFSObject>, ZFSContainer {
         return ((ret != 0) ? null : propbuf.getString(0));
     }
 
-    public Hashtable<String, String> getUserProperty(List<String> keys) {
+    public Hashtable<String, String> getUserProperty(Collection<String> keys) {
         // don't we need to release userProps later?
         Hashtable<String, String> map = new Hashtable<String, String>();
 
