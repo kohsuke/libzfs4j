@@ -111,7 +111,7 @@ public class AppTest extends TestCase {
     }
 
     public void testCreate() {
-        ZFSObject fs = zfs.create(dataSet, ZFSType.FILESYSTEM);
+        ZFSObject fs = zfs.create(dataSet, ZFSFileSystem.class);
 
         assertNotNull("ZFSObject was null for DataSet [" + dataSet + "]",
                 fs);
@@ -122,7 +122,7 @@ public class AppTest extends TestCase {
     }
 
     public void testDestroy() {
-        zfs.create(dataSet, ZFSType.FILESYSTEM);
+        zfs.create(dataSet, ZFSFileSystem.class);
 
         assertTrue("Prerequisite Failed, Test DataSet [" + dataSet
                 + "] didn't create", zfs.exists(dataSet));
@@ -142,8 +142,7 @@ public class AppTest extends TestCase {
     }
 
     public void testUserProperty() {
-        zfs.create(ZFS_TEST_POOL_BASENAME + "testUserProperty",
-                ZFSType.FILESYSTEM);
+        zfs.create(ZFS_TEST_POOL_BASENAME + "testUserProperty",ZFSFileSystem.class);
 
         ZFSObject o = zfs.open(ZFS_TEST_POOL_BASENAME + "testUserProperty");
         String property = "my:test";
@@ -197,10 +196,8 @@ public class AppTest extends TestCase {
     }
 
     public void testInheritProperty() {
-        zfs.create(ZFS_TEST_POOL_BASENAME + "testInheritProperty",
-                ZFSType.FILESYSTEM);
-        zfs.create(ZFS_TEST_POOL_BASENAME + "testInheritProperty/child",
-                ZFSType.FILESYSTEM);
+        zfs.create(ZFS_TEST_POOL_BASENAME + "testInheritProperty",ZFSFileSystem.class);
+        zfs.create(ZFS_TEST_POOL_BASENAME + "testInheritProperty/child",ZFSFileSystem.class);
 
         ZFSObject o = zfs.open(ZFS_TEST_POOL_BASENAME + "testInheritProperty");
         String property = "my:test";
@@ -216,7 +213,7 @@ public class AppTest extends TestCase {
     }
 
     public void test_zfsObject_exists() {
-        final ZFSObject fs1 = zfs.create(dataSet, ZFSType.FILESYSTEM);
+        final ZFSObject fs1 = zfs.create(dataSet, ZFSFileSystem.class);
 
         assertNotNull("Prerequisite Failed ZFS dataset created was null ["
                 + dataSet + "]", fs1);
@@ -232,7 +229,7 @@ public class AppTest extends TestCase {
         assertFalse("ZFS exists failed for freshly destory dataset", zfs
                 .exists(dataSet, ZFSType.FILESYSTEM));
 
-        final ZFSObject fs2 = zfs.create(dataSet, ZFSType.FILESYSTEM);
+        final ZFSObject fs2 = zfs.create(dataSet, ZFSFileSystem.class);
 
         assertNotNull("Prerequisite Failed ZFS dataset created was null ["
                 + dataSet + "]", fs2);
