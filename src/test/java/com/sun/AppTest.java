@@ -45,7 +45,6 @@ public class AppTest extends TestCase {
     private String ZFS_TEST_POOL_BASENAME;
 
     private String tearDownDataSet;
-    private boolean tearDownAutoDestroy = false;
 
     public void setUp() throws Exception {
         super.setUp();
@@ -61,10 +60,8 @@ public class AppTest extends TestCase {
 
         final LibZFS zfs = new LibZFS();
 
-        if (tearDownAutoDestroy && tearDownDataSet != null
-                && !"".equals(tearDownDataSet)) {
-            System.out.println("TearDown test dataset [" + tearDownDataSet
-                    + "]");
+        if (tearDownDataSet != null) {
+            System.out.println("TearDown test dataset [" + tearDownDataSet+ "]");
 
             if (zfs.exists(tearDownDataSet)) {
                 final ZFSFileSystem fs = zfs.open(tearDownDataSet,ZFSFileSystem.class);
@@ -75,10 +72,8 @@ public class AppTest extends TestCase {
         }
     }
 
-    public void defineTestTearDown(final String dataSet,
-            final boolean autoDestroy) {
+    public void defineTestTearDown(final String dataSet) {
         tearDownDataSet = dataSet;
-        tearDownAutoDestroy = autoDestroy;
     }
 
     public String defineTestDataSetName() {
@@ -252,7 +247,7 @@ public class AppTest extends TestCase {
 
     public void test_zfsObject_exists() {
         final String dataSet = defineTestDataSetName();
-        defineTestTearDown(dataSet, true);
+        defineTestTearDown(dataSet);
 
         final LibZFS zfs = new LibZFS();
 
@@ -295,7 +290,7 @@ public class AppTest extends TestCase {
 
     public void test_zfsObject_isMounted() {
         final String dataSet = defineTestDataSetName();
-        defineTestTearDown(dataSet, true);
+        defineTestTearDown(dataSet);
 
         final LibZFS zfs = new LibZFS();
 
@@ -330,7 +325,7 @@ public class AppTest extends TestCase {
 
     public void xtest_zfsObject_isShared() {
         final String dataSet = defineTestDataSetName();
-        defineTestTearDown(dataSet, true);
+        defineTestTearDown(dataSet);
 
         final LibZFS zfs = new LibZFS();
 
