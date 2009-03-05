@@ -80,6 +80,7 @@ public class AppTest extends TestCase {
                 fs.destory(true);
             }
         }
+	zfs.dispose();
     }
 
     public void testApp() {
