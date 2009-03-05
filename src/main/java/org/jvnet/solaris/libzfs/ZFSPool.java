@@ -24,7 +24,6 @@ import com.sun.jna.Memory;
 import com.sun.jna.NativeLong;
 import org.jvnet.solaris.libzfs.jna.libzfs;
 import static org.jvnet.solaris.libzfs.jna.libzfs.LIBZFS;
-import org.jvnet.solaris.libzfs.jna.libzfs.zpool_status_t;
 import org.jvnet.solaris.libzfs.jna.zpool_handle_t;
 import org.jvnet.solaris.libzfs.jna.zpool_prop_t;
 
@@ -56,8 +55,8 @@ public final class ZFSPool {
         return ((ret != 0) ? null : propbuf.getString(0));
     }
 
-    public zpool_status_t getStatus() {
-        return LIBZFS.zpool_get_status(handle,null);
+    public ZPoolStatus getStatus() {
+        return ZPoolStatus.values()[LIBZFS.zpool_get_status(handle,null)];
     }
 
     /**

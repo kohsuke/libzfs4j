@@ -37,6 +37,7 @@ import org.jvnet.solaris.jna.EnumByReference;
 import org.jvnet.solaris.jna.PtrByReference;
 import org.jvnet.solaris.nvlist.jna.nvlist_t;
 import org.jvnet.solaris.mount.MountFlags;
+import org.jvnet.solaris.libzfs.ZPoolStatus;
 
 /**
  * @author Kohsuke Kawaguchi
@@ -161,47 +162,8 @@ long zpool_get_prop_int(zpool_handle_t pool, zpool_prop_t prop, EnumByReference<
 String zpool_prop_to_name(zpool_prop_t prop);
 String zpool_prop_values(zpool_prop_t prop);
 
-/*
- * Pool health statistics.
- */
-enum zpool_status_t {
-	/*
-	 * The following correspond to faults as defined in the (fault.fs.zfs.*)
-	 * event namespace.  Each is associated with a corresponding message ID.
-	 */
-	ZPOOL_STATUS_CORRUPT_CACHE,	/* corrupt /kernel/drv/zpool.cache */
-	ZPOOL_STATUS_MISSING_DEV_R,	/* missing device with replicas */
-	ZPOOL_STATUS_MISSING_DEV_NR,	/* missing device with no replicas */
-	ZPOOL_STATUS_CORRUPT_LABEL_R,	/* bad device label with replicas */
-	ZPOOL_STATUS_CORRUPT_LABEL_NR,	/* bad device label with no replicas */
-	ZPOOL_STATUS_BAD_GUID_SUM,	/* sum of device guids didn't match */
-	ZPOOL_STATUS_CORRUPT_POOL,	/* pool metadata is corrupted */
-	ZPOOL_STATUS_CORRUPT_DATA,	/* data errors in user (meta)data */
-	ZPOOL_STATUS_FAILING_DEV,	/* device experiencing errors */
-	ZPOOL_STATUS_VERSION_NEWER,	/* newer on-disk version */
-	ZPOOL_STATUS_HOSTID_MISMATCH,	/* last accessed by another system */
-	ZPOOL_STATUS_IO_FAILURE_WAIT,	/* failed I/O, failmode 'wait' */
-	ZPOOL_STATUS_IO_FAILURE_CONTINUE, /* failed I/O, failmode 'continue' */
-	ZPOOL_STATUS_FAULTED_DEV_R,	/* faulted device with replicas */
-	ZPOOL_STATUS_FAULTED_DEV_NR,	/* faulted device with no replicas */
-
-	/*
-	 * The following are not faults per se, but still an error possibly
-	 * requiring administrative attention.  There is no corresponding
-	 * message ID.
-	 */
-	ZPOOL_STATUS_VERSION_OLDER,	/* older on-disk version */
-	ZPOOL_STATUS_RESILVERING,	/* device being resilvered */
-	ZPOOL_STATUS_OFFLINE_DEV,	/* device online */
-
-	/*
-	 * Finally, the following indicates a healthy pool.
-	 */
-	ZPOOL_STATUS_OK
-}
-
-zpool_status_t zpool_get_status(zpool_handle_t handle, /*char ** */ PointerByReference ppchBuf);
-zpool_status_t zpool_import_status(nvlist_t _1, PointerByReference ppchBuf);
+int/*ZPoolStatus*/ zpool_get_status(zpool_handle_t handle, /*char ** */ PointerByReference ppchBuf);
+int/*ZPoolStatus*/ zpool_import_status(nvlist_t _1, PointerByReference ppchBuf);
 
 /*
  * Statistics and configuration functions.
