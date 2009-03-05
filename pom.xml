@@ -4,15 +4,15 @@
   <groupId>org.jvnet.libzfs</groupId>
   <artifactId>libzfs</artifactId>
   <packaging>jar</packaging>
-  <version>0.4-SNAPSHOT</version>
+  <version>0.4</version>
   <name>libzfs-java</name>
   <description>libzfs for Java</description>
   <url>https://zfs.dev.java.net/</url>
 
   <scm>
-    <connection>scm:svn:https://zfs.dev.java.net/svn/zfs/trunk/libzfs/</connection>
-    <developerConnection>scm:svn:https://zfs.dev.java.net/svn/zfs/trunk/libzfs/</developerConnection>
-    <url>https://zfs.dev.java.net/source/browse/zfs/</url>
+    <connection>scm:svn:https://zfs.dev.java.net/svn/zfs/tags/libzfs-0.4</connection>
+    <developerConnection>scm:svn:https://zfs.dev.java.net/svn/zfs/tags/libzfs-0.4</developerConnection>
+    <url>https://zfs.dev.java.net/source/browse/zfs/tags/libzfs-0.4</url>
   </scm>
 
   <distributionManagement>
