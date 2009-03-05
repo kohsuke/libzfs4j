@@ -83,7 +83,7 @@ public class AppTest extends TestCase {
 
     public void testApp() {
         System.out.println("Iterating roots");
-        for (ZFSPool pool : zfs.roots()) {
+        for (ZFSFileSystem pool : zfs.roots()) {
             System.out.println(pool.getName());
             for (ZFSObject child : pool.descendants()) {
                 System.out.println("- " + child.getName());
@@ -154,7 +154,7 @@ public class AppTest extends TestCase {
     }
 
     public void testGetZfsProperties() {
-        for (ZFSPool pool : zfs.roots()) {
+        for (ZFSFileSystem pool : zfs.roots()) {
             System.out.println("pool    :" + pool.getName());
 
             Map<zfs_prop_t, String> zfsPoolProps = pool.getZfsProperty(EnumSet.allOf(zfs_prop_t.class));
@@ -175,7 +175,7 @@ public class AppTest extends TestCase {
     }
 
     public void testGetZpoolProperties() {
-        for (ZFSPool o : zfs.roots()) {
+        for (ZFSPool o : zfs.pools()) {
             System.out.println("name:" + o.getName() + " size:"
                     + o.getZpoolProperty(zpool_prop_t.ZPOOL_PROP_SIZE)
                     + " used:"

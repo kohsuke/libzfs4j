@@ -29,22 +29,42 @@ import com.sun.jna.Memory;
 import com.sun.jna.NativeLong;
 
 /**
- * ZFS pool, which is a top-level object of the ZFS data sets.
+ * zpool, which is a storage abstraction.
  *
  * @author Kohsuke Kawaguchi
  */
-public final class ZFSPool extends ZFSObject {
-    ZFSPool(final LibZFS parent, final zfs_handle_t handle) {
-        super(parent, handle);
+public final class ZFSPool {
+    /*package*/ final LibZFS library;
+    /*package*/ zpool_handle_t handle;
+    private final String name;
+
+    ZFSPool(final LibZFS parent, final zpool_handle_t handle) {
+        this.library = parent;
+        this.handle = handle;
+        this.name = LIBZFS.zpool_get_name(handle);
+    }
+
+    public String getName() {
+        return name;
     }
 
     public String getZpoolProperty(zpool_prop_t prop) {
         Memory propbuf = new Memory(libzfs.ZPOOL_MAXPROPLEN);
-        zpool_handle_t zpool_handle = LIBZFS.zpool_open(library.getHandle(),
-                this.getName());
-        int ret = LIBZFS.zpool_get_prop(zpool_handle, new NativeLong(prop
+        int ret = LIBZFS.zpool_get_prop(handle, new NativeLong(prop
                 .ordinal()), propbuf, new NativeLong(
                 libzfs.ZPOOL_MAXPROPLEN), null);
         return ((ret != 0) ? null : propbuf.getString(0));
+    }
+
+    public synchronized void dispose() {
+        if (handle != null)
+            LIBZFS.zpool_close(handle);
+        handle = null;
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+        dispose();
+        super.finalize();
     }
 }

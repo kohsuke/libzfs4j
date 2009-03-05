@@ -66,7 +66,6 @@ public abstract class ZFSObject implements Comparable<ZFSObject>, ZFSContainer {
     /*package*/ static ZFSObject create(LibZFS parent, zfs_handle_t handle) {
         switch (ZFSType.fromCode(LIBZFS.zfs_get_type(handle))) {
         case FILESYSTEM:    return new ZFSFileSystem(parent,handle);
-        case POOL:          return new ZFSPool(parent,handle);
         case SNAPSHOT:      return new ZFSSnapshot(parent,handle);
         case VOLUME:        return new ZFSVolume(parent,handle);
         default:            throw new AssertionError();

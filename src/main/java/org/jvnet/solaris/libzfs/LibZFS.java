@@ -23,9 +23,11 @@ package org.jvnet.solaris.libzfs;
 import com.sun.jna.Pointer;
 import org.jvnet.solaris.libzfs.jna.libzfs;
 import static org.jvnet.solaris.libzfs.jna.libzfs.LIBZFS;
+import org.jvnet.solaris.libzfs.jna.libzfs.zpool_iter_f;
 import org.jvnet.solaris.libzfs.jna.libzfs_handle_t;
 import org.jvnet.solaris.libzfs.jna.zfs_handle_t;
 import org.jvnet.solaris.libzfs.jna.zfs_type_t;
+import org.jvnet.solaris.libzfs.jna.zpool_handle_t;
 import org.jvnet.solaris.nvlist.jna.nvlist_t;
 import static org.jvnet.solaris.nvlist.jna.libnvpair.NV_UNIQUE_NAME;
 
@@ -51,10 +53,12 @@ public class LibZFS implements ZFSContainer {
     }
 
     /**
-     * List up all the root pools and return them.
-     * 
-     * TODO: are there roots that are not pools?
-     * 
+     * List up all the root file systems and return them.
+     *
+     * <p>
+     * In ZFS, each zpool gets a top-level zfs file system automatically.
+     * This method returns those top-level file systems.
+     *
      * @return can be empty but never null.
      */
     public List<ZFSFileSystem> roots() {
@@ -62,6 +66,22 @@ public class LibZFS implements ZFSContainer {
         LIBZFS.zfs_iter_root(handle, new libzfs.zfs_iter_f() {
             public int callback(zfs_handle_t handle, Pointer arg) {
                 r.add(new ZFSFileSystem(LibZFS.this, handle));
+                return 0;
+            }
+        }, null);
+        return r;
+    }
+
+    /**
+     * Lists up all the ZFS pools.
+     *
+     * @return can be empty but never null.
+     */
+    public List<ZFSPool> pools() {
+        final List<ZFSPool> r = new ArrayList<ZFSPool>();
+        LIBZFS.zpool_iter(handle, new zpool_iter_f() {
+            public int callback(zpool_handle_t handle, Pointer arg) {
+                r.add(new ZFSPool(LibZFS.this, handle));
                 return 0;
             }
         }, null);

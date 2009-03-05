@@ -52,14 +52,15 @@ public enum ZFSType {
      * environments.  Volumes  cannot  be  used in a non-global
      * zone.
      */
-    VOLUME(4,ZFSVolume.class),
-    /**
-     * Pool is a storage abstraction in which filesysems, snapshots,
-     * and volumes are stored.
-     *
-     * TODO: find an official documentation and replace this.
-     */
-    POOL(8,ZFSPool.class);
+    VOLUME(4,ZFSVolume.class);
+    // AFAICT, pool is never represented as zfs_handle_t, so this doesn't belong here.
+//    /**
+//     * Pool is a storage abstraction in which filesysems, snapshots,
+//     * and volumes are stored.
+//     *
+//     * TODO: find an official documentation and replace this.
+//     */
+//    POOL(8,ZFSPool.class);
 
     ZFSType(int code, Class<? extends ZFSObject> type) {
         this.code = code;
