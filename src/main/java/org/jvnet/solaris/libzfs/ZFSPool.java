@@ -20,13 +20,13 @@
  */
 package org.jvnet.solaris.libzfs;
 
-import org.jvnet.solaris.libzfs.jna.zfs_handle_t;
-import org.jvnet.solaris.libzfs.jna.zpool_prop_t;
-import org.jvnet.solaris.libzfs.jna.libzfs;
-import org.jvnet.solaris.libzfs.jna.zpool_handle_t;
-import static org.jvnet.solaris.libzfs.jna.libzfs.LIBZFS;
 import com.sun.jna.Memory;
 import com.sun.jna.NativeLong;
+import org.jvnet.solaris.libzfs.jna.libzfs;
+import static org.jvnet.solaris.libzfs.jna.libzfs.LIBZFS;
+import org.jvnet.solaris.libzfs.jna.libzfs.zpool_status_t;
+import org.jvnet.solaris.libzfs.jna.zpool_handle_t;
+import org.jvnet.solaris.libzfs.jna.zpool_prop_t;
 
 /**
  * zpool, which is a storage abstraction.
@@ -54,6 +54,10 @@ public final class ZFSPool {
                 .ordinal()), propbuf, new NativeLong(
                 libzfs.ZPOOL_MAXPROPLEN), null);
         return ((ret != 0) ? null : propbuf.getString(0));
+    }
+
+    public zpool_status_t getStatus() {
+        return LIBZFS.zpool_get_status(handle,null);
     }
 
     /**

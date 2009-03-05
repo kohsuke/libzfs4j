@@ -180,6 +180,7 @@ public class AppTest extends TestCase {
                     + o.getProperty(zpool_prop_t.ZPOOL_PROP_SIZE)
                     + " used:"
                     + o.getProperty(zpool_prop_t.ZPOOL_PROP_USED));
+            System.out.println("  status:"+o.getStatus());
         }
     }
 
