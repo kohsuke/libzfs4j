@@ -33,6 +33,7 @@ import org.jvnet.solaris.libzfs.jna.zpool_prop_t;
 
 import java.util.EnumSet;
 import java.util.Map;
+import java.io.File;
 
 /**
  * Unit test for simple App.
@@ -108,6 +109,10 @@ public class AppTest extends TestCase {
         } else {
             System.out.println("no zfs pools were found");
         }
+    }
+
+    public void testRpoolMount() throws Exception {
+        assertNotNull(zfs.getFileSystemByMountPoint(new File("/rpool")));
     }
 
     public void testCreate() {
