@@ -57,11 +57,11 @@ public class LibZFS implements ZFSContainer {
      * 
      * @return can be empty but never null.
      */
-    public List<ZFSPool> roots() {
-        final List<ZFSPool> r = new ArrayList<ZFSPool>();
+    public List<ZFSFileSystem> roots() {
+        final List<ZFSFileSystem> r = new ArrayList<ZFSFileSystem>();
         LIBZFS.zfs_iter_root(handle, new libzfs.zfs_iter_f() {
             public int callback(zfs_handle_t handle, Pointer arg) {
-                r.add(new ZFSPool(LibZFS.this, handle));
+                r.add(new ZFSFileSystem(LibZFS.this, handle));
                 return 0;
             }
         }, null);
@@ -217,12 +217,12 @@ public class LibZFS implements ZFSContainer {
         return null;
     }
 
-    public List<ZFSPool> children() {
+    public List<ZFSFileSystem> children() {
         return roots();
     }
 
     public <T extends ZFSObject> List<T> children(Class<T> type) {
-        if(type.isAssignableFrom(ZFSPool.class))
+        if(type.isAssignableFrom(ZFSFileSystem.class))
             return (List)roots();
         else
             return Collections.emptyList();
@@ -235,7 +235,7 @@ public class LibZFS implements ZFSContainer {
     public <T extends ZFSObject> List<T> descendants(Class<T> type) {
         ArrayList<T> r = new ArrayList<T>();
         r.addAll(children(type));
-        for (ZFSPool p : roots())
+        for (ZFSFileSystem p : roots())
             r.addAll(p.descendants(type));
         return r;
     }
