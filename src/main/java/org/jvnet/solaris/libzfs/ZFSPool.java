@@ -48,12 +48,38 @@ public final class ZFSPool {
         return name;
     }
 
-    public String getZpoolProperty(zpool_prop_t prop) {
+    public String getProperty(zpool_prop_t prop) {
         Memory propbuf = new Memory(libzfs.ZPOOL_MAXPROPLEN);
         int ret = LIBZFS.zpool_get_prop(handle, new NativeLong(prop
                 .ordinal()), propbuf, new NativeLong(
                 libzfs.ZPOOL_MAXPROPLEN), null);
         return ((ret != 0) ? null : propbuf.getString(0));
+    }
+
+    /**
+     * Disables datasets within a pool by unmounting/unsharing them all.
+     *
+     * @param force
+     *      Not exactly sure what this does.
+     */
+    public void disableDatasets(boolean force) {
+        check(LIBZFS.zpool_disable_datasets(handle,force));
+    }
+
+    private void check(int r) {
+        if(r!=0)
+            throw new ZFSException(library);
+    }
+
+    /**
+     * Does "zpool export".
+     */
+    public void export(boolean force, boolean hardForce) {
+        disableDatasets(force);
+        if(hardForce)
+            check(LIBZFS.zpool_export_force(handle));
+        else
+            check(LIBZFS.zpool_export(handle,force));
     }
 
     public synchronized void dispose() {

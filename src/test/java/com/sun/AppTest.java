@@ -177,9 +177,9 @@ public class AppTest extends TestCase {
     public void testGetZpoolProperties() {
         for (ZFSPool o : zfs.pools()) {
             System.out.println("name:" + o.getName() + " size:"
-                    + o.getZpoolProperty(zpool_prop_t.ZPOOL_PROP_SIZE)
+                    + o.getProperty(zpool_prop_t.ZPOOL_PROP_SIZE)
                     + " used:"
-                    + o.getZpoolProperty(zpool_prop_t.ZPOOL_PROP_USED));
+                    + o.getProperty(zpool_prop_t.ZPOOL_PROP_USED));
         }
     }
 

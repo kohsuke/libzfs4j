@@ -213,7 +213,8 @@ int zpool_get_errlog(zpool_handle_t pool, /*nvlist_t ** */ PointerByReference pp
 /*
  * Import and export functions
  */
-int zpool_export(zpool_handle_t pool);
+int zpool_export(zpool_handle_t pool, boolean force);
+int zpool_export_force(zpool_handle_t pool);
 int zpool_import(libzfs_handle_t lib, nvlist_t _1, String _2, /*char * */  String altroot);
 int zpool_import_props(libzfs_handle_t lib, nvlist_t _1, String _2, nvlist_t _3);
 
@@ -464,5 +465,5 @@ int zvol_check_dump_config(/*char **/String _1);
  * sharing/unsharing them.
  */
 int zpool_enable_datasets(zpool_handle_t pool, String _2, int _3);
-int zpool_disable_datasets(zpool_handle_t pool, boolean _2);
+int zpool_disable_datasets(zpool_handle_t pool, boolean force);
 }
