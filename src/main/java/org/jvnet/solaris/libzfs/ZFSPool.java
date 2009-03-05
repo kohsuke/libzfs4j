@@ -22,6 +22,7 @@ package org.jvnet.solaris.libzfs;
 
 import com.sun.jna.Memory;
 import com.sun.jna.NativeLong;
+import com.sun.jna.ptr.PointerByReference;
 import org.jvnet.solaris.libzfs.jna.libzfs;
 import static org.jvnet.solaris.libzfs.jna.libzfs.LIBZFS;
 import org.jvnet.solaris.libzfs.jna.zpool_handle_t;
@@ -56,7 +57,7 @@ public final class ZFSPool {
     }
 
     public ZPoolStatus getStatus() {
-        return ZPoolStatus.values()[LIBZFS.zpool_get_status(handle,null)];
+        return ZPoolStatus.values()[LIBZFS.zpool_get_status(handle,new PointerByReference())];
     }
 
     /**
