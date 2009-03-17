@@ -109,7 +109,10 @@ public final class ZFSPool {
         case 'K':   multiplier *= 1024; // fall through
         }
 
-        return (long)(d*multiplier);
+        if(multiplier==1)   return (long)d;
+
+        // this is to control the rounding error
+        return ((long)(d*1024))*(multiplier/1024);
     }
 
     /**
