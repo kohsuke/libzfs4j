@@ -76,6 +76,18 @@ public abstract class ZFSObject implements Comparable<ZFSObject>, ZFSContainer {
         return library;
     }
 
+    /**
+     * Gets the {@link ZFSPool} that contains this ZFS object.
+     *
+     * @return
+     *      This method should never return null.
+     */
+    public ZFSPool getPool() {
+        int idx = name.indexOf('/');
+        if(idx<0)   return library.getPool(name);
+        return library.getPool(name.substring(0,idx));
+    }
+
     public int compareTo(ZFSObject that) {
         long a = Long.parseLong(this.getZfsProperty(zfs_prop_t.ZFS_PROP_CREATETXG));
         long b = Long.parseLong(that.getZfsProperty(zfs_prop_t.ZFS_PROP_CREATETXG));

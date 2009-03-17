@@ -89,6 +89,15 @@ public class LibZFS implements ZFSContainer {
     }
 
     /**
+     * Gets the pool of the given name.
+     */
+    public ZFSPool getPool(String name) {
+        zpool_handle_t h = LIBZFS.zpool_open(handle, name);
+        if(h==null) return null;    // not found
+        return new ZFSPool(this,h);
+    }
+
+    /**
      * Does a zfs dataset of the given name exist?
      * 
      * @param dataSetName
@@ -287,5 +296,4 @@ public class LibZFS implements ZFSContainer {
             handle = null;
         }
     }
-
 }
