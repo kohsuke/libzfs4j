@@ -187,6 +187,8 @@ public class AppTest extends TestCase {
                     + " used:"
                     + o.getProperty(zpool_prop_t.ZPOOL_PROP_USED));
             System.out.println("  status:"+o.getStatus());
+
+            System.out.println(" size:"+o.getSize()+" used:"+o.getUsedSize()+" available:"+o.getAvailableSize());
         }
     }
 

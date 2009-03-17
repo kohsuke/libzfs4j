@@ -61,6 +61,58 @@ public final class ZFSPool {
     }
 
     /**
+     * Gets the total size of this pool in bytes.
+     *
+     * <p>
+     * Because of the way libzfs report the size information
+     * (as strings like 1.2G), the precision of this information is low.
+     */
+    public long getSize() {
+        return toSize(getProperty(zpool_prop_t.ZPOOL_PROP_SIZE));
+    }
+
+    /**
+     * Gets the remaining free space size of this pool in bytes.
+     *
+     * <p>
+     * Because of the way libzfs report the size information
+     * (as strings like 1.2G), the precision of this information is low.
+     */
+    public long getAvailableSize() {
+        return toSize(getProperty(zpool_prop_t.ZPOOL_PROP_AVAILABLE));
+    }
+
+    /**
+     * Gets the size of this pool that's already used in bytes.
+     *
+     * <p>
+     * Because of the way libzfs report the size information
+     * (as strings like 1.2G), the precision of this information is low.
+     */
+    public long getUsedSize() {
+        return toSize(getProperty(zpool_prop_t.ZPOOL_PROP_USED));
+    }
+
+    /**
+     * @param value
+     *      String that represents a size
+     */
+    private long toSize(String value) {
+        value = value.toUpperCase();
+        double d = Double.parseDouble(value.substring(0,value.length()-1));
+        long multiplier = 1;
+        switch(value.charAt(value.length()-1)) {
+        case 'P':   multiplier *= 1024; // fall through
+        case 'T':   multiplier *= 1024; // fall through
+        case 'G':   multiplier *= 1024; // fall through
+        case 'M':   multiplier *= 1024; // fall through
+        case 'K':   multiplier *= 1024; // fall through
+        }
+
+        return (long)(d*multiplier);
+    }
+
+    /**
      * Disables datasets within a pool by unmounting/unsharing them all.
      *
      * @param force
