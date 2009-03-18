@@ -182,6 +182,8 @@ public class AppTest extends TestCase {
 
     public void testGetZpoolProperties() {
         for (ZFSPool o : zfs.pools()) {
+            ZFSFileSystem r = zfs.open(o.getName(), ZFSFileSystem.class);
+            assertNotNull(r.getPool());
             System.out.println("name:" + o.getName() + " size:"
                     + o.getProperty(zpool_prop_t.ZPOOL_PROP_SIZE)
                     + " used:"
