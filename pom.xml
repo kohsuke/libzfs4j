@@ -4,7 +4,7 @@
   <groupId>org.jvnet.libzfs</groupId>
   <artifactId>libzfs</artifactId>
   <packaging>jar</packaging>
-  <version>0.6-SNAPSHOT</version>
+  <version>0.5-SNAPSHOT</version>
   <name>libzfs-java</name>
   <description>libzfs for Java</description>
   <url>https://zfs.dev.java.net/</url>
@@ -23,7 +23,7 @@
     <repository>
       <uniqueVersion>false</uniqueVersion>
       <id>java.net-maven2-repository</id>
-      <url>java-net:/maven2-repository/trunk/repository/</url>
+      <url>java-net:/maven2-repository/trunk/www/repository/</url>
     </repository>
   </distributionManagement>
 
