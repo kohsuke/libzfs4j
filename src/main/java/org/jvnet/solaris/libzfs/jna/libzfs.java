@@ -41,6 +41,7 @@ import org.jvnet.solaris.libzfs.ZPoolStatus;
 
 /**
  * @author Kohsuke Kawaguchi
+ * @author Leo Xu
  */
 public interface libzfs extends Library {
     public static final libzfs LIBZFS = (libzfs) Native.loadLibrary("zfs",libzfs.class);
@@ -107,6 +108,15 @@ int libzfs_errno(libzfs_handle_t lib);
 String libzfs_error_action(libzfs_handle_t lib);
 String libzfs_error_description(libzfs_handle_t lib);
 
+
+void libzfs_mnttab_init(libzfs_handle_t lib);
+void libzfs_mnttab_fini(libzfs_handle_t lib);
+void libzfs_mnttab_cache(libzfs_handle_t lib, boolean flag);
+//int libzfs_mnttab_find(libzfs_handle_t lib, String fsname,     struct mnttab *);
+void libzfs_mnttab_add(libzfs_handle_t lib, String specal, String mountp, String mntopts);
+void libzfs_mnttab_remove(libzfs_handle_t lib, String fsname);
+
+
 /*
  * Basic handle functions
  */
@@ -115,7 +125,9 @@ zpool_handle_t zpool_open_canfail(libzfs_handle_t lib, String name);
 void zpool_close(zpool_handle_t pool);
 String zpool_get_name(zpool_handle_t pool);
 int zpool_get_state(zpool_handle_t pool);
-String zpool_state_to_name(vdev_state_t _1, vdev_aux_t _2);
+String zpool_state_to_name(vdev_state_t state, vdev_aux_t aux);
+void zpool_free_handles(libzfs_handle_t lib);
+
 
 /*
  * Iterate over all active pools in the system.
@@ -138,17 +150,21 @@ int zpool_add(zpool_handle_t pool, nvlist_t _1);
 int zpool_scrub(zpool_handle_t pool, pool_scrub_type_t scrub);
 int zpool_clear(zpool_handle_t pool, String name);
 
-int zpool_vdev_online(zpool_handle_t pool, String _1, int _2, vdev_state_t _3);
-int zpool_vdev_offline(zpool_handle_t pool, String _2, boolean _3);
-int zpool_vdev_attach(zpool_handle_t pool, String _2, String _3, nvlist_t _4, int _5);
-int zpool_vdev_detach(zpool_handle_t pool, String _2);
-int zpool_vdev_remove(zpool_handle_t pool, String _2);
+int zpool_vdev_online(zpool_handle_t pool, String path, int flags, vdev_state_t newstate);
+int zpool_vdev_offline(zpool_handle_t pool, String path, boolean istmp);
+int zpool_vdev_attach(zpool_handle_t pool, String old_disk, String new_disk, nvlist_t nvroot, int replacing);
+int zpool_vdev_detach(zpool_handle_t pool, String path);
+int zpool_vdev_remove(zpool_handle_t pool, String path);
 
-int zpool_vdev_fault(zpool_handle_t pool, long _2);
-int zpool_vdev_degrade(zpool_handle_t pool, long _2);
-int zpool_vdev_clear(zpool_handle_t pool, long _2);
+int zpool_vdev_fault(zpool_handle_t pool, long guid, vdev_aux_t aux);
+int zpool_vdev_degrade(zpool_handle_t pool, long guid, vdev_aux_t aux);
+int zpool_vdev_clear(zpool_handle_t pool, long guid);
 
-nvlist_t zpool_find_vdev(zpool_handle_t pool, String _2, BooleanByReference _3, BooleanByReference _4);
+nvlist_t zpool_find_vdev(zpool_handle_t pool, String path, BooleanByReference avail_spare,
+        BooleanByReference l2cache, BooleanByReference log);
+nvlist_t zpool_find_vdev_by_physpath(zpool_handle_t pool, String ppath,
+         BooleanByReference avail_spare, BooleanByReference l2cache, BooleanByReference log);
+
 int zpool_label_disk(libzfs_handle_t lib, zpool_handle_t pool, String label);
 
 /*
@@ -156,20 +172,21 @@ int zpool_label_disk(libzfs_handle_t lib, zpool_handle_t pool, String label);
  */
 int zpool_set_prop(zpool_handle_t pool, String name, String value);
 int zpool_get_prop(zpool_handle_t pool, /* zpool_prop_t */ NativeLong prop, /*char[] */ Pointer buf,
-    NativeLong proplen, EnumByReference<zprop_source_t> _5);
-long zpool_get_prop_int(zpool_handle_t pool, zpool_prop_t prop, EnumByReference<zprop_source_t> _3);
+    NativeLong len, EnumByReference<zprop_source_t> srctype);
+long zpool_get_prop_int(zpool_handle_t pool, zpool_prop_t prop, EnumByReference<zprop_source_t> src);
 
 String zpool_prop_to_name(zpool_prop_t prop);
 String zpool_prop_values(zpool_prop_t prop);
 
-int/*ZPoolStatus*/ zpool_get_status(zpool_handle_t handle, /*char ** */ PointerByReference ppchBuf);
-int/*ZPoolStatus*/ zpool_import_status(nvlist_t _1, PointerByReference ppchBuf);
+int/*ZPoolStatus*/ zpool_get_status(zpool_handle_t handle, /*char ** */ PointerByReference msgid);
+int/*ZPoolStatus*/ zpool_import_status(nvlist_t config, PointerByReference misgid);
+// void zpool_dump_ddt(ddt_stat_t dds_total, ddt_histogram_t ddh);
 
 /*
  * Statistics and configuration functions.
  */
 nvlist_t zpool_get_config(zpool_handle_t pool, /*nvlist_t ** */ PointerByReference ppchNVList);
-int zpool_refresh_stats(zpool_handle_t pool, BooleanByReference r);
+int zpool_refresh_stats(zpool_handle_t pool, BooleanByReference missing);
 int zpool_get_errlog(zpool_handle_t pool, /*nvlist_t ** */ PointerByReference ppchNVList);
 
 /*
@@ -177,22 +194,26 @@ int zpool_get_errlog(zpool_handle_t pool, /*nvlist_t ** */ PointerByReference pp
  */
 int zpool_export(zpool_handle_t pool, boolean force);
 int zpool_export_force(zpool_handle_t pool);
-int zpool_import(libzfs_handle_t lib, nvlist_t _1, String _2, /*char * */  String altroot);
-int zpool_import_props(libzfs_handle_t lib, nvlist_t _1, String _2, nvlist_t _3);
+int zpool_import(libzfs_handle_t lib, nvlist_t config, String newname, /*char * */  String altroot);
+int zpool_import_props(libzfs_handle_t lib, nvlist_t config, String newname,
+                        nvlist_t props, BooleanByReference importfaulted);
 
 /*
  * Search for pools to import
  */
-nvlist_t zpool_find_import(libzfs_handle_t lib, int _1, /*char ** */PointerByReference _2, boolean _3);
-nvlist_t zpool_find_import_cached(libzfs_handle_t lib, String _1, boolean _2);
+nvlist_t zpool_find_import(libzfs_handle_t lib, int argc, /*char ** */PointerByReference argv);
+nvlist_t zpool_find_import_cached(libzfs_handle_t lib, String cachefile, String poolname, long guid);
+nvlist_t zpool_find_import_byname(libzfs_handle_t lib, int argc, /*char ** */ PointerByReference argv, String pool);
+nvlist_t zpool_find_import_byguid(libzfs_handle_t lib, int argc, /*char ** */ PointerByReference argv, long guid);
+nvlist_t zpool_find_import_activeok(libzfs_handle_t lib, int argc, /*char ** */ PointerByReference argv);
 
 /*
  * Miscellaneous pool functions
  */
 //struct zfs_cmd;
 
-String zpool_vdev_name(libzfs_handle_t lib, zpool_handle_t pool, nvlist_t _3);
-int zpool_upgrade(zpool_handle_t pool , long _1);
+String zpool_vdev_name(libzfs_handle_t lib, zpool_handle_t pool, nvlist_t nv, BooleanByReference verbose);
+int zpool_upgrade(zpool_handle_t pool , long new_version);
 int zpool_get_history(zpool_handle_t pool, /*nvlist_t ** */ PointerByReference ppNVList);
 void zpool_set_history_str(String subcommand, int argc, String[] argv, String history_str);
 int zpool_stage_history(libzfs_handle_t lib, String _2);
