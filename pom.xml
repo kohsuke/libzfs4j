@@ -7,12 +7,12 @@
   <version>0.6-SNAPSHOT</version>
   <name>libzfs-java</name>
   <description>libzfs for Java</description>
-  <url>https://zfs.dev.java.net/</url>
+  <url>http://java.net/projects/zfs</url>
 
   <scm>
-    <connection>scm:svn:https://zfs.dev.java.net/svn/zfs/trunk/libzfs/</connection>
-    <developerConnection>scm:svn:https://zfs.dev.java.net/svn/zfs/trunk/libzfs/</developerConnection>
-    <url>https://zfs.dev.java.net/source/browse/zfs/</url>
+    <connection>scm:svn:https://svn.java.net/svn/zfs~svn/trunk/libzfs</connection>
+    <developerConnection>scm:svn:https://svn.java.net/svn/zfs~svn/trunk/libzfs</developerConnection>
+    <url>http://java.net/projects/zfs/sources/svn/show</url>
   </scm>
 
   <distributionManagement>
