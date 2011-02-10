@@ -31,6 +31,11 @@ import org.jvnet.solaris.libzfs.jna.libzfs_handle_t;
  */
 public class ZFSException extends RuntimeException {
 
+    /**
+     * serialVersionUID.
+     */
+    private static final long serialVersionUID = 8348969894255697338L;
+
     private final ErrorCode code;
 
     /* package */ZFSException(LibZFS zfs) {
