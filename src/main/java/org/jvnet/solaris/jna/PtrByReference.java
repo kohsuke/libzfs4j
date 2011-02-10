@@ -21,10 +21,10 @@
 
 package org.jvnet.solaris.jna;
 
-import com.sun.jna.PointerType;
 import com.sun.jna.Pointer;
-import com.sun.jna.ptr.PointerByReference;
+import com.sun.jna.PointerType;
 import com.sun.jna.ptr.ByReference;
+import com.sun.jna.ptr.PointerByReference;
 
 /**
  * {@link PointerByReference} equivalent but type-safe.

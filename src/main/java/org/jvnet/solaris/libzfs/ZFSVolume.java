@@ -20,8 +20,9 @@
  */
 package org.jvnet.solaris.libzfs;
 
-import org.jvnet.solaris.libzfs.jna.zfs_handle_t;
 import static org.jvnet.solaris.libzfs.jna.libzfs.LIBZFS;
+
+import org.jvnet.solaris.libzfs.jna.zfs_handle_t;
 
 /**
  * @author Kohsuke Kawaguchi

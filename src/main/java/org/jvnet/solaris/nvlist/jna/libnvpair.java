@@ -18,14 +18,13 @@
  *
  * CDDL HEADER END
  */
-
 package org.jvnet.solaris.nvlist.jna;
+
+import org.jvnet.solaris.jna.PtrByReference;
 
 import com.sun.jna.Library;
 import com.sun.jna.Native;
-import com.sun.jna.Pointer;
 import com.sun.jna.ptr.PointerByReference;
-import org.jvnet.solaris.jna.PtrByReference;
 
 /**
  * @author Kohsuke Kawaguchi

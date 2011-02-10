@@ -22,8 +22,8 @@
 package org.jvnet.solaris.libzfs.jna;
 
 import com.sun.jna.NativeLong;
-import com.sun.jna.Structure;
 import com.sun.jna.Pointer;
+import com.sun.jna.Structure;
 
 /**
  * @author Kohsuke Kawaguchi

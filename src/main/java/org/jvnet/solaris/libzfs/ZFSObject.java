@@ -20,25 +20,27 @@
  */
 package org.jvnet.solaris.libzfs;
 
-import com.sun.jna.Memory;
-import com.sun.jna.NativeLong;
-import com.sun.jna.Pointer;
-import com.sun.jna.ptr.IntByReference;
-import org.jvnet.solaris.libzfs.jna.libzfs;
 import static org.jvnet.solaris.libzfs.jna.libzfs.LIBZFS;
-import org.jvnet.solaris.libzfs.jna.zfs_handle_t;
-import org.jvnet.solaris.libzfs.jna.zfs_prop_t;
-import org.jvnet.solaris.libzfs.jna.zfs_type_t;
-import org.jvnet.solaris.libzfs.ACLBuilder.PermissionBuilder;
-import org.jvnet.solaris.nvlist.jna.nvlist_t;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.Collection;
+
+import org.jvnet.solaris.libzfs.ACLBuilder.PermissionBuilder;
+import org.jvnet.solaris.libzfs.jna.libzfs;
+import org.jvnet.solaris.libzfs.jna.zfs_handle_t;
+import org.jvnet.solaris.libzfs.jna.zfs_prop_t;
+import org.jvnet.solaris.libzfs.jna.zfs_type_t;
+import org.jvnet.solaris.nvlist.jna.nvlist_t;
+
+import com.sun.jna.Memory;
+import com.sun.jna.NativeLong;
+import com.sun.jna.Pointer;
+import com.sun.jna.ptr.IntByReference;
 
 /**
  * Represents ZFS snapshot, file system, volume, or pool.

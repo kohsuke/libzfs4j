@@ -18,8 +18,15 @@
  *
  * CDDL HEADER END
  */
-
 package org.jvnet.solaris.libzfs.jna;
+
+import org.jvnet.solaris.avl.avl_node_t;
+import org.jvnet.solaris.avl.avl_tree_t;
+import org.jvnet.solaris.jna.BooleanByReference;
+import org.jvnet.solaris.jna.EnumByReference;
+import org.jvnet.solaris.jna.PtrByReference;
+import org.jvnet.solaris.mount.MountFlags;
+import org.jvnet.solaris.nvlist.jna.nvlist_t;
 
 import com.sun.jna.Callback;
 import com.sun.jna.Library;
@@ -30,14 +37,6 @@ import com.sun.jna.Structure;
 import com.sun.jna.ptr.IntByReference;
 import com.sun.jna.ptr.LongByReference;
 import com.sun.jna.ptr.PointerByReference;
-import org.jvnet.solaris.avl.avl_node_t;
-import org.jvnet.solaris.avl.avl_tree_t;
-import org.jvnet.solaris.jna.BooleanByReference;
-import org.jvnet.solaris.jna.EnumByReference;
-import org.jvnet.solaris.jna.PtrByReference;
-import org.jvnet.solaris.nvlist.jna.nvlist_t;
-import org.jvnet.solaris.mount.MountFlags;
-import org.jvnet.solaris.libzfs.ZPoolStatus;
 
 /**
  * @author Kohsuke Kawaguchi

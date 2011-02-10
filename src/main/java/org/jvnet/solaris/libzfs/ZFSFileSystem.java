@@ -20,12 +20,13 @@
  */
 package org.jvnet.solaris.libzfs;
 
-import org.jvnet.solaris.libzfs.jna.zfs_handle_t;
-import org.jvnet.solaris.libzfs.jna.zfs_prop_t;
 import static org.jvnet.solaris.libzfs.jna.libzfs.LIBZFS;
-import org.jvnet.solaris.mount.MountFlags;
 
 import java.io.File;
+
+import org.jvnet.solaris.libzfs.jna.zfs_handle_t;
+import org.jvnet.solaris.libzfs.jna.zfs_prop_t;
+import org.jvnet.solaris.mount.MountFlags;
 
 /**
  * ZFS file system.

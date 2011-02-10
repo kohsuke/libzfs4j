@@ -18,15 +18,15 @@
  *
  * CDDL HEADER END
  */
-
 package org.jvnet.solaris.nvlist.jna;
 
-import com.sun.jna.PointerType;
-import com.sun.jna.Pointer;
-import com.sun.jna.ptr.PointerByReference;
-import org.jvnet.solaris.jna.PtrByReference;
 import static org.jvnet.solaris.nvlist.jna.libnvpair.LIBNVPAIR;
 import static org.jvnet.solaris.nvlist.jna.libnvpair.NV_UNIQUE_NAME;
+
+import org.jvnet.solaris.jna.PtrByReference;
+
+import com.sun.jna.PointerType;
+import com.sun.jna.ptr.PointerByReference;
 
 /**
  * Opaque handle type that represents name/value pair list.

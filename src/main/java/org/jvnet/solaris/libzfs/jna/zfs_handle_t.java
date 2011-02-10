@@ -21,8 +21,8 @@
 
 package org.jvnet.solaris.libzfs.jna;
 
-import com.sun.jna.PointerType;
 import com.sun.jna.Pointer;
+import com.sun.jna.PointerType;
 
 /**
  * @author Kohsuke Kawaguchi

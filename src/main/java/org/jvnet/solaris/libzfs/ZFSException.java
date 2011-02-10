@@ -21,6 +21,7 @@
 package org.jvnet.solaris.libzfs;
 
 import static org.jvnet.solaris.libzfs.jna.libzfs.LIBZFS;
+
 import org.jvnet.solaris.libzfs.jna.libzfs_handle_t;
 
 /**

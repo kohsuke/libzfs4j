@@ -20,13 +20,15 @@
  */
 package org.jvnet.solaris.libzfs;
 
+import static org.jvnet.solaris.libzfs.jna.libzfs.LIBZFS;
+
+import org.jvnet.solaris.libzfs.jna.libzfs;
+import org.jvnet.solaris.libzfs.jna.zpool_handle_t;
+import org.jvnet.solaris.libzfs.jna.zpool_prop_t;
+
 import com.sun.jna.Memory;
 import com.sun.jna.NativeLong;
 import com.sun.jna.ptr.PointerByReference;
-import org.jvnet.solaris.libzfs.jna.libzfs;
-import static org.jvnet.solaris.libzfs.jna.libzfs.LIBZFS;
-import org.jvnet.solaris.libzfs.jna.zpool_handle_t;
-import org.jvnet.solaris.libzfs.jna.zpool_prop_t;
 
 /**
  * zpool, which is a storage abstraction.
