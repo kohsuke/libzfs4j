@@ -18,7 +18,6 @@
  *
  * CDDL HEADER END
  */
-
 package org.jvnet.solaris.mount;
 
 /**

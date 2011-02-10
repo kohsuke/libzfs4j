@@ -18,7 +18,6 @@
  *
  * CDDL HEADER END
  */
-
 package org.jvnet.solaris.jna;
 
 import com.sun.jna.ptr.ByReference;
