@@ -18,7 +18,7 @@
  *
  * CDDL HEADER END
  */
-package com.sun;
+package org.jvnet.solaris.libzfs;
 
 import java.io.File;
 import java.util.EnumSet;
@@ -39,7 +39,7 @@ import org.jvnet.solaris.libzfs.jna.zpool_prop_t;
 /**
  * Unit test for simple App.
  */
-public class AppTest extends TestCase {
+public class LibZFSTest extends TestCase {
 
     private static final String ZFS_TEST_POOL_OVERRIDE_PROPERTY = "libzfs.test.pool";
 
