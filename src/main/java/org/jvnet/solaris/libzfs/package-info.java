@@ -20,6 +20,6 @@
  */
 
 /**
- * High-level Java API to <tt>libzfs</tt>. Start navigating from {@link LibZFS}.
+ * High-level Java API to <tt>libzfs</tt>. Start navigating from {@link org.jvnet.solaris.libzfs.LibZFS}.
  */
 package org.jvnet.solaris.libzfs;
