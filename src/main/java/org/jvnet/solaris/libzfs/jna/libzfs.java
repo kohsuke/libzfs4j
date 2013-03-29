@@ -314,8 +314,8 @@ int zfs_iter_snapshots(zfs_handle_t handle, zfs_iter_f callback, Pointer arg);
  */
 int zfs_create(libzfs_handle_t lib, String name, int/*zfs_type_t*/ type, nvlist_t props);
 int zfs_create_ancestors(libzfs_handle_t lib, String _2);
-int zfs_destroy(zfs_handle_t handle);
-int zfs_destroy_snaps(zfs_handle_t handle, String name);
+int zfs_destroy(zfs_handle_t handle, boolean defer);
+int zfs_destroy_snaps(zfs_handle_t handle, String name, boolean _3);
 int zfs_clone(zfs_handle_t handle, String name, nvlist_t _3);
 /*
  * nv96 prototype:

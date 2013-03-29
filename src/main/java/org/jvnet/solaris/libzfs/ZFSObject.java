@@ -210,26 +210,40 @@ public abstract class ZFSObject implements Comparable<ZFSObject>, ZFSContainer {
     }
 
     /**
+     * @deprecated added by typo
+     */
+    public void destory() {
+        destroy();
+    }
+
+    /**
+     * @deprecated added by typo
+     */
+    public void destory(boolean recursive) {
+        destroy(recursive);
+    }
+
+    /**
      * Wipes out the dataset and all its data. Very dangerous.
      *
      * <p>
      * If this dataset contains nested datasets, this method fails with
      * {@link ErrorCode#EZFS_EXISTS}.
      */
-    public void destory() {
-        if (LIBZFS.zfs_destroy(handle) != 0)
+    public void destroy() {
+        if (LIBZFS.zfs_destroy(handle,false/*?*/) != 0)
             throw new ZFSException(library,"Failed to destroy "+getName());
     }
 
     /**
      * Wipes out this dataset and all its data, optionally recursively.
      */
-    public void destory(boolean recursive) {
+    public void destroy(boolean recursive) {
         if(recursive) {
             for (ZFSObject child : children())
-                child.destory(recursive);
+                child.destroy(recursive);
         }
-        destory();
+        destroy();
     }
 
     public synchronized void dispose() {

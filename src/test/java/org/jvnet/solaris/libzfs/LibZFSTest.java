@@ -78,10 +78,10 @@ public class LibZFSTest extends TestCase {
                 final ZFSFileSystem fs = zfs.open(dataSet,ZFSFileSystem.class);
                 fs.unshare();
                 fs.unmount();
-                fs.destory(true);
+                fs.destroy(true);
             }
         }
-	zfs.dispose();
+        zfs.dispose();
     }
 
     public void testApp() {
