@@ -52,6 +52,8 @@ public class LibZFS implements ZFSContainer {
 
     public LibZFS() {
         handle = LIBZFS.libzfs_init();
+        if (handle==null)
+            throw new LinkageError("Failed to initialize libzfs");
     }
 
     /**
