@@ -38,6 +38,10 @@ import com.sun.jna.ptr.IntByReference;
 import com.sun.jna.ptr.LongByReference;
 import com.sun.jna.ptr.PointerByReference;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 /**
  * @author Kohsuke Kawaguchi
  * @author Leo Xu
@@ -71,7 +75,12 @@ public interface libzfs extends Library {
 class zfs_perm_node_t extends Structure implements Structure.ByReference {
 	avl_node_t z_node;
 	char[] z_pname = new char[MAXPATHLEN];
-}
+
+        @Override
+        protected List getFieldOrder() {
+            return Arrays.asList("z_node","z_pname");
+        }
+    }
 
 class zfs_allow_node_t extends Structure implements Structure.ByReference {
 	avl_node_t z_node;
@@ -80,6 +89,11 @@ class zfs_allow_node_t extends Structure implements Structure.ByReference {
 	avl_tree_t z_local;		/* local permissions */
 	avl_tree_t z_descend;		/* descendent permissions */
     // TODO: KK: aren't there avl_tree_t pointers?
+
+    @Override
+    protected List getFieldOrder() {
+        return Arrays.asList("z_node","z_key","z_localdescend","z_local","z_descend");
+    }
 }
 
 class zfs_allow_t extends Structure implements Structure.ByReference {
@@ -90,6 +104,11 @@ class zfs_allow_t extends Structure implements Structure.ByReference {
 	avl_tree_t z_user;
 	avl_tree_t z_group;
 	avl_tree_t z_everyone;
+
+    @Override
+    protected List getFieldOrder() {
+        return Arrays.asList("z_next","z_setpoint","z_sets","z_crperms","z_user","z_group","z_everyone");
+    }
 }
 
 /*
@@ -225,9 +244,11 @@ int zfs_ioctl(libzfs_handle_t lib, int _2, zfs_cmd cmd);
  * See http://src.opensolaris.org/source/xref/onnv/onnv-gate/usr/src/lib/libzfs/common/libzfs_dataset.c
  */
 zfs_handle_t zfs_open(libzfs_handle_t lib, String name, int/*zfs_type_t*/ typeMask);
+zfs_handle_t zfs_handle_dup(zfs_handle_t src);
 void zfs_close(zfs_handle_t handle);
 int/*zfs_type_t*/ zfs_get_type(zfs_handle_t handle);
 String zfs_get_name(zfs_handle_t handle);
+zpool_handle_t zfs_get_pool_handle(zfs_handle_t h);
 
 /*
  * Property management functions.  Some functions are shared with the kernel,
@@ -308,6 +329,8 @@ int zfs_iter_children(zfs_handle_t handle, zfs_iter_f callback, Pointer arg);
 int zfs_iter_dependents(zfs_handle_t handle, boolean _2, zfs_iter_f callback, Pointer arg);
 int zfs_iter_filesystems(zfs_handle_t handle, zfs_iter_f callback, Pointer arg);
 int zfs_iter_snapshots(zfs_handle_t handle, zfs_iter_f callback, Pointer arg);
+int zfs_iter_snapshots_sorted(zfs_handle_t handle, zfs_iter_f callback, Pointer arg);
+int zfs_iter_snapspec(zfs_handle_t handle, zfs_iter_f callback, Pointer arg);
 
 /*
  * Functions to create and destroy datasets.
@@ -327,10 +350,73 @@ int zfs_snapshot(libzfs_handle_t lib, String fullNameWithAtSnapShot, boolean rec
         
 int zfs_rollback(zfs_handle_t handle1, zfs_handle_t handle2, boolean _3);
 int zfs_rename(zfs_handle_t handle, String name, boolean _3);
-int zfs_send(zfs_handle_t handle, String _2, String _3, boolean _4, boolean _5, boolean _6, boolean _7, int _8);
 int zfs_promote(zfs_handle_t handle);
 
-int zfs_receive(libzfs_handle_t lib, String name, recvflags_t _3, int _4, avl_tree_t _5);
+//typedef struct sendflags {
+//        /* print informational messages (ie, -v was specified) */
+//        boolean_t verbose;
+//
+//        /* recursive send  (ie, -R) */
+//        boolean_t replicate;
+//
+//        /* for incrementals, do all intermediate snapshots */
+//        boolean_t doall;
+//
+//        /* if dataset is a clone, do incremental from its origin */
+//        boolean_t fromorigin;
+//
+//        /* do deduplication */
+//        boolean_t dedup;
+//
+//        /* send properties (ie, -p) */
+//        boolean_t props;
+//
+//        /* do not send (no-op, ie. -n) */
+//        boolean_t dryrun;
+//
+//        /* parsable verbose output (ie. -P) */
+//        boolean_t parsable;
+//
+//        /* show progress (ie. -v) */
+//        boolean_t progress;
+//} sendflags_t;
+//
+//typedef boolean_t (snapfilter_cb_t)(zfs_handle_t *, void *);
+//
+//extern int zfs_send(zfs_handle_t *, const char *, const char *,
+//    sendflags_t *, int, snapfilter_cb_t, void *, nvlist_t **);
+
+//    typedef struct recvflags {
+//            /* print informational messages (ie, -v was specified) */
+//            boolean_t verbose;
+//
+//            /* the destination is a prefix, not the exact fs (ie, -d) */
+//            boolean_t isprefix;
+//
+//            /*
+//             * Only the tail of the sent snapshot path is appended to the
+//             * destination to determine the received snapshot name (ie, -e).
+//             */
+//            boolean_t istail;
+//
+//            /* do not actually do the recv, just check if it would work (ie, -n) */
+//            boolean_t dryrun;
+//
+//            /* rollback/destroy filesystems as necessary (eg, -F) */
+//            boolean_t force;
+//
+//            /* set "canmount=off" on all modified filesystems */
+//            boolean_t canmountoff;
+//
+//            /* byteswap flag is used internally; callers need not specify */
+//            boolean_t byteswap;
+//
+//            /* do not mount file systems as they are extracted (private) */
+//            boolean_t nomount;
+//    } recvflags_t;
+//
+//    extern int zfs_receive(libzfs_handle_t *, const char *, recvflags_t *,
+//        int, avl_tree_t *);
 
 /*
  * Miscellaneous functions.
