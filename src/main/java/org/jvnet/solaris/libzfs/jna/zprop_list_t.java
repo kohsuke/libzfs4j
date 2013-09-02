@@ -24,6 +24,9 @@ import com.sun.jna.NativeLong;
 import com.sun.jna.Pointer;
 import com.sun.jna.Structure;
 
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * @author Kohsuke Kawaguchi
  */
@@ -50,5 +53,10 @@ public class zprop_list_t extends Structure implements Structure.ByReference {
 
     public zprop_list_t(Pointer p) {
         useMemory(p);
+    }
+
+    @Override
+    protected List getFieldOrder() {
+        return Arrays.asList("pl_prop,pl_user_prop,pl_next,pl_all,pl_width,pl_fixed".split(","));
     }
 }
