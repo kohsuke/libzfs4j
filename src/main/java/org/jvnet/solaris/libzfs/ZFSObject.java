@@ -448,7 +448,7 @@ public abstract class ZFSObject implements Comparable<ZFSObject>, ZFSContainer {
      */
     public Set<ZFSSnapshot> snapshots() {
         final Set<ZFSSnapshot> set = new TreeSet<ZFSSnapshot>();
-        LIBZFS.zfs_iter_snapshots(handle, new libzfs.zfs_iter_f() {
+        LIBZFS.zfs_iter_snapshots(handle, false, new libzfs.zfs_iter_f() {
             public int callback(zfs_handle_t handle, Pointer arg) {
                 set.add((ZFSSnapshot)ZFSObject.create(library, handle));
                 return 0;
