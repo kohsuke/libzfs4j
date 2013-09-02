@@ -81,7 +81,7 @@ public final class ZFSPool {
      * (as strings like 1.2G), the precision of this information is low.
      */
     public long getAvailableSize() {
-        return toSize(getProperty(zpool_prop_t.ZPOOL_PROP_AVAILABLE));
+        return toSize(getProperty(zpool_prop_t.ZPOOL_PROP_FREE));
     }
 
     /**
@@ -92,7 +92,7 @@ public final class ZFSPool {
      * (as strings like 1.2G), the precision of this information is low.
      */
     public long getUsedSize() {
-        return toSize(getProperty(zpool_prop_t.ZPOOL_PROP_USED));
+        return Math.max(0, getSize()-getAvailableSize());
     }
 
     /**

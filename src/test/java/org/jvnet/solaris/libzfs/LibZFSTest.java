@@ -187,8 +187,8 @@ public class LibZFSTest extends TestCase {
             assertNotNull(r.getPool());
             System.out.println("name:" + o.getName() + " size:"
                     + o.getProperty(zpool_prop_t.ZPOOL_PROP_SIZE)
-                    + " used:"
-                    + o.getProperty(zpool_prop_t.ZPOOL_PROP_USED));
+                    + " free:"
+                    + o.getProperty(zpool_prop_t.ZPOOL_PROP_FREE));
             System.out.println("  status:"+o.getStatus());
 
             System.out.println(" size:"+o.getSize()+" used:"+o.getUsedSize()+" available:"+o.getAvailableSize());
