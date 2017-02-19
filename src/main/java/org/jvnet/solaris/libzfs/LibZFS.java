@@ -96,8 +96,14 @@ public class LibZFS implements ZFSContainer {
 
         libzfs4j_envvar_name = "LIBZFS4J_ABI";
         libzfs4j_envvar_value = System.getenv(libzfs4j_envvar_name);
-        /* Currently we recognize two values; later it may be more like openzfs-YYYY */
+        if (libzfs4j_envvar_value == null || libzfs4j_envvar_value.equals("")) {
+            libzfs4j_envvar_value = System.getProperty(libzfs4j_envvar_name);
+            if (libzfs4j_envvar_value == null || libzfs4j_envvar_value.equals("")) {
+                libzfs4j_envvar_value = "<NULL>";
+            }
+        }
         if (libzfs4j_envvar_value.equals("legacy") || libzfs4j_envvar_value.equals("openzfs")) {
+            /* Currently we recognize two values; later it may be more like openzfs-YYYY */
             libzfs4j_default_abi = libzfs4j_envvar_value;
         } else {
             /* Detect presence of e.g. feature flags routines == openzfs */
@@ -112,6 +118,12 @@ public class LibZFS implements ZFSContainer {
 
         libzfs4j_envvar_name = "LIBZFS4J_ABI_zfs_iter_snapshots";
         libzfs4j_envvar_value = System.getenv(libzfs4j_envvar_name);
+        if (libzfs4j_envvar_value == null || libzfs4j_envvar_value.equals("")) {
+            libzfs4j_envvar_value = System.getProperty(libzfs4j_envvar_name);
+            if (libzfs4j_envvar_value == null || libzfs4j_envvar_value.equals("")) {
+                libzfs4j_envvar_value = "<NULL>";
+            }
+        }
         if (libzfs4j_envvar_value.equals("legacy") || libzfs4j_envvar_value.equals("3")) {
             libzfs4j_usevar_value = "legacy";
         } else {
