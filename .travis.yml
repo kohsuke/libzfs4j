@@ -18,4 +18,4 @@ jdk:
   - oraclejdk7
   - openjdk6
   - openjdk7
-  - openjdk8
+#  - openjdk8
