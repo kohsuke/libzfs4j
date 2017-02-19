@@ -41,6 +41,7 @@ import org.jvnet.solaris.libzfs.ZPoolStatus;
 
 /**
  * @author Kohsuke Kawaguchi
+ * @author Jim Klimov
  */
 public interface libzfs extends Library {
     public static final libzfs LIBZFS = (libzfs) Native.loadLibrary("zfs",libzfs.class);

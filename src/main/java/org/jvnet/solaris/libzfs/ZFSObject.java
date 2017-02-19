@@ -44,6 +44,7 @@ import java.util.Collection;
  * Represents ZFS snapshot, file system, volume, or pool.
  * 
  * @author Kohsuke Kawaguchi
+ * @author Jim Klimov
  */
 public abstract class ZFSObject implements Comparable<ZFSObject>, ZFSContainer {
 

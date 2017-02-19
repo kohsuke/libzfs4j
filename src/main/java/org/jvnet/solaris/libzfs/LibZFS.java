@@ -48,6 +48,7 @@ import java.util.Map.Entry;
  * Entry point to ZFS functionality in Java.
  * 
  * @author Kohsuke Kawaguchi
+ * @author Jim Klimov
  */
 public class LibZFS implements ZFSContainer {
 
