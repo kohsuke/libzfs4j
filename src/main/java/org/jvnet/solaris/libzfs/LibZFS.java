@@ -84,6 +84,21 @@ public class LibZFS implements ZFSContainer {
         return "";
     }
 
+    private String libzfs4j_get_extsetting(String libzfs4j_envvar_name) {
+        /* Ensure the caller has a string set via envvars or Java CLI.
+         * If the value is not set or is set to empty string, try the
+         * next option. If it ends up not set, return a "<NULL>". */
+        String libzfs4j_envvar_value;
+        libzfs4j_envvar_value = System.getenv(libzfs4j_envvar_name);
+        if (libzfs4j_envvar_value == null || libzfs4j_envvar_value.equals("")) {
+            libzfs4j_envvar_value = System.getProperty(libzfs4j_envvar_name);
+            if (libzfs4j_envvar_value == null || libzfs4j_envvar_value.equals("")) {
+                libzfs4j_envvar_value = "<NULL>";
+            }
+        }
+        return libzfs4j_envvar_value;
+    }
+
     void libzfs4j_init_features() {
         String libzfs4j_envvar_value;
         String libzfs4j_envvar_name;
@@ -95,13 +110,7 @@ public class LibZFS implements ZFSContainer {
             return; /* already inited */
 
         libzfs4j_envvar_name = "LIBZFS4J_ABI";
-        libzfs4j_envvar_value = System.getenv(libzfs4j_envvar_name);
-        if (libzfs4j_envvar_value == null || libzfs4j_envvar_value.equals("")) {
-            libzfs4j_envvar_value = System.getProperty(libzfs4j_envvar_name);
-            if (libzfs4j_envvar_value == null || libzfs4j_envvar_value.equals("")) {
-                libzfs4j_envvar_value = "<NULL>";
-            }
-        }
+        libzfs4j_envvar_value = libzfs4j_get_extsetting(libzfs4j_envvar_name);
         if (libzfs4j_envvar_value.equals("legacy") || libzfs4j_envvar_value.equals("openzfs")) {
             /* Currently we recognize two values; later it may be more like openzfs-YYYY */
             libzfs4j_default_abi = libzfs4j_envvar_value;
@@ -117,13 +126,7 @@ public class LibZFS implements ZFSContainer {
         libzfs_features.add(myEntry);
 
         libzfs4j_envvar_name = "LIBZFS4J_ABI_zfs_iter_snapshots";
-        libzfs4j_envvar_value = System.getenv(libzfs4j_envvar_name);
-        if (libzfs4j_envvar_value == null || libzfs4j_envvar_value.equals("")) {
-            libzfs4j_envvar_value = System.getProperty(libzfs4j_envvar_name);
-            if (libzfs4j_envvar_value == null || libzfs4j_envvar_value.equals("")) {
-                libzfs4j_envvar_value = "<NULL>";
-            }
-        }
+        libzfs4j_envvar_value = libzfs4j_get_extsetting(libzfs4j_envvar_name);
         if (libzfs4j_envvar_value.equals("legacy") || libzfs4j_envvar_value.equals("3")) {
             libzfs4j_usevar_value = "legacy";
         } else {
