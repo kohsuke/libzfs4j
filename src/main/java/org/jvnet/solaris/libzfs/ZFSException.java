@@ -21,6 +21,7 @@
 package org.jvnet.solaris.libzfs;
 
 import static org.jvnet.solaris.libzfs.jna.libzfs.LIBZFS;
+
 import org.jvnet.solaris.libzfs.jna.libzfs_handle_t;
 
 /**
@@ -29,6 +30,11 @@ import org.jvnet.solaris.libzfs.jna.libzfs_handle_t;
  * @author Kohsuke Kawaguchi
  */
 public class ZFSException extends RuntimeException {
+
+    /**
+     * serialVersionUID.
+     */
+    private static final long serialVersionUID = 8348969894255697338L;
 
     private final ErrorCode code;
 

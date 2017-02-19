@@ -45,6 +45,9 @@ public enum ZPoolStatus {
 	ZPOOL_STATUS_IO_FAILURE_CONTINUE("One or more devices are faulted in response to IO failures.","Make sure the affected devices are connected, then run 'zpool clear'."), /* failed I/O, failmode 'continue' */
 	ZPOOL_STATUS_BAD_LOG("An intent log record could not be read.\tWaiting for adminstrator intervention to fix the faulted pool.","Either restore the affected device(s) and run 'zpool online',\tor ignore the intent log records by running 'zpool clear'."),		/* cannot read log chain(s) */
 
+    ZPOOL_STATUS_UNSUP_FEAT_READ, /* unsupported features for read */
+    ZPOOL_STATUS_UNSUP_FEAT_WRITE, /* unsupported features for write */
+
     ZPOOL_STATUS_FAULTED_DEV_R("One or more devices are faulted in response to persistent errors. Sufficient replicas exist for the pool to continue functioning in a degraded state.","Replace the faulted device, or use 'zpool clear' to mark the device repaired."),	/* faulted device with replicas */
 	ZPOOL_STATUS_FAULTED_DEV_NR("One or more devices are faulted in response to persistent errors.  There are insufficient replicas for the pool to continue functioning.","Destroy and re-create the pool from a backup source.  Manually marking the device\trepaired using 'zpool clear' may allow some data to be recovered."),	/* faulted device with no replicas */
 
@@ -54,8 +57,10 @@ public enum ZPoolStatus {
 	 * message ID.
 	 */
 	ZPOOL_STATUS_VERSION_OLDER("The pool is formatted using an older on-disk format.  The pool can still be used, but some features are unavailable.","Upgrade the pool using 'zpool upgrade'.  Once this is done, the pool will no longer be accessible on older software versions."),	/* older on-disk version */
-	ZPOOL_STATUS_RESILVERING("One or more devices is currently being resilvered.  The pool will continue to function, possibly in a degraded state.","Wait for the resilver to complete."),	/* device being resilvered */
+    ZPOOL_STATUS_FEAT_DISABLED(), /* supported features are disabled */
+    ZPOOL_STATUS_RESILVERING("One or more devices is currently being resilvered.  The pool will continue to function, possibly in a degraded state.","Wait for the resilver to complete."),	/* device being resilvered */
 	ZPOOL_STATUS_OFFLINE_DEV("One or more devices has been taken offline by the administrator. Sufficient replicas exist for the pool to continue functioning in a degraded state.","Online the device using 'zpool online' or replace the device with 'zpool replace'."),	/* device online */
+    ZPOOL_STATUS_REMOVED_DEV(), /* "removed device" */
 
 	/*
 	 * Finally, the following indicates a healthy pool.

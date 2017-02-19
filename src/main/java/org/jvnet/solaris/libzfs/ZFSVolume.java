@@ -20,6 +20,8 @@
  */
 package org.jvnet.solaris.libzfs;
 
+import static org.jvnet.solaris.libzfs.jna.libzfs.LIBZFS;
+
 import org.jvnet.solaris.libzfs.jna.zfs_handle_t;
 
 /**
@@ -29,4 +31,24 @@ public final class ZFSVolume extends ZFSObject {
     /*package*/ ZFSVolume(LibZFS parent, zfs_handle_t handle) {
         super(parent, handle);
     }
+
+
+    /**
+     * Share this dataset.
+     */
+    public void shareISCSI() {
+        if (LIBZFS.zfs_share_iscsi(handle) != 0) {
+            throw new ZFSException(library);
+        }
+    }
+
+    /**
+     * Unshare this dataset.
+     */
+    public void unshareISCSI() {
+        if (LIBZFS.zfs_unshare_iscsi(handle) != 0) {
+            throw new ZFSException(library);
+        }
+    }
+
 }

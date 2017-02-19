@@ -18,27 +18,28 @@
  *
  * CDDL HEADER END
  */
-package com.sun;
+package org.jvnet.solaris.libzfs;
+
+import java.io.File;
+import java.util.EnumSet;
+import java.util.Map;
 
 import junit.framework.TestCase;
+
 import org.jvnet.solaris.libzfs.ACLBuilder;
 import org.jvnet.solaris.libzfs.LibZFS;
 import org.jvnet.solaris.libzfs.ZFSFileSystem;
 import org.jvnet.solaris.libzfs.ZFSObject;
+import org.jvnet.solaris.libzfs.ZFSPermission;
 import org.jvnet.solaris.libzfs.ZFSPool;
 import org.jvnet.solaris.libzfs.ZFSType;
-import org.jvnet.solaris.libzfs.ZFSPermission;
 import org.jvnet.solaris.libzfs.jna.zfs_prop_t;
 import org.jvnet.solaris.libzfs.jna.zpool_prop_t;
-
-import java.util.EnumSet;
-import java.util.Map;
-import java.io.File;
 
 /**
  * Unit test for simple App.
  */
-public class AppTest extends TestCase {
+public class LibZFSTest extends TestCase {
 
     private static final String ZFS_TEST_POOL_OVERRIDE_PROPERTY = "libzfs.test.pool";
 
@@ -77,10 +78,10 @@ public class AppTest extends TestCase {
                 final ZFSFileSystem fs = zfs.open(dataSet,ZFSFileSystem.class);
                 fs.unshare();
                 fs.unmount();
-                fs.destory(true);
+                fs.destroy(true);
             }
         }
-	zfs.dispose();
+        zfs.dispose();
     }
 
     public void testApp() {
@@ -186,22 +187,12 @@ public class AppTest extends TestCase {
             assertNotNull(r.getPool());
             System.out.println("name:" + o.getName() + " size:"
                     + o.getProperty(zpool_prop_t.ZPOOL_PROP_SIZE)
-                    + " used:"
-                    + o.getProperty(zpool_prop_t.ZPOOL_PROP_USED));
+                    + " free:"
+                    + o.getProperty(zpool_prop_t.ZPOOL_PROP_FREE));
             System.out.println("  status:"+o.getStatus());
 
             System.out.println(" size:"+o.getSize()+" used:"+o.getUsedSize()+" available:"+o.getAvailableSize());
         }
-    }
-
-    public void testAllow() {
-        ZFSFileSystem fs = zfs.create(dataSet, ZFSFileSystem.class);
-        ACLBuilder acl = new ACLBuilder();
-        acl.everyone().with(ZFSPermission.CREATE);
-        // this fails if the permission being allowed here isn't already allowed to me
-        fs.allow(acl);
-        // for reasons beyond me, I can't unallow permissions that I just set above
-        // fs.unallow(acl);
     }
 
     public void testInheritProperty() {

@@ -20,24 +20,26 @@
  */
 package org.jvnet.solaris.libzfs;
 
-import com.sun.jna.Pointer;
-import org.jvnet.solaris.libzfs.jna.libzfs;
 import static org.jvnet.solaris.libzfs.jna.libzfs.LIBZFS;
+import static org.jvnet.solaris.nvlist.jna.libnvpair.NV_UNIQUE_NAME;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.jvnet.solaris.libzfs.jna.libzfs;
 import org.jvnet.solaris.libzfs.jna.libzfs.zpool_iter_f;
 import org.jvnet.solaris.libzfs.jna.libzfs_handle_t;
 import org.jvnet.solaris.libzfs.jna.zfs_handle_t;
 import org.jvnet.solaris.libzfs.jna.zfs_type_t;
 import org.jvnet.solaris.libzfs.jna.zpool_handle_t;
 import org.jvnet.solaris.nvlist.jna.nvlist_t;
-import static org.jvnet.solaris.nvlist.jna.libnvpair.NV_UNIQUE_NAME;
 
-import java.util.ArrayList;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.Collections;
-import java.io.File;
+import com.sun.jna.Pointer;
 
 /* For the list of zfs features */
 import java.util.AbstractMap.SimpleEntry;
@@ -142,6 +144,9 @@ public class LibZFS implements ZFSContainer {
 
     public LibZFS() {
         handle = LIBZFS.libzfs_init();
+        if (handle==null)
+            throw new LinkageError("Failed to initialize libzfs");
+
         libzfs_features = new ArrayList();
         libzfs4j_init_features();
     }

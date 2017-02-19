@@ -20,18 +20,16 @@
  */
 package org.jvnet.solaris.libzfs;
 
-import org.jvnet.solaris.nvlist.jna.nvlist_t;
-import org.jvnet.solaris.libzfs.jna.libzfs;
-import org.jvnet.solaris.libzfs.jna.zfs_deleg_who_type_t;
-import org.jvnet.solaris.jna.PtrByReference;
-
-import java.util.Set;
-import java.util.HashSet;
-import java.util.EnumSet;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.EnumSet;
+import java.util.HashSet;
+import java.util.Set;
 
-import com.sun.jna.ptr.PointerByReference;
+import org.jvnet.solaris.jna.PtrByReference;
+import org.jvnet.solaris.libzfs.jna.libzfs;
+import org.jvnet.solaris.libzfs.jna.zfs_deleg_who_type_t;
+import org.jvnet.solaris.nvlist.jna.nvlist_t;
 
 /**
  * Access control list for ZFS dataset.

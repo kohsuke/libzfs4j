@@ -18,9 +18,7 @@
  *
  * CDDL HEADER END
  */
-
 package org.jvnet.solaris.libzfs.jna;
-
 
 /**
  * @author Kohsuke Kawaguchi

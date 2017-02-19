@@ -20,25 +20,27 @@
  */
 package org.jvnet.solaris.libzfs;
 
-import com.sun.jna.Memory;
-import com.sun.jna.NativeLong;
-import com.sun.jna.Pointer;
-import com.sun.jna.ptr.IntByReference;
-import org.jvnet.solaris.libzfs.jna.libzfs;
 import static org.jvnet.solaris.libzfs.jna.libzfs.LIBZFS;
-import org.jvnet.solaris.libzfs.jna.zfs_handle_t;
-import org.jvnet.solaris.libzfs.jna.zfs_prop_t;
-import org.jvnet.solaris.libzfs.jna.zfs_type_t;
-import org.jvnet.solaris.libzfs.ACLBuilder.PermissionBuilder;
-import org.jvnet.solaris.nvlist.jna.nvlist_t;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.Collection;
+
+import org.jvnet.solaris.libzfs.ACLBuilder.PermissionBuilder;
+import org.jvnet.solaris.libzfs.jna.libzfs;
+import org.jvnet.solaris.libzfs.jna.zfs_handle_t;
+import org.jvnet.solaris.libzfs.jna.zfs_prop_t;
+import org.jvnet.solaris.libzfs.jna.zfs_type_t;
+import org.jvnet.solaris.nvlist.jna.nvlist_t;
+
+import com.sun.jna.Memory;
+import com.sun.jna.NativeLong;
+import com.sun.jna.Pointer;
+import com.sun.jna.ptr.IntByReference;
 
 /**
  * Represents ZFS snapshot, file system, volume, or pool.
@@ -208,26 +210,40 @@ public abstract class ZFSObject implements Comparable<ZFSObject>, ZFSContainer {
     }
 
     /**
+     * @deprecated added by typo
+     */
+    public void destory() {
+        destroy();
+    }
+
+    /**
+     * @deprecated added by typo
+     */
+    public void destory(boolean recursive) {
+        destroy(recursive);
+    }
+
+    /**
      * Wipes out the dataset and all its data. Very dangerous.
      *
      * <p>
      * If this dataset contains nested datasets, this method fails with
      * {@link ErrorCode#EZFS_EXISTS}.
      */
-    public void destory() {
-        if (LIBZFS.zfs_destroy(handle) != 0)
+    public void destroy() {
+        if (LIBZFS.zfs_destroy(handle,false/*?*/) != 0)
             throw new ZFSException(library,"Failed to destroy "+getName());
     }
 
     /**
      * Wipes out this dataset and all its data, optionally recursively.
      */
-    public void destory(boolean recursive) {
+    public void destroy(boolean recursive) {
         if(recursive) {
             for (ZFSObject child : children())
-                child.destory(recursive);
+                child.destroy(recursive);
         }
-        destory();
+        destroy();
     }
 
     public synchronized void dispose() {
@@ -450,27 +466,6 @@ public abstract class ZFSObject implements Comparable<ZFSObject>, ZFSContainer {
         }
         return set;
     }
-
-    /**
-     * Grants the specified set of permissions to this dataset.
-     */
-    public void allow(ACLBuilder acl) {
-        for (PermissionBuilder b : acl.builders) {
-            if(LIBZFS.zfs_perm_set(handle,b.toNativeFormat(this))!=0)
-                throw new ZFSException(library);
-        }
-    }
-
-    /**
-     * Revokes the specified set of permissions to this dataset.
-     */
-    public void unallow(ACLBuilder acl) {
-        for (PermissionBuilder b : acl.builders) {
-            if(LIBZFS.zfs_perm_remove(handle,b.toNativeFormat(this))!=0)
-                throw new ZFSException(library);
-        }
-    }
-
 
     /**
      * Returns {@link #getName() the name}.

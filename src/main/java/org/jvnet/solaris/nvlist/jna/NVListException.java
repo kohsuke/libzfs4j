@@ -18,11 +18,16 @@
  *
  * CDDL HEADER END
  */
-
 package org.jvnet.solaris.nvlist.jna;
 
 /**
  * @author Kohsuke Kawaguchi
  */
 public class NVListException extends RuntimeException {
+
+    /**
+     * serialVersionUID.
+     */
+    private static final long serialVersionUID = 7417001311982153763L;
+
 }

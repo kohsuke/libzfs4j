@@ -18,7 +18,6 @@
  *
  * CDDL HEADER END
  */
-
 package org.jvnet.solaris.libzfs.jna;
 
 enum zprop_source_t {

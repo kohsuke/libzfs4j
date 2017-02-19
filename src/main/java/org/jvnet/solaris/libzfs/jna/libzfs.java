@@ -18,8 +18,15 @@
  *
  * CDDL HEADER END
  */
-
 package org.jvnet.solaris.libzfs.jna;
+
+import org.jvnet.solaris.avl.avl_node_t;
+import org.jvnet.solaris.avl.avl_tree_t;
+import org.jvnet.solaris.jna.BooleanByReference;
+import org.jvnet.solaris.jna.EnumByReference;
+import org.jvnet.solaris.jna.PtrByReference;
+import org.jvnet.solaris.mount.MountFlags;
+import org.jvnet.solaris.nvlist.jna.nvlist_t;
 
 import com.sun.jna.Callback;
 import com.sun.jna.Library;
@@ -30,17 +37,14 @@ import com.sun.jna.Structure;
 import com.sun.jna.ptr.IntByReference;
 import com.sun.jna.ptr.LongByReference;
 import com.sun.jna.ptr.PointerByReference;
-import org.jvnet.solaris.avl.avl_node_t;
-import org.jvnet.solaris.avl.avl_tree_t;
-import org.jvnet.solaris.jna.BooleanByReference;
-import org.jvnet.solaris.jna.EnumByReference;
-import org.jvnet.solaris.jna.PtrByReference;
-import org.jvnet.solaris.nvlist.jna.nvlist_t;
-import org.jvnet.solaris.mount.MountFlags;
-import org.jvnet.solaris.libzfs.ZPoolStatus;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * @author Kohsuke Kawaguchi
+ * @author Leo Xu
  */
 public interface libzfs extends Library {
     public static final libzfs LIBZFS = (libzfs) Native.loadLibrary("zfs",libzfs.class);
@@ -71,7 +75,12 @@ public interface libzfs extends Library {
 class zfs_perm_node_t extends Structure implements Structure.ByReference {
 	avl_node_t z_node;
 	char[] z_pname = new char[MAXPATHLEN];
-}
+
+        @Override
+        protected List getFieldOrder() {
+            return Arrays.asList("z_node","z_pname");
+        }
+    }
 
 class zfs_allow_node_t extends Structure implements Structure.ByReference {
 	avl_node_t z_node;
@@ -80,6 +89,11 @@ class zfs_allow_node_t extends Structure implements Structure.ByReference {
 	avl_tree_t z_local;		/* local permissions */
 	avl_tree_t z_descend;		/* descendent permissions */
     // TODO: KK: aren't there avl_tree_t pointers?
+
+    @Override
+    protected List getFieldOrder() {
+        return Arrays.asList("z_node","z_key","z_localdescend","z_local","z_descend");
+    }
 }
 
 class zfs_allow_t extends Structure implements Structure.ByReference {
@@ -90,6 +104,11 @@ class zfs_allow_t extends Structure implements Structure.ByReference {
 	avl_tree_t z_user;
 	avl_tree_t z_group;
 	avl_tree_t z_everyone;
+
+    @Override
+    protected List getFieldOrder() {
+        return Arrays.asList("z_next","z_setpoint","z_sets","z_crperms","z_user","z_group","z_everyone");
+    }
 }
 
 /*
@@ -107,6 +126,15 @@ int libzfs_errno(libzfs_handle_t lib);
 String libzfs_error_action(libzfs_handle_t lib);
 String libzfs_error_description(libzfs_handle_t lib);
 
+
+void libzfs_mnttab_init(libzfs_handle_t lib);
+void libzfs_mnttab_fini(libzfs_handle_t lib);
+void libzfs_mnttab_cache(libzfs_handle_t lib, boolean flag);
+//int libzfs_mnttab_find(libzfs_handle_t lib, String fsname,     struct mnttab *);
+void libzfs_mnttab_add(libzfs_handle_t lib, String specal, String mountp, String mntopts);
+void libzfs_mnttab_remove(libzfs_handle_t lib, String fsname);
+
+
 /*
  * Basic handle functions
  */
@@ -115,7 +143,9 @@ zpool_handle_t zpool_open_canfail(libzfs_handle_t lib, String name);
 void zpool_close(zpool_handle_t pool);
 String zpool_get_name(zpool_handle_t pool);
 int zpool_get_state(zpool_handle_t pool);
-String zpool_state_to_name(vdev_state_t _1, vdev_aux_t _2);
+String zpool_state_to_name(vdev_state_t state, vdev_aux_t aux);
+void zpool_free_handles(libzfs_handle_t lib);
+
 
 /*
  * Iterate over all active pools in the system.
@@ -138,17 +168,21 @@ int zpool_add(zpool_handle_t pool, nvlist_t _1);
 int zpool_scrub(zpool_handle_t pool, pool_scrub_type_t scrub);
 int zpool_clear(zpool_handle_t pool, String name);
 
-int zpool_vdev_online(zpool_handle_t pool, String _1, int _2, vdev_state_t _3);
-int zpool_vdev_offline(zpool_handle_t pool, String _2, boolean _3);
-int zpool_vdev_attach(zpool_handle_t pool, String _2, String _3, nvlist_t _4, int _5);
-int zpool_vdev_detach(zpool_handle_t pool, String _2);
-int zpool_vdev_remove(zpool_handle_t pool, String _2);
+int zpool_vdev_online(zpool_handle_t pool, String path, int flags, vdev_state_t newstate);
+int zpool_vdev_offline(zpool_handle_t pool, String path, boolean istmp);
+int zpool_vdev_attach(zpool_handle_t pool, String old_disk, String new_disk, nvlist_t nvroot, int replacing);
+int zpool_vdev_detach(zpool_handle_t pool, String path);
+int zpool_vdev_remove(zpool_handle_t pool, String path);
 
-int zpool_vdev_fault(zpool_handle_t pool, long _2);
-int zpool_vdev_degrade(zpool_handle_t pool, long _2);
-int zpool_vdev_clear(zpool_handle_t pool, long _2);
+int zpool_vdev_fault(zpool_handle_t pool, long guid, vdev_aux_t aux);
+int zpool_vdev_degrade(zpool_handle_t pool, long guid, vdev_aux_t aux);
+int zpool_vdev_clear(zpool_handle_t pool, long guid);
 
-nvlist_t zpool_find_vdev(zpool_handle_t pool, String _2, BooleanByReference _3, BooleanByReference _4);
+nvlist_t zpool_find_vdev(zpool_handle_t pool, String path, BooleanByReference avail_spare,
+        BooleanByReference l2cache, BooleanByReference log);
+nvlist_t zpool_find_vdev_by_physpath(zpool_handle_t pool, String ppath,
+         BooleanByReference avail_spare, BooleanByReference l2cache, BooleanByReference log);
+
 int zpool_label_disk(libzfs_handle_t lib, zpool_handle_t pool, String label);
 
 /*
@@ -156,20 +190,21 @@ int zpool_label_disk(libzfs_handle_t lib, zpool_handle_t pool, String label);
  */
 int zpool_set_prop(zpool_handle_t pool, String name, String value);
 int zpool_get_prop(zpool_handle_t pool, /* zpool_prop_t */ NativeLong prop, /*char[] */ Pointer buf,
-    NativeLong proplen, EnumByReference<zprop_source_t> _5);
-long zpool_get_prop_int(zpool_handle_t pool, zpool_prop_t prop, EnumByReference<zprop_source_t> _3);
+    NativeLong len, EnumByReference<zprop_source_t> srctype);
+long zpool_get_prop_int(zpool_handle_t pool, zpool_prop_t prop, EnumByReference<zprop_source_t> src);
 
 String zpool_prop_to_name(zpool_prop_t prop);
 String zpool_prop_values(zpool_prop_t prop);
 
-int/*ZPoolStatus*/ zpool_get_status(zpool_handle_t handle, /*char ** */ PointerByReference ppchBuf);
-int/*ZPoolStatus*/ zpool_import_status(nvlist_t _1, PointerByReference ppchBuf);
+int/*ZPoolStatus*/ zpool_get_status(zpool_handle_t handle, /*char ** */ PointerByReference msgid);
+int/*ZPoolStatus*/ zpool_import_status(nvlist_t config, PointerByReference misgid);
+// void zpool_dump_ddt(ddt_stat_t dds_total, ddt_histogram_t ddh);
 
 /*
  * Statistics and configuration functions.
  */
 nvlist_t zpool_get_config(zpool_handle_t pool, /*nvlist_t ** */ PointerByReference ppchNVList);
-int zpool_refresh_stats(zpool_handle_t pool, BooleanByReference r);
+int zpool_refresh_stats(zpool_handle_t pool, BooleanByReference missing);
 int zpool_get_errlog(zpool_handle_t pool, /*nvlist_t ** */ PointerByReference ppchNVList);
 
 /*
@@ -177,22 +212,26 @@ int zpool_get_errlog(zpool_handle_t pool, /*nvlist_t ** */ PointerByReference pp
  */
 int zpool_export(zpool_handle_t pool, boolean force);
 int zpool_export_force(zpool_handle_t pool);
-int zpool_import(libzfs_handle_t lib, nvlist_t _1, String _2, /*char * */  String altroot);
-int zpool_import_props(libzfs_handle_t lib, nvlist_t _1, String _2, nvlist_t _3);
+int zpool_import(libzfs_handle_t lib, nvlist_t config, String newname, /*char * */  String altroot);
+int zpool_import_props(libzfs_handle_t lib, nvlist_t config, String newname,
+                        nvlist_t props, BooleanByReference importfaulted);
 
 /*
  * Search for pools to import
  */
-nvlist_t zpool_find_import(libzfs_handle_t lib, int _1, /*char ** */PointerByReference _2, boolean _3);
-nvlist_t zpool_find_import_cached(libzfs_handle_t lib, String _1, boolean _2);
+nvlist_t zpool_find_import(libzfs_handle_t lib, int argc, /*char ** */PointerByReference argv);
+nvlist_t zpool_find_import_cached(libzfs_handle_t lib, String cachefile, String poolname, long guid);
+nvlist_t zpool_find_import_byname(libzfs_handle_t lib, int argc, /*char ** */ PointerByReference argv, String pool);
+nvlist_t zpool_find_import_byguid(libzfs_handle_t lib, int argc, /*char ** */ PointerByReference argv, long guid);
+nvlist_t zpool_find_import_activeok(libzfs_handle_t lib, int argc, /*char ** */ PointerByReference argv);
 
 /*
  * Miscellaneous pool functions
  */
 //struct zfs_cmd;
 
-String zpool_vdev_name(libzfs_handle_t lib, zpool_handle_t pool, nvlist_t _3);
-int zpool_upgrade(zpool_handle_t pool , long _1);
+String zpool_vdev_name(libzfs_handle_t lib, zpool_handle_t pool, nvlist_t nv, BooleanByReference verbose);
+int zpool_upgrade(zpool_handle_t pool , long new_version);
 int zpool_get_history(zpool_handle_t pool, /*nvlist_t ** */ PointerByReference ppNVList);
 void zpool_set_history_str(String subcommand, int argc, String[] argv, String history_str);
 int zpool_stage_history(libzfs_handle_t lib, String _2);
@@ -205,9 +244,11 @@ int zfs_ioctl(libzfs_handle_t lib, int _2, zfs_cmd cmd);
  * See http://src.opensolaris.org/source/xref/onnv/onnv-gate/usr/src/lib/libzfs/common/libzfs_dataset.c
  */
 zfs_handle_t zfs_open(libzfs_handle_t lib, String name, int/*zfs_type_t*/ typeMask);
+zfs_handle_t zfs_handle_dup(zfs_handle_t src);
 void zfs_close(zfs_handle_t handle);
 int/*zfs_type_t*/ zfs_get_type(zfs_handle_t handle);
 String zfs_get_name(zfs_handle_t handle);
+zpool_handle_t zfs_get_pool_handle(zfs_handle_t h);
 
 /*
  * Property management functions.  Some functions are shared with the kernel,
@@ -291,14 +332,16 @@ int zfs_iter_filesystems(zfs_handle_t handle, zfs_iter_f callback, Pointer arg);
 int zfs_iter_snapshots(zfs_handle_t handle, zfs_iter_f callback, Pointer arg);
 /* The OpenZFS function ABI signature since ~2012 (illumos since mid-2016, BSD, ZoL, ...): */
 int zfs_iter_snapshots(zfs_handle_t handle, boolean simple, zfs_iter_f callback, Pointer arg);
+int zfs_iter_snapshots_sorted(zfs_handle_t handle, zfs_iter_f callback, Pointer arg);
+int zfs_iter_snapspec(zfs_handle_t handle, zfs_iter_f callback, Pointer arg);
 
 /*
  * Functions to create and destroy datasets.
  */
 int zfs_create(libzfs_handle_t lib, String name, int/*zfs_type_t*/ type, nvlist_t props);
 int zfs_create_ancestors(libzfs_handle_t lib, String _2);
-int zfs_destroy(zfs_handle_t handle);
-int zfs_destroy_snaps(zfs_handle_t handle, String name);
+int zfs_destroy(zfs_handle_t handle, boolean defer);
+int zfs_destroy_snaps(zfs_handle_t handle, String name, boolean _3);
 int zfs_clone(zfs_handle_t handle, String name, nvlist_t _3);
 /*
  * nv96 prototype:
@@ -310,10 +353,73 @@ int zfs_snapshot(libzfs_handle_t lib, String fullNameWithAtSnapShot, boolean rec
         
 int zfs_rollback(zfs_handle_t handle1, zfs_handle_t handle2, boolean _3);
 int zfs_rename(zfs_handle_t handle, String name, boolean _3);
-int zfs_send(zfs_handle_t handle, String _2, String _3, boolean _4, boolean _5, boolean _6, boolean _7, int _8);
 int zfs_promote(zfs_handle_t handle);
 
-int zfs_receive(libzfs_handle_t lib, String name, recvflags_t _3, int _4, avl_tree_t _5);
+//typedef struct sendflags {
+//        /* print informational messages (ie, -v was specified) */
+//        boolean_t verbose;
+//
+//        /* recursive send  (ie, -R) */
+//        boolean_t replicate;
+//
+//        /* for incrementals, do all intermediate snapshots */
+//        boolean_t doall;
+//
+//        /* if dataset is a clone, do incremental from its origin */
+//        boolean_t fromorigin;
+//
+//        /* do deduplication */
+//        boolean_t dedup;
+//
+//        /* send properties (ie, -p) */
+//        boolean_t props;
+//
+//        /* do not send (no-op, ie. -n) */
+//        boolean_t dryrun;
+//
+//        /* parsable verbose output (ie. -P) */
+//        boolean_t parsable;
+//
+//        /* show progress (ie. -v) */
+//        boolean_t progress;
+//} sendflags_t;
+//
+//typedef boolean_t (snapfilter_cb_t)(zfs_handle_t *, void *);
+//
+//extern int zfs_send(zfs_handle_t *, const char *, const char *,
+//    sendflags_t *, int, snapfilter_cb_t, void *, nvlist_t **);
+
+//    typedef struct recvflags {
+//            /* print informational messages (ie, -v was specified) */
+//            boolean_t verbose;
+//
+//            /* the destination is a prefix, not the exact fs (ie, -d) */
+//            boolean_t isprefix;
+//
+//            /*
+//             * Only the tail of the sent snapshot path is appended to the
+//             * destination to determine the received snapshot name (ie, -e).
+//             */
+//            boolean_t istail;
+//
+//            /* do not actually do the recv, just check if it would work (ie, -n) */
+//            boolean_t dryrun;
+//
+//            /* rollback/destroy filesystems as necessary (eg, -F) */
+//            boolean_t force;
+//
+//            /* set "canmount=off" on all modified filesystems */
+//            boolean_t canmountoff;
+//
+//            /* byteswap flag is used internally; callers need not specify */
+//            boolean_t byteswap;
+//
+//            /* do not mount file systems as they are extracted (private) */
+//            boolean_t nomount;
+//    } recvflags_t;
+//
+//    extern int zfs_receive(libzfs_handle_t *, const char *, recvflags_t *,
+//        int, avl_tree_t *);
 
 /*
  * Miscellaneous functions.

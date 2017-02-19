@@ -18,7 +18,6 @@
  *
  * CDDL HEADER END
  */
-
 package org.jvnet.solaris.libzfs.jna;
 
 public enum zfs_deleg_inherit_t {

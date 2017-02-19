@@ -20,12 +20,13 @@
  */
 package org.jvnet.solaris.libzfs;
 
-import org.jvnet.solaris.libzfs.jna.zfs_handle_t;
-import org.jvnet.solaris.libzfs.jna.zfs_prop_t;
 import static org.jvnet.solaris.libzfs.jna.libzfs.LIBZFS;
-import org.jvnet.solaris.mount.MountFlags;
 
 import java.io.File;
+
+import org.jvnet.solaris.libzfs.jna.zfs_handle_t;
+import org.jvnet.solaris.libzfs.jna.zfs_prop_t;
+import org.jvnet.solaris.mount.MountFlags;
 
 /**
  * ZFS file system.
@@ -85,8 +86,9 @@ public final class ZFSFileSystem extends ZFSObject {
      *      See {@link MountFlags}.
      */
     public void mount(int flags) {
-        if (LIBZFS.zfs_mount(handle, null, flags) != 0)
-            throw new ZFSException(library,"Failed to mount "+getName());
+        int r = LIBZFS.zfs_mount(handle, null, flags);
+        if (r != 0)
+            throw new ZFSException(library,"Failed to mount "+getName()+": code="+r);
     }
 
     /**
