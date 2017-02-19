@@ -83,7 +83,7 @@ public class LibZFS implements ZFSContainer {
         String abi; /* Cache the default while we make decisions */
 
         n = "LIBZFS4J_ABI";
-        v = getSetting(n,null);
+        v = getSetting(n,"");
         if (v.equals("legacy") || v.equals("openzfs")) {
             /* Currently we recognize two values; later it may be more like openzfs-YYYY */
             abi = v;
@@ -118,16 +118,27 @@ public class LibZFS implements ZFSContainer {
      * libzfs doesn't define any obvious version function to help us here, so we use a presence
      * of a method to determine if it's OpenZFS.
      * GitHubID:jimklimov suggested to me in FOSDEM 2017 that feature_is_supported is one such function.
+     * Then I discovered that on ZFS on Linux this function is replaced by spa_feature_is_enabled:
+     * https://github.com/zfsonlinux/zfs/commit/fa86b5dbb6d33371df344efb2adb0aba026d097c#diff-4b1411a9b1911486460e7ea126a7d9c5
+     *
+     * ... so here I'm testing both.
      *
      * See https://people.freebsd.org/~gibbs/zfs_doxygenation/html/d4/dd6/zfeature_8h.html
      */
     private String detectCurrentABI() {
         try {
+            Function.getFunction("zfs","spa_feature_is_enabled");
+            return "openzfs";
+        } catch (Throwable e) {
+            // fall through
+        }
+        try {
             Function.getFunction("zfs","feature_is_supported");
             return "openzfs";
         } catch (Throwable e) {
-            return "legacy";
+            // fall through
         }
+        return "legacy";
     }
 
     public LibZFS() {
