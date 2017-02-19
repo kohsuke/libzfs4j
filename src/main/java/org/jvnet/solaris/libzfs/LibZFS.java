@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.sun.jna.Function;
 import org.jvnet.solaris.libzfs.jna.libzfs;
 import org.jvnet.solaris.libzfs.jna.libzfs.zpool_iter_f;
 import org.jvnet.solaris.libzfs.jna.libzfs_handle_t;
@@ -41,11 +42,6 @@ import org.jvnet.solaris.libzfs.jna.zpool_handle_t;
 import org.jvnet.solaris.nvlist.jna.nvlist_t;
 
 import com.sun.jna.Pointer;
-
-/* For the list of zfs features */
-import java.util.AbstractMap.SimpleEntry;
-import java.util.Map.Entry;
-
 
 /**
  * Entry point to ZFS functionality in Java.
@@ -93,7 +89,7 @@ public class LibZFS implements ZFSContainer {
             abi = v;
         } else {
             /* Detect presence of e.g. feature flags routines == openzfs */
-            abi = "legacy";
+            abi = detectCurrentABI();
         }
         features.put(n,abi);
 
@@ -113,6 +109,25 @@ public class LibZFS implements ZFSContainer {
         if (v!=null)    return v;
 
         return defaultValue;
+    }
+
+    /**
+     * Makes some effort to find the current ABI (openzfs vs legacy)
+     *
+     * <p>
+     * libzfs doesn't define any obvious version function to help us here, so we use a presence
+     * of a method to determine if it's OpenZFS.
+     * GitHubID:jimklimov suggested to me in FOSDEM 2017 that feature_is_supported is one such function.
+     *
+     * See https://people.freebsd.org/~gibbs/zfs_doxygenation/html/d4/dd6/zfeature_8h.html
+     */
+    private String detectCurrentABI() {
+        try {
+            Function.getFunction("zfs","feature_is_supported");
+            return "openzfs";
+        } catch (Throwable e) {
+            return "legacy";
+        }
     }
 
     public LibZFS() {
