@@ -99,12 +99,27 @@ public class LibZFS implements ZFSContainer {
         return libzfs4j_envvar_value;
     }
 
+    private void libzfs4j_add_feature(String libzfs4j_envvar_name, String libzfs4j_usevar_value, String libzfs4j_envvar_value) {
+        /* Add the key=value, reporting on it in log (and reporting the
+         * original envvvar/property value) for debugging. */
+        /* Note: we do not slow down to replace-if-present logic, since
+         * by current implementation and intention, this is only used from
+         * libzfs4j_init_features() below and that one only runs once.
+         * This decision can be amended later, if ever needed. */
+        Entry<String, String> myEntry;
+
+        System.out.println("[LIBZFS4J-DEBUG]: Setting '" +
+            libzfs4j_envvar_name + "' = '" + libzfs4j_usevar_value +
+            "' (envvar value was '" + libzfs4j_envvar_value + "')");
+        myEntry = new SimpleEntry<String, String>(libzfs4j_envvar_name, libzfs4j_usevar_value);
+        libzfs_features.add(myEntry);
+    }
+
     void libzfs4j_init_features() {
         String libzfs4j_envvar_value;
         String libzfs4j_envvar_name;
         String libzfs4j_usevar_value;
         String libzfs4j_default_abi; /* Cache the default while we make decisions */
-        Entry<String, String> myEntry;
 
         if (libzfs_features.size() > 0)
             return; /* already inited */
@@ -119,11 +134,7 @@ public class LibZFS implements ZFSContainer {
             libzfs4j_default_abi = "legacy";
         }
         libzfs4j_usevar_value = libzfs4j_default_abi;
-        System.out.println("[LIBZFS4J-DEBUG]: Setting " +
-            libzfs4j_envvar_name + " = " + libzfs4j_usevar_value +
-            " (envvar value was '" + libzfs4j_envvar_value + "')");
-        myEntry = new SimpleEntry<String, String>(libzfs4j_envvar_name, libzfs4j_usevar_value);
-        libzfs_features.add(myEntry);
+        libzfs4j_add_feature(libzfs4j_envvar_name, libzfs4j_usevar_value, libzfs4j_envvar_value);
 
         libzfs4j_envvar_name = "LIBZFS4J_ABI_zfs_iter_snapshots";
         libzfs4j_envvar_value = libzfs4j_get_extsetting(libzfs4j_envvar_name);
@@ -136,11 +147,7 @@ public class LibZFS implements ZFSContainer {
                 libzfs4j_usevar_value = libzfs4j_default_abi;
             }
         }
-        System.out.println("[LIBZFS4J-DEBUG]: Setting " +
-            libzfs4j_envvar_name + " = " + libzfs4j_usevar_value +
-            " (envvar value was '" + libzfs4j_envvar_value + "')");
-        myEntry = new SimpleEntry<String, String>(libzfs4j_envvar_name, libzfs4j_usevar_value);
-        libzfs_features.add(myEntry);
+        libzfs4j_add_feature(libzfs4j_envvar_name, libzfs4j_usevar_value, libzfs4j_envvar_value);
     }
 
     public LibZFS() {
