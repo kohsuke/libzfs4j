@@ -19,3 +19,7 @@ jdk:
   - openjdk6
   - openjdk7
 #  - openjdk8
+
+# Do the tests only on a suitable system (with ZFS capable OS and expected dataset)
+script:
+  - if which zfs && zfs list rpool/kohsuke ; then mvn package ; else mvn package -Dmaven.test.skip=true ; fi
