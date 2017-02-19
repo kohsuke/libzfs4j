@@ -60,6 +60,16 @@ public class LibZFS implements ZFSContainer {
  * as a fallback - but being private, admins should expect to reconfigure such
  * strings when this library gets updated... in reality, auto-guesswork should
  * (be implemented at all and then) do a good job.
+ * Note: in this context, the "legacy" ABI refers to function signatures that
+ * were in the OpenSolaris codebase prior to split between Oracle and illumos
+ * and subsequently OpenZFS. The "openzfs" refers to the state of OpenZFS code
+ * "Git HEAD" at the time of relevant edit of these libzfs.jar sources. Keep
+ * in mind that downstream projects may lag accepting such changes, maybe for
+ * years. For this reason, we keep a toggle for every function where we care
+ * about signature differences, and in the (future) case that there are more
+ * than these two levels for us to care about (e.g. HEADs in illumos-gate, ZoL
+ * and *BSD downstreams of OpenZFS) some interim version strings may be defined
+ * and if nothing is defined or value is unknown, then assume "legacy" mode.
  */
     private List<Entry<String, String>> libzfs_features;
 
