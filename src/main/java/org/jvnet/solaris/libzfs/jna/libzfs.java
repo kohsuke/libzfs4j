@@ -45,6 +45,7 @@ import java.util.List;
 /**
  * @author Kohsuke Kawaguchi
  * @author Leo Xu
+ * @author Jim Klimov
  */
 public interface libzfs extends Library {
     public static final libzfs LIBZFS = (libzfs) Native.loadLibrary("zfs",libzfs.class);
