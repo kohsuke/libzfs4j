@@ -85,35 +85,46 @@ public class LibZFS implements ZFSContainer {
     }
 
     void libzfs4j_init_features() {
-        String libzfs4j_envvar;
+        String libzfs4j_envvar_value;
+        String libzfs4j_envvar_name;
+        String libzfs4j_usevar_value;
         String libzfs4j_default_abi; /* Cache the default while we make decisions */
         Entry<String, String> myEntry;
 
         if (libzfs_features.size() > 0)
             return; /* already inited */
 
-        libzfs4j_envvar = System.getenv("LIBZFS4J_ABI");
+        libzfs4j_envvar_name = "LIBZFS4J_ABI";
+        libzfs4j_envvar_value = System.getenv(libzfs4j_envvar_name);
         /* Currently we recognize two values; later it may be more like openzfs-YYYY */
-        if (libzfs4j_envvar.equals("legacy") || libzfs4j_envvar.equals("openzfs")) {
-            libzfs4j_default_abi = libzfs4j_envvar;
+        if (libzfs4j_envvar_value.equals("legacy") || libzfs4j_envvar_value.equals("openzfs")) {
+            libzfs4j_default_abi = libzfs4j_envvar_value;
         } else {
             /* Detect presence of e.g. feature flags routines == openzfs */
             libzfs4j_default_abi = "legacy";
         }
-        myEntry = new SimpleEntry<String, String>("LIBZFS4J_ABI", libzfs4j_default_abi);
+        libzfs4j_usevar_value = libzfs4j_default_abi;
+        System.out.println("[LIBZFS4J-DEBUG]: Setting " +
+            libzfs4j_envvar_name + " = " + libzfs4j_usevar_value +
+            " (envvar value was '" + libzfs4j_envvar_value + "')");
+        myEntry = new SimpleEntry<String, String>(libzfs4j_envvar_name, libzfs4j_usevar_value);
         libzfs_features.add(myEntry);
 
-        libzfs4j_envvar = System.getenv("LIBZFS4J_ABI_zfs_iter_snapshots");
-        if (libzfs4j_envvar.equals("legacy") || libzfs4j_envvar.equals("3")) {
-            libzfs4j_envvar = "legacy";
+        libzfs4j_envvar_name = "LIBZFS4J_ABI_zfs_iter_snapshots";
+        libzfs4j_envvar_value = System.getenv(libzfs4j_envvar_name);
+        if (libzfs4j_envvar_value.equals("legacy") || libzfs4j_envvar_value.equals("3")) {
+            libzfs4j_usevar_value = "legacy";
         } else {
-            if (libzfs4j_envvar.equals("openzfs") || libzfs4j_envvar.equals("4")) {
-                libzfs4j_envvar = "openzfs";
+            if (libzfs4j_envvar_value.equals("openzfs") || libzfs4j_envvar_value.equals("4")) {
+                libzfs4j_usevar_value = "openzfs";
             } else {
-                libzfs4j_envvar = libzfs4j_default_abi;
+                libzfs4j_usevar_value = libzfs4j_default_abi;
             }
         }
-        myEntry = new SimpleEntry<String, String>("LIBZFS4J_ABI_zfs_iter_snapshots", libzfs4j_envvar);
+        System.out.println("[LIBZFS4J-DEBUG]: Setting " +
+            libzfs4j_envvar_name + " = " + libzfs4j_usevar_value +
+            " (envvar value was '" + libzfs4j_envvar_value + "')");
+        myEntry = new SimpleEntry<String, String>(libzfs4j_envvar_name, libzfs4j_usevar_value);
         libzfs_features.add(myEntry);
     }
 
