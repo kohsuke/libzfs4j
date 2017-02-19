@@ -432,12 +432,22 @@ public abstract class ZFSObject implements Comparable<ZFSObject>, ZFSContainer {
      */
     public Set<ZFSSnapshot> snapshots() {
         final Set<ZFSSnapshot> set = new TreeSet<ZFSSnapshot>();
-        LIBZFS.zfs_iter_snapshots(handle, new libzfs.zfs_iter_f() {
-            public int callback(zfs_handle_t handle, Pointer arg) {
-                set.add((ZFSSnapshot)ZFSObject.create(library, handle));
-                return 0;
-            }
-        }, null);
+        String abi = library.libzfs4j_features_get("LIBZFS4J_ABI_zfs_iter_snapshots");
+        if (abi.equals("openzfs")) {
+            LIBZFS.zfs_iter_snapshots(handle, false, new libzfs.zfs_iter_f() {
+                public int callback(zfs_handle_t handle, Pointer arg) {
+                    set.add((ZFSSnapshot)ZFSObject.create(library, handle));
+                    return 0;
+                }
+            }, null);
+        } else {
+            LIBZFS.zfs_iter_snapshots(handle, new libzfs.zfs_iter_f() {
+                public int callback(zfs_handle_t handle, Pointer arg) {
+                    set.add((ZFSSnapshot)ZFSObject.create(library, handle));
+                    return 0;
+                }
+            }, null);
+        }
         return set;
     }
 

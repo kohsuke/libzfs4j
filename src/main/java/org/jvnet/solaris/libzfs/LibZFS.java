@@ -39,6 +39,11 @@ import java.util.Set;
 import java.util.Collections;
 import java.io.File;
 
+/* For the list of zfs features */
+import java.util.AbstractMap.SimpleEntry;
+import java.util.Map.Entry;
+
+
 /**
  * Entry point to ZFS functionality in Java.
  * 
@@ -47,9 +52,98 @@ import java.io.File;
 public class LibZFS implements ZFSContainer {
 
     private libzfs_handle_t handle;
+/*
+ * Track features available in current host ZFS ABI so we can use specific JNA
+ * signatures. These will be populated as string tuples (key=value) as defined
+ * in this library privately; beside auto-guesswork they can be populated from
+ * environment variables (via appserver/init-script setup for hosting Jenkins)
+ * as a fallback - but being private, admins should expect to reconfigure such
+ * strings when this library gets updated... in reality, auto-guesswork should
+ * (be implemented at all and then) do a good job.
+ * Note: in this context, the "legacy" ABI refers to function signatures that
+ * were in the OpenSolaris codebase prior to split between Oracle and illumos
+ * and subsequently OpenZFS. The "openzfs" refers to the state of OpenZFS code
+ * "Git HEAD" at the time of relevant edit of these libzfs.jar sources. Keep
+ * in mind that downstream projects may lag accepting such changes, maybe for
+ * years. For this reason, we keep a toggle for every function where we care
+ * about signature differences, and in the (future) case that there are more
+ * than these two levels for us to care about (e.g. HEADs in illumos-gate, ZoL
+ * and *BSD downstreams of OpenZFS) some interim version strings may be defined
+ * and if nothing is defined or value is unknown, then assume "legacy" mode.
+ */
+    private List<Entry<String, String>> libzfs_features;
+
+    String libzfs4j_features_get(String key) {
+        if (libzfs_features.size() > 0) {
+            for (Entry<String, String> entr : libzfs_features) {
+                if ( entr.getKey().equals(key) ) {
+                    return entr.getValue();
+                }
+            }
+        }
+        return "";
+    }
+
+    void libzfs4j_init_features() {
+        String libzfs4j_envvar_value;
+        String libzfs4j_envvar_name;
+        String libzfs4j_usevar_value;
+        String libzfs4j_default_abi; /* Cache the default while we make decisions */
+        Entry<String, String> myEntry;
+
+        if (libzfs_features.size() > 0)
+            return; /* already inited */
+
+        libzfs4j_envvar_name = "LIBZFS4J_ABI";
+        libzfs4j_envvar_value = System.getenv(libzfs4j_envvar_name);
+        if (libzfs4j_envvar_value == null || libzfs4j_envvar_value.equals("")) {
+            libzfs4j_envvar_value = System.getProperty(libzfs4j_envvar_name);
+            if (libzfs4j_envvar_value == null || libzfs4j_envvar_value.equals("")) {
+                libzfs4j_envvar_value = "<NULL>";
+            }
+        }
+        if (libzfs4j_envvar_value.equals("legacy") || libzfs4j_envvar_value.equals("openzfs")) {
+            /* Currently we recognize two values; later it may be more like openzfs-YYYY */
+            libzfs4j_default_abi = libzfs4j_envvar_value;
+        } else {
+            /* Detect presence of e.g. feature flags routines == openzfs */
+            libzfs4j_default_abi = "legacy";
+        }
+        libzfs4j_usevar_value = libzfs4j_default_abi;
+        System.out.println("[LIBZFS4J-DEBUG]: Setting " +
+            libzfs4j_envvar_name + " = " + libzfs4j_usevar_value +
+            " (envvar value was '" + libzfs4j_envvar_value + "')");
+        myEntry = new SimpleEntry<String, String>(libzfs4j_envvar_name, libzfs4j_usevar_value);
+        libzfs_features.add(myEntry);
+
+        libzfs4j_envvar_name = "LIBZFS4J_ABI_zfs_iter_snapshots";
+        libzfs4j_envvar_value = System.getenv(libzfs4j_envvar_name);
+        if (libzfs4j_envvar_value == null || libzfs4j_envvar_value.equals("")) {
+            libzfs4j_envvar_value = System.getProperty(libzfs4j_envvar_name);
+            if (libzfs4j_envvar_value == null || libzfs4j_envvar_value.equals("")) {
+                libzfs4j_envvar_value = "<NULL>";
+            }
+        }
+        if (libzfs4j_envvar_value.equals("legacy") || libzfs4j_envvar_value.equals("3")) {
+            libzfs4j_usevar_value = "legacy";
+        } else {
+            if (libzfs4j_envvar_value.equals("openzfs") || libzfs4j_envvar_value.equals("4")) {
+                libzfs4j_usevar_value = "openzfs";
+            } else {
+                libzfs4j_usevar_value = libzfs4j_default_abi;
+            }
+        }
+        System.out.println("[LIBZFS4J-DEBUG]: Setting " +
+            libzfs4j_envvar_name + " = " + libzfs4j_usevar_value +
+            " (envvar value was '" + libzfs4j_envvar_value + "')");
+        myEntry = new SimpleEntry<String, String>(libzfs4j_envvar_name, libzfs4j_usevar_value);
+        libzfs_features.add(myEntry);
+    }
 
     public LibZFS() {
         handle = LIBZFS.libzfs_init();
+        libzfs_features = new ArrayList();
+        libzfs4j_init_features();
     }
 
     /**
