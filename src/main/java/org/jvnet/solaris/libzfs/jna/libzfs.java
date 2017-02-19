@@ -287,7 +287,10 @@ int zfs_iter_root(libzfs_handle_t lib, zfs_iter_f callback, Pointer arg);
 int zfs_iter_children(zfs_handle_t handle, zfs_iter_f callback, Pointer arg);
 int zfs_iter_dependents(zfs_handle_t handle, boolean _2, zfs_iter_f callback, Pointer arg);
 int zfs_iter_filesystems(zfs_handle_t handle, zfs_iter_f callback, Pointer arg);
+/* The legacy (Sun/Oracle Solaris; OpenSolaris) function ABI signature: */
 int zfs_iter_snapshots(zfs_handle_t handle, zfs_iter_f callback, Pointer arg);
+/* The OpenZFS function ABI signature since ~2012 (illumos since mid-2016, BSD, ZoL, ...): */
+int zfs_iter_snapshots(zfs_handle_t handle, boolean simple, zfs_iter_f callback, Pointer arg);
 
 /*
  * Functions to create and destroy datasets.

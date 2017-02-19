@@ -39,6 +39,11 @@ import java.util.Set;
 import java.util.Collections;
 import java.io.File;
 
+/* For the list of zfs features */
+import java.util.AbstractMap.SimpleEntry;
+import java.util.Map.Entry;
+
+
 /**
  * Entry point to ZFS functionality in Java.
  * 
@@ -47,9 +52,65 @@ import java.io.File;
 public class LibZFS implements ZFSContainer {
 
     private libzfs_handle_t handle;
+/*
+ * Track features available in current host ZFS ABI so we can use specific JNA
+ * signatures. These will be populated as string tuples (key=value) as defined
+ * in this library privately; beside auto-guesswork they can be populated from
+ * environment variables (via appserver/init-script setup for hosting Jenkins)
+ * as a fallback - but being private, admins should expect to reconfigure such
+ * strings when this library gets updated... in reality, auto-guesswork should
+ * (be implemented at all and then) do a good job.
+ */
+    private List<Entry<String, String>> libzfs_features;
+
+    String libzfs4j_features_get(String key) {
+        if (libzfs_features.size() > 0) {
+            for (Entry<String, String> entr : libzfs_features) {
+                if ( entr.getKey().equals(key) ) {
+                    return entr.getValue();
+                }
+            }
+        }
+        return "";
+    }
+
+    void libzfs4j_init_features() {
+        String libzfs4j_envvar;
+        String libzfs4j_default_abi; /* Cache the default while we make decisions */
+        Entry<String, String> myEntry;
+
+        if (libzfs_features.size() > 0)
+            return; /* already inited */
+
+        libzfs4j_envvar = System.getenv("LIBZFS4J_ABI");
+        /* Currently we recognize two values; later it may be more like openzfs-YYYY */
+        if (libzfs4j_envvar.equals("legacy") || libzfs4j_envvar.equals("openzfs")) {
+            libzfs4j_default_abi = libzfs4j_envvar;
+        } else {
+            /* Detect presence of e.g. feature flags routines == openzfs */
+            libzfs4j_default_abi = "legacy";
+        }
+        myEntry = new SimpleEntry<String, String>("LIBZFS4J_ABI", libzfs4j_default_abi);
+        libzfs_features.add(myEntry);
+
+        libzfs4j_envvar = System.getenv("LIBZFS4J_ABI_zfs_iter_snapshots");
+        if (libzfs4j_envvar.equals("legacy") || libzfs4j_envvar.equals("3")) {
+            libzfs4j_envvar = "legacy";
+        } else {
+            if (libzfs4j_envvar.equals("openzfs") || libzfs4j_envvar.equals("4")) {
+                libzfs4j_envvar = "openzfs";
+            } else {
+                libzfs4j_envvar = libzfs4j_default_abi;
+            }
+        }
+        myEntry = new SimpleEntry<String, String>("LIBZFS4J_ABI_zfs_iter_snapshots", libzfs4j_envvar);
+        libzfs_features.add(myEntry);
+    }
 
     public LibZFS() {
         handle = LIBZFS.libzfs_init();
+        libzfs_features = new ArrayList();
+        libzfs4j_init_features();
     }
 
     /**
