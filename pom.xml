@@ -1,9 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<project
-   xmlns="http://maven.apache.org/POM/4.0.0"
-   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd"
->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <parent>
     <groupId>org.kohsuke</groupId>
     <artifactId>pom</artifactId>
@@ -12,7 +8,7 @@
   <modelVersion>4.0.0</modelVersion>
   <artifactId>libzfs</artifactId>
   <name>libzfs-java</name>
-  <version>0.6-SNAPSHOT</version>
+  <version>0.6</version>
   <description>libzfs for Java</description>
   <url>http://libzfs.kohsuke.org/</url>
 
@@ -81,7 +77,7 @@
     <connection>scm:git:git@github.com/kohsuke/libzfs4j.git</connection>
     <developerConnection>scm:git:ssh://git@github.com/kohsuke/libzfs4j.git</developerConnection>
     <url>http://libzfs4j.kohsuke.org/</url>
-    <tag>HEAD</tag>
+    <tag>libzfs-0.6</tag>
   </scm>
 
 </project>
