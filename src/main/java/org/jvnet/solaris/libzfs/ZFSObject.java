@@ -197,13 +197,17 @@ public abstract class ZFSObject implements Comparable<ZFSObject>, ZFSContainer {
     public ZFSSnapshot createSnapshot(final String snapshotName,
             final boolean recursive) {
         String fullName = name + '@' + snapshotName;
-        /*
-         * nv96 prototype: if(LIBZFS.zfs_snapshot(library.getHandle(),
-         * fullName,recursive, null)!=0) pre-nv96 prototype:
-         * if(LIBZFS.zfs_snapshot(library.getHandle(), fullName,recursive)!=0)
-         */
-        if (LIBZFS.zfs_snapshot(library.getHandle(), fullName, recursive, null) != 0) {
-            throw new ZFSException(library);
+        String abi = library.getFeature("LIBZFS4J_ABI_zfs_snapshot");
+        if (abi.equals("pre-nv96")) {
+            /* Very-very old, prehistoric signature */
+            if (LIBZFS.zfs_snapshot(library.getHandle(), fullName, recursive) != 0) {
+                throw new ZFSException(library);
+            }
+        } else {
+            /* good for both "openzfs" and "legacy" as we know them today */
+            if (LIBZFS.zfs_snapshot(library.getHandle(), fullName, recursive, null) != 0) {
+                throw new ZFSException(library);
+            }
         }
 
         final ZFSSnapshot dataSet = (ZFSSnapshot) library.open(fullName, zfs_type_t.SNAPSHOT);

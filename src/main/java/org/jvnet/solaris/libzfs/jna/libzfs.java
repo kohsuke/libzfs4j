@@ -350,13 +350,10 @@ int zfs_destroy(zfs_handle_t handle, boolean defer);
 int zfs_destroy_snaps(zfs_handle_t handle, String name, boolean _3);
 
 int zfs_clone(zfs_handle_t handle, String name, nvlist_t _3);
-/*
- * nv96 prototype:
- * int zfs_snapshot(libzfs_handle_t lib, String fullNameWithAtSnapShot, boolean recursive, nvlist_t props);
- * pre-nv96:
- * int zfs_snapshot(libzfs_handle_t lib, String fullNameWithAtSnapShot, boolean recursive);
-*/
+/* nv96 and later prototype (so good for both "legacy" and "openzfs"): */
 int zfs_snapshot(libzfs_handle_t lib, String fullNameWithAtSnapShot, boolean recursive, nvlist_t props);
+/* pre-nv96 prototype (very old - mid-way Sun OpenSolaris lifetimes): */
+int zfs_snapshot(libzfs_handle_t lib, String fullNameWithAtSnapShot, boolean recursive);
 
 int zfs_rollback(zfs_handle_t handle1, zfs_handle_t handle2, boolean _3);
 int zfs_rename(zfs_handle_t handle, String name, boolean _3);
