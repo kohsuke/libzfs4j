@@ -99,6 +99,10 @@ public class LibZFS implements ZFSContainer {
         v = getSetting(n,abi);
         features.put(n,v);
 
+        n = "LIBZFS4J_ABI_zfs_destroy";
+        v = getSetting(n,abi);
+        features.put(n,v);
+
         LOGGER.log(Level.FINE, "libzfs4j features: "+features);
     }
 

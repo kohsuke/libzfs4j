@@ -231,8 +231,14 @@ public abstract class ZFSObject implements Comparable<ZFSObject>, ZFSContainer {
      * {@link ErrorCode#EZFS_EXISTS}.
      */
     public void destroy() {
-        if (LIBZFS.zfs_destroy(handle,false/*?*/) != 0)
-            throw new ZFSException(library,"Failed to destroy "+getName());
+        String abi = library.getFeature("LIBZFS4J_ABI_zfs_destroy");
+        if (abi.equals("openzfs")) {
+            if (LIBZFS.zfs_destroy(handle,false/*?*/) != 0)
+                throw new ZFSException(library,"Failed to destroy "+getName());
+        } else {
+            if (LIBZFS.zfs_destroy(handle) != 0)
+                throw new ZFSException(library,"Failed to destroy "+getName());
+        }
     }
 
     /**

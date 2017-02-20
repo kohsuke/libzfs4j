@@ -340,8 +340,14 @@ int zfs_iter_snapspec(zfs_handle_t handle, zfs_iter_f callback, Pointer arg);
  */
 int zfs_create(libzfs_handle_t lib, String name, int/*zfs_type_t*/ type, nvlist_t props);
 int zfs_create_ancestors(libzfs_handle_t lib, String _2);
+
+/* The legacy (Sun/Oracle Solaris; OpenSolaris) function ABI signature: */
+int zfs_destroy(zfs_handle_t handle);
+int zfs_destroy_snaps(zfs_handle_t handle, String name);
+/* The OpenZFS function ABI signature since ~2013 (per ZoL): */
 int zfs_destroy(zfs_handle_t handle, boolean defer);
 int zfs_destroy_snaps(zfs_handle_t handle, String name, boolean _3);
+
 int zfs_clone(zfs_handle_t handle, String name, nvlist_t _3);
 /*
  * nv96 prototype:
@@ -350,7 +356,7 @@ int zfs_clone(zfs_handle_t handle, String name, nvlist_t _3);
  * int zfs_snapshot(libzfs_handle_t lib, String fullNameWithAtSnapShot, boolean recursive);
 */
 int zfs_snapshot(libzfs_handle_t lib, String fullNameWithAtSnapShot, boolean recursive, nvlist_t props);
-        
+
 int zfs_rollback(zfs_handle_t handle1, zfs_handle_t handle2, boolean _3);
 int zfs_rename(zfs_handle_t handle, String name, boolean _3);
 int zfs_promote(zfs_handle_t handle);
