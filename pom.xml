@@ -76,4 +76,12 @@
       <version>3.5.2</version>
     </dependency>
   </dependencies>
+
+  <scm>
+    <connection>scm:git:git@github.com/kohsuke/libzfs4j.git</connection>
+    <developerConnection>scm:git:ssh://git@github.com/kohsuke/libzfs4j.git</developerConnection>
+    <url>http://libzfs4j.kohsuke.org/</url>
+    <tag>HEAD</tag>
+  </scm>
+
 </project>
