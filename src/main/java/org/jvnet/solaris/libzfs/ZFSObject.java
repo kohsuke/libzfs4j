@@ -257,6 +257,31 @@ public abstract class ZFSObject implements Comparable<ZFSObject>, ZFSContainer {
         destroy();
     }
 
+    /**
+     * Destroys snapshots
+     */
+    public void destroy_snaps(String name) {
+        String abi = library.getFeature("LIBZFS4J_ABI_zfs_destroy_snaps");
+        if (abi.equals("openzfs")) {
+            if (LIBZFS.zfs_destroy_snaps(handle, name, false/*?*/) != 0)
+                throw new ZFSException(library,"Failed to destroy "+getName());
+        } else {
+            if (LIBZFS.zfs_destroy_snaps(handle, name) != 0)
+                throw new ZFSException(library,"Failed to destroy "+getName());
+        }
+    }
+
+    /**
+     * Wipes out this dataset and all its data, optionally recursively.
+     */
+    public void destroy_snaps(String name, boolean recursive) {
+        if(recursive) {
+            for (ZFSObject child : children())
+                child.destroy_snaps(name, recursive);
+        }
+        destroy_snaps(name);
+    }
+
     public synchronized void dispose() {
         if (handle != null)
             LIBZFS.zfs_close(handle);

@@ -347,7 +347,7 @@ int zfs_destroy(zfs_handle_t handle);
 int zfs_destroy_snaps(zfs_handle_t handle, String name);
 /* The OpenZFS function ABI signature since ~2013 (per ZoL): */
 int zfs_destroy(zfs_handle_t handle, boolean defer);
-int zfs_destroy_snaps(zfs_handle_t handle, String name, boolean _3);
+int zfs_destroy_snaps(zfs_handle_t handle, String name, boolean defer);
 
 int zfs_clone(zfs_handle_t handle, String name, nvlist_t _3);
 /* nv96 and later prototype (so good for both "legacy" and "openzfs"): */

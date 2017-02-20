@@ -104,6 +104,10 @@ public class LibZFS implements ZFSContainer {
         v = getSetting(n,abi);
         features.put(n,v);
 
+        n = "LIBZFS4J_ABI_zfs_destroy_snaps";
+        v = getSetting(n,abi);
+        features.put(n,v);
+
         /* Here the expected tweak is "pre-nv96" for VERY old ABI */
         n = "LIBZFS4J_ABI_zfs_snapshot";
         v = getSetting(n,abi);
