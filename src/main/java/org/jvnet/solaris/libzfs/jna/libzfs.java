@@ -240,7 +240,10 @@ nvlist_t zpool_find_import_activeok(libzfs_handle_t lib, int argc, /*char ** */ 
  */
 //struct zfs_cmd;
 
+/* Newer "openzfs" ABI */
 String zpool_vdev_name(libzfs_handle_t lib, zpool_handle_t pool, nvlist_t nv, BooleanByReference verbose);
+/* Legacy ABI in Sol10, SXCE... */
+String zpool_vdev_name(libzfs_handle_t lib, zpool_handle_t pool, nvlist_t nv);
 int zpool_upgrade(zpool_handle_t pool , long new_version);
 int zpool_get_history(zpool_handle_t pool, /*nvlist_t ** */ PointerByReference ppNVList);
 void zpool_set_history_str(String subcommand, int argc, String[] argv, String history_str);
