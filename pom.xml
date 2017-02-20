@@ -34,6 +34,7 @@
         <version>2.7.1</version>
         <configuration>
           <forkMode>never</forkMode>
+          <skip>true</skip><!-- can't really run tests -->
         </configuration>
       </plugin>
       <plugin>
