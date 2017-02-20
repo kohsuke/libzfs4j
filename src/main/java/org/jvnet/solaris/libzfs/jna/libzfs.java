@@ -214,6 +214,10 @@ int zpool_get_errlog(zpool_handle_t pool, /*nvlist_t ** */ PointerByReference pp
 int zpool_export(zpool_handle_t pool, boolean force);
 int zpool_export_force(zpool_handle_t pool);
 int zpool_import(libzfs_handle_t lib, nvlist_t config, String newname, /*char * */  String altroot);
+/* Note: the importfaulted flag was added in 2008 so applies to both the
+ * "legacy" and "openzfs"; older versions effectively default it to FALSE.
+ * This signature is in Sun Solaris 10u8, but not yet in 10u6 though...
+ */
 int zpool_import_props(libzfs_handle_t lib, nvlist_t config, String newname,
                         nvlist_t props, BooleanByReference importfaulted);
 
