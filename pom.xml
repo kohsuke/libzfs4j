@@ -7,7 +7,7 @@
   <parent>
     <groupId>org.kohsuke</groupId>
     <artifactId>pom</artifactId>
-    <version>6</version>
+    <version>17</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>libzfs</artifactId>
