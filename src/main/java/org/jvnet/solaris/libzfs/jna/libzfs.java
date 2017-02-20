@@ -224,6 +224,11 @@ int zpool_import_props(libzfs_handle_t lib, nvlist_t config, String newname,
 /*
  * Search for pools to import
  */
+/* Note: The ABI below is in place since Sol10u8 (though there was a bool
+ * added as arg3 of zpool_find_import_cached() in Sol10u6), and the last
+ * three routines in the list are not in libzfs.h of illumos-gate in 2017
+ * while the remaining first two are marked as legacy methods.
+ */
 nvlist_t zpool_find_import(libzfs_handle_t lib, int argc, /*char ** */PointerByReference argv);
 nvlist_t zpool_find_import_cached(libzfs_handle_t lib, String cachefile, String poolname, long guid);
 nvlist_t zpool_find_import_byname(libzfs_handle_t lib, int argc, /*char ** */ PointerByReference argv, String pool);
