@@ -1,4 +1,6 @@
-node {
+node('docker') {
     checkout scm
-    sh 'mvn verify'
+    docker.image('maven:3.3.9-jdk-8').inside {
+        sh 'mvn clean verify'
+    }
 }
