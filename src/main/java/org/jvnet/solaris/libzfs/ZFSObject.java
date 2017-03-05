@@ -30,7 +30,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.jvnet.solaris.libzfs.ACLBuilder.PermissionBuilder;
 import org.jvnet.solaris.libzfs.jna.libzfs;
 import org.jvnet.solaris.libzfs.jna.zfs_handle_t;
 import org.jvnet.solaris.libzfs.jna.zfs_prop_t;
@@ -258,9 +257,9 @@ public abstract class ZFSObject implements Comparable<ZFSObject>, ZFSContainer {
     }
 
     /**
-     * Destroys snapshots
+     * Destroy a named snapshot of this dataset.
      */
-    public void destroy_snaps(String name) {
+    public void destroySnapshot(String name) {
         String abi = library.getFeature("LIBZFS4J_ABI_zfs_destroy_snaps");
         if (abi.equals("openzfs")) {
             if (LIBZFS.zfs_destroy_snaps(handle, name, false/*?*/) != 0)
@@ -272,14 +271,14 @@ public abstract class ZFSObject implements Comparable<ZFSObject>, ZFSContainer {
     }
 
     /**
-     * Wipes out this dataset and all its data, optionally recursively.
+     * Recursively destroy a named snapshot of this dataset and its descendants.
      */
-    public void destroy_snaps(String name, boolean recursive) {
-        if(recursive) {
+    public void destroySnapshot(String name, boolean recursive) {
+        if (recursive) {
             for (ZFSObject child : children())
-                child.destroy_snaps(name, recursive);
+                child.destroySnapshot(name, true);
         }
-        destroy_snaps(name);
+        destroySnapshot(name);
     }
 
     public synchronized void dispose() {
