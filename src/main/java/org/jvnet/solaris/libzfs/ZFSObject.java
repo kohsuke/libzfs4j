@@ -29,7 +29,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
+import org.jvnet.solaris.libzfs.ACLBuilder.PermissionBuilder;
 import org.jvnet.solaris.libzfs.jna.libzfs;
 import org.jvnet.solaris.libzfs.jna.zfs_handle_t;
 import org.jvnet.solaris.libzfs.jna.zfs_prop_t;
@@ -504,21 +507,42 @@ public abstract class ZFSObject implements Comparable<ZFSObject>, ZFSContainer {
 
     /**
      * Grants the specified set of permissions to this dataset.
+     * NOTE that the "zfs_perm_*" libzfs.so routines are not present at
+     * all in OpenZFS, nor even in Sun Solaris 10u8 (last seen in 10u6).
+     * Not sure about Sol10u7 since it was a rather intermediate release.
+     * They may have been replaced with other logic, since zfs_allow_t and
+     * related data types and comments are still present in the headers.
      */
     public void allow(ACLBuilder acl) {
-        for (PermissionBuilder b : acl.builders) {
-            if(LIBZFS.zfs_perm_set(handle,b.toNativeFormat(this))!=0)
-                throw new ZFSException(library);
+        String abi = library.getFeature("LIBZFS4J_ABI_zfs_perm_set");
+        if (abi.equals("pre-sol10u8")) {
+            for (PermissionBuilder b : acl.builders) {
+                if(LIBZFS.zfs_perm_set(handle,b.toNativeFormat(this))!=0)
+                    throw new ZFSException(library);
+            }
+        } else {
+            if (abi == null)
+                abi = "<null>";
+            LOGGER.log(Level.FINE, "libzfs4j::allow() was called while LIBZFS4J_ABI_zfs_perm_set=='"+abi+"'");
         }
+
     }
 
     /**
      * Revokes the specified set of permissions to this dataset.
+     * See also the detailed "NOTE" comment above.
      */
     public void unallow(ACLBuilder acl) {
-        for (PermissionBuilder b : acl.builders) {
-            if(LIBZFS.zfs_perm_remove(handle,b.toNativeFormat(this))!=0)
-                throw new ZFSException(library);
+        String abi = library.getFeature("LIBZFS4J_ABI_zfs_perm_remove");
+        if (abi.equals("pre-sol10u8")) {
+            for (PermissionBuilder b : acl.builders) {
+                if(LIBZFS.zfs_perm_remove(handle,b.toNativeFormat(this))!=0)
+                    throw new ZFSException(library);
+            }
+        } else {
+            if (abi == null)
+                abi = "<null>";
+            LOGGER.log(Level.FINE, "libzfs4j::unallow() was called while LIBZFS4J_ABI_zfs_perm_remove=='"+abi+"'");
         }
     }
 
@@ -530,4 +554,6 @@ public abstract class ZFSObject implements Comparable<ZFSObject>, ZFSContainer {
     public String toString() {
         return getName();
     }
+
+    private static final Logger LOGGER = Logger.getLogger(LibZFS.class.getName());
 }

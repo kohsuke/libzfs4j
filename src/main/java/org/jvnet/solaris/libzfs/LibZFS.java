@@ -113,6 +113,30 @@ public class LibZFS implements ZFSContainer {
         v = getSetting(n,abi);
         features.put(n,v);
 
+        /**
+         * This couple of functions was last seen in Sol10u6 and is gone
+         * since Sol10u8. More detailed comments in ZFSObject.java::allow()
+         * At this time we wrap the old routines and log an error if absent
+         * when called; later might find and wrap newer implementations.
+         */
+        n = "LIBZFS4J_ABI_zfs_perm_set";
+        try {
+            Function.getFunction("zfs","zfs_perm_set");
+            v = getSetting(n,"pre-sol10u8");
+        } catch (Throwable e) {
+            v = getSetting(n,null);
+        }
+        features.put(n,v);
+
+        n = "LIBZFS4J_ABI_zfs_perm_remove";
+        try {
+            Function.getFunction("zfs","zfs_perm_remove");
+            v = getSetting(n,"pre-sol10u8");
+        } catch (Throwable e) {
+            v = getSetting(n,null);
+        }
+        features.put(n,v);
+
         LOGGER.log(Level.FINE, "libzfs4j features: "+features);
     }
 
