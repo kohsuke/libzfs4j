@@ -150,6 +150,12 @@ public class LibZFS implements ZFSContainer {
         v = System.getenv(key);
         if (v!=null)    return v;
 
+        /*
+         * Avoid using `null' as the defaultValue, so that subsequent
+         * calls to stringvar.equals(...) are kept simple.
+         */
+        if (v == null)  return "NO-OP";
+
         return defaultValue;
     }
 

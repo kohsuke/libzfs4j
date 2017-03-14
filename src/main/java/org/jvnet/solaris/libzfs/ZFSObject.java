@@ -521,8 +521,6 @@ public abstract class ZFSObject implements Comparable<ZFSObject>, ZFSContainer {
                     throw new ZFSException(library);
             }
         } else {
-            if (abi == null)
-                abi = "<null>";
             LOGGER.log(Level.FINE, "NO-OP: libzfs4j::allow() was called while LIBZFS4J_ABI_zfs_perm_set=='"+abi+"' and this is currently not implemented");
         }
 
@@ -540,8 +538,6 @@ public abstract class ZFSObject implements Comparable<ZFSObject>, ZFSContainer {
                     throw new ZFSException(library);
             }
         } else {
-            if (abi == null)
-                abi = "<null>";
             LOGGER.log(Level.FINE, "NO-OP: libzfs4j::unallow() was called while LIBZFS4J_ABI_zfs_perm_remove=='"+abi+"' and this is currently not implemented");
         }
     }
