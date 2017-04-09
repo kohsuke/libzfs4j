@@ -154,7 +154,7 @@ public class LibZFS implements ZFSContainer {
          * Avoid using `null' as the defaultValue, so that subsequent
          * calls to stringvar.equals(...) are kept simple.
          */
-        if (v == null)  return "NO-OP";
+        if (defaultValue == null)  return "NO-OP";
 
         return defaultValue;
     }
