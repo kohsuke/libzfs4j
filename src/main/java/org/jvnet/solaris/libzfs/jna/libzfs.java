@@ -449,6 +449,10 @@ int zfs_spa_version(zfs_handle_t handle, IntByReference r);
 
 /*
  * dataset permission functions.
+ * This couple of functions was last seen in Sol10u6 and is gone
+ * since Sol10u8. More detailed comments in ZFSObject.java::allow()
+ * At this time we wrap the old routines and log an error if absent
+ * when called; later might find and wrap newer implementations.
  */
 int zfs_perm_set(zfs_handle_t handle, nvlist_t perms);
 int zfs_perm_remove(zfs_handle_t handle, nvlist_t perms);
