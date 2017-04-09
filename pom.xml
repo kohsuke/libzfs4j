@@ -8,7 +8,7 @@
   <modelVersion>4.0.0</modelVersion>
   <artifactId>libzfs</artifactId>
   <name>libzfs-java</name>
-  <version>0.8</version>
+  <version>0.9-SNAPSHOT</version>
   <description>libzfs for Java</description>
   <url>http://libzfs.kohsuke.org/</url>
 
@@ -77,7 +77,7 @@
     <connection>scm:git:git@github.com/kohsuke/libzfs4j.git</connection>
     <developerConnection>scm:git:ssh://git@github.com/kohsuke/libzfs4j.git</developerConnection>
     <url>http://libzfs4j.kohsuke.org/</url>
-    <tag>libzfs-0.8</tag>
+    <tag>HEAD</tag>
   </scm>
 
 </project>
