@@ -478,6 +478,7 @@ public class LibZFS implements ZFSContainer {
         return roots();
     }
 
+    @SuppressWarnings("unchecked")
     public <T extends ZFSObject> List<T> children(Class<T> type) {
         if (!is_libzfs_enabled("children"))
             return null;
