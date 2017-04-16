@@ -188,7 +188,7 @@ public class LibZFSTest extends TestCase {
                 dataSet, fs.getName());
         assertTrue("ZFS exists doesn't report ZFS", zfs.exists(dataSet));
 
-        fs.destory();
+        fs.destroy();
 
         assertFalse("ZFS exists doesn't report ZFS as destroyed", zfs
                 .exists(dataSet));
@@ -275,13 +275,13 @@ public class LibZFSTest extends TestCase {
 
         assertTrue("ZFS exists failed for freshly created dataset", zfs
                 .exists(dataSet));
-        assertTrue("ZFS exists failed for freshly created dataset", zfs.exists(
+        assertTrue("ZFS exists failed for freshly created dataset of type FILESYSTEM", zfs.exists(
                 dataSet, ZFSType.FILESYSTEM));
 
-        fs1.destory();
-        assertFalse("ZFS exists failed for freshly destory dataset", zfs
+        fs1.destroy();
+        assertFalse("ZFS exists failed for freshly destroyed dataset", zfs
                 .exists(dataSet));
-        assertFalse("ZFS exists failed for freshly destory dataset", zfs
+        assertFalse("ZFS exists failed for freshly destroyed dataset of type FILESYSTEM", zfs
                 .exists(dataSet, ZFSType.FILESYSTEM));
 
         final ZFSObject fs2 = zfs.create(dataSet, ZFSFileSystem.class);
@@ -291,13 +291,13 @@ public class LibZFSTest extends TestCase {
 
         assertTrue("ZFS exists failed for freshly created dataset", zfs
                 .exists(dataSet));
-        assertTrue("ZFS exists failed for freshly created dataset", zfs.exists(
+        assertTrue("ZFS exists failed for freshly created dataset of type FILESYSTEM", zfs.exists(
                 dataSet, ZFSType.FILESYSTEM));
 
-        fs2.destory();
-        assertFalse("ZFS exists failed for freshly destory dataset", zfs
+        fs2.destroy();
+        assertFalse("ZFS exists failed for freshly destroyed dataset", zfs
                 .exists(dataSet));
-        assertFalse("ZFS exists failed for freshly destory dataset", zfs
+        assertFalse("ZFS exists failed for freshly destroyed dataset of type FILESYSTEM", zfs
                 .exists(dataSet, ZFSType.FILESYSTEM));
     }
 
