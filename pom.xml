@@ -83,7 +83,7 @@
         <version>3.3</version>
         <configuration>
           <compilerArgument>
-            -Xlint:unchecked
+            -Xlint:unchecked,deprecation
           </compilerArgument>
         </configuration>
       </plugin>
