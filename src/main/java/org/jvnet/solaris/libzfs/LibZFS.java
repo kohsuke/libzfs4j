@@ -54,6 +54,7 @@ import com.sun.jna.Pointer;
 public class LibZFS implements ZFSContainer {
 
     private libzfs_handle_t handle;
+    private boolean libzfs_enabled = false;
 
     /*
      * Track features available in current host ZFS ABI so we can use specific JNA
@@ -199,11 +200,26 @@ public class LibZFS implements ZFSContainer {
     }
 
     public LibZFS() {
+        libzfs_enabled = false;
+
         handle = LIBZFS.libzfs_init();
         if (handle==null)
             throw new LinkageError("Failed to initialize libzfs");
 
         initFeatures(); // Can throw LinkageError if e.g. ZFS is disabled by user settings
+
+        libzfs_enabled = true;
+    }
+
+    /**
+     * Used in routines below to report if this LibZFS instance is not
+     * enabled and allow a clean abortion of the corresponding call
+     */
+    private boolean is_libzfs_enabled(String funcname) {
+        if (!libzfs_enabled) {
+            LOGGER.log(Level.INFO, "libzfs4j not enabled; increase logging if needed to see why. Skipped " + funcname + "()");
+        }
+        return libzfs_enabled;
     }
 
     /**
@@ -217,6 +233,9 @@ public class LibZFS implements ZFSContainer {
      */
     public List<ZFSFileSystem> roots() {
         final List<ZFSFileSystem> r = new ArrayList<ZFSFileSystem>();
+        if (!is_libzfs_enabled("roots"))
+            return r;
+
         LIBZFS.zfs_iter_root(handle, new libzfs.zfs_iter_f() {
             public int callback(zfs_handle_t handle, Pointer arg) {
                 r.add(new ZFSFileSystem(LibZFS.this, handle));
@@ -233,6 +252,9 @@ public class LibZFS implements ZFSContainer {
      */
     public List<ZFSPool> pools() {
         final List<ZFSPool> r = new ArrayList<ZFSPool>();
+        if (!is_libzfs_enabled("pools"))
+            return r;
+
         LIBZFS.zpool_iter(handle, new zpool_iter_f() {
             public int callback(zpool_handle_t handle, Pointer arg) {
                 r.add(new ZFSPool(LibZFS.this, handle));
@@ -247,6 +269,9 @@ public class LibZFS implements ZFSContainer {
      */
     public ZFSPool getPool(String name) {
         zpool_handle_t h = LIBZFS.zpool_open(handle, name);
+        if (!is_libzfs_enabled("getPool"))
+            return null;
+
         if(h==null) return null;    // not found
         return new ZFSPool(this,h);
     }
@@ -259,6 +284,9 @@ public class LibZFS implements ZFSContainer {
      * @return does the dataset exist?
      */
     public boolean exists(final String dataSetName) {
+        if (!is_libzfs_enabled("exists"))
+            return false;
+
         final boolean exists = exists(dataSetName, EnumSet.allOf(ZFSType.class));
         return exists;
     }
@@ -273,6 +301,9 @@ public class LibZFS implements ZFSContainer {
      * @return does the dataset exist?
      */
     public boolean exists(final String name, final Set<ZFSType> typeMask) {
+        if (!is_libzfs_enabled("exists"))
+            return false;
+
         int mask = 0;
         for (ZFSType t : typeMask) {
             mask |= t.code;
@@ -292,6 +323,9 @@ public class LibZFS implements ZFSContainer {
      * @return does the dataset exist?
      */
     public boolean exists(final String dataSetName, final ZFSType type) {
+        if (!is_libzfs_enabled("exists"))
+            return false;
+
         final boolean exists = exists(dataSetName, EnumSet.of(type));
         return exists;
     }
@@ -307,6 +341,9 @@ public class LibZFS implements ZFSContainer {
      *      Never null. Created dataset.
      */
     public <T extends ZFSObject> T create(String dataSetName, Class<T> type) {
+        if (!is_libzfs_enabled("create"))
+            return null;
+
         return type.cast(create(dataSetName, ZFSType.fromType(type), null));
     }
 
@@ -323,6 +360,9 @@ public class LibZFS implements ZFSContainer {
      */
     public ZFSObject create(final String dataSetName, final ZFSType type,
             final Map<String, String> props) {
+        if (!is_libzfs_enabled("create"))
+            return null;
+
         final nvlist_t nvl = nvlist_t.alloc(NV_UNIQUE_NAME);
         if(props!=null) {
             for (Map.Entry<String, String> e : props.entrySet()) {
@@ -354,6 +394,9 @@ public class LibZFS implements ZFSContainer {
      * @return opened dataset, or null if no such dataset exists.
      */
     public ZFSObject open(final String dataSetName) {
+        if (!is_libzfs_enabled("open"))
+            return null;
+
         final ZFSObject dataSet = open(dataSetName, zfs_type_t.DATASET);
         return dataSet;
     }
@@ -368,6 +411,9 @@ public class LibZFS implements ZFSContainer {
      * @return opened dataset, or null if no such dataset exists.
      */
     public ZFSObject open(final String dataSetName, final int /* zfs_type_t */mask) {
+        if (!is_libzfs_enabled("open"))
+            return null;
+
         zfs_handle_t h = LIBZFS.zfs_open(handle, dataSetName, mask);
         if(h==null) {
             int err = LIBZFS.libzfs_errno(handle);
@@ -381,6 +427,9 @@ public class LibZFS implements ZFSContainer {
      * Opens a ZFS dataset of the given name and type.
      */
     public <T extends ZFSObject> T open(String dataSetName, Class<T> type) {
+        if (!is_libzfs_enabled("open"))
+            return null;
+
         return type.cast(open(dataSetName,ZFSType.fromType(type).code));
     }
 
@@ -391,6 +440,9 @@ public class LibZFS implements ZFSContainer {
      *      null if no such file system exists.
      */
     public ZFSFileSystem getFileSystemByMountPoint(File dir) {
+        if (!is_libzfs_enabled("getFileSystemByMountPoint"))
+            return null;
+
         dir = dir.getAbsoluteFile();
         for (ZFSFileSystem f : descendants(ZFSFileSystem.class)) {
             File mp = f.getMountPoint();
@@ -401,10 +453,16 @@ public class LibZFS implements ZFSContainer {
     }
 
     public List<ZFSFileSystem> children() {
+        if (!is_libzfs_enabled("children"))
+            return null;
+
         return roots();
     }
 
     public <T extends ZFSObject> List<T> children(Class<T> type) {
+        if (!is_libzfs_enabled("children"))
+            return null;
+
         if(type.isAssignableFrom(ZFSFileSystem.class))
             return (List)roots();
         else
@@ -412,10 +470,16 @@ public class LibZFS implements ZFSContainer {
     }
 
     public List<ZFSObject> descendants() {
+        if (!is_libzfs_enabled("descendants"))
+            return null;
+
         return children(ZFSObject.class);
     }
 
     public <T extends ZFSObject> List<T> descendants(Class<T> type) {
+        if (!is_libzfs_enabled("descendants"))
+            return null;
+
         ArrayList<T> r = new ArrayList<T>();
         r.addAll(children(type));
         for (ZFSFileSystem p : roots())
@@ -448,6 +512,7 @@ public class LibZFS implements ZFSContainer {
         if (handle != null) {
             LIBZFS.libzfs_fini(handle);
             handle = null;
+            libzfs_enabled = false;
         }
     }
 
