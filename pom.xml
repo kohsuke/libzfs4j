@@ -44,6 +44,16 @@
               <value>rpool/kohsuke/</value>
             </property>
 -->
+
+<!-- To simplify tests on developer's private system, you can specify
+     the LIBZFS4J_* settings by uncommenting and/or adding lines like
+     the following (note that ideally auto-guesswork should succeed): -->
+<!--
+            <property>
+              <name>LIBZFS4J_ABI</name>
+              <value>openzfs</value>
+            </property>
+-->
           </systemProperties>
         </configuration>
       </plugin>
