@@ -54,6 +54,11 @@
               <value>openzfs</value>
             </property>
 -->
+
+            <property>
+              <name>libzfs.test.loglevel</name>
+              <value>INFO</value>
+            </property>
           </systemProperties>
         </configuration>
       </plugin>

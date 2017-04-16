@@ -26,6 +26,8 @@ import java.util.Map;
 
 import junit.framework.TestCase;
 
+import java.util.logging.*;
+
 import org.jvnet.solaris.libzfs.ACLBuilder;
 import org.jvnet.solaris.libzfs.LibZFS;
 import org.jvnet.solaris.libzfs.ZFSFileSystem;
@@ -47,7 +49,15 @@ public class LibZFSTest extends TestCase {
 
     private String ZFS_TEST_POOL_BASENAME;
 
+    private static final String ZFS_TEST_LOGLEVEL_OVERRIDE_PROPERTY = "libzfs.test.loglevel";
+
+    private static final String ZFS_TEST_LOGLEVEL_DEFAULT = "FINE";
+
+    private String ZFS_TEST_LOGLEVEL;
+
     private LibZFS zfs = null;
+
+    private Logger LOGGER = null;
 
     /**
      * The dataset name that can be created in a test.
@@ -56,10 +66,37 @@ public class LibZFSTest extends TestCase {
     private String dataSet;
 
     public void setUp() throws Exception {
+        /* Set up logging so the LibZFS FINE log messages can be seen */
+        ZFS_TEST_LOGLEVEL = System
+                .getProperty(ZFS_TEST_LOGLEVEL_OVERRIDE_PROPERTY,
+                        ZFS_TEST_LOGLEVEL_DEFAULT);
+
+        if (LOGGER == null) {
+            LOGGER = Logger.getLogger(LibZFS.class.getName());
+            //System.out.println("Initial logging level is: " + LOGGER.getLevel());
+
+            // LOG this level to the log */
+            Level level;
+            try {
+                level = Level.parse(ZFS_TEST_LOGLEVEL);
+            } catch ( Throwable e ) {
+                level = Level.FINE;
+            }
+            LOGGER.setLevel(level);
+
+            ConsoleHandler handler = new ConsoleHandler();
+            /* PUBLISH this level */
+            handler.setLevel(level);
+            LOGGER.addHandler(handler);
+
+            //System.out.println("Logging level is: " + LOGGER.getLevel());
+        }
+
         super.setUp();
 
         if (zfs == null) {
             try {
+                //System.out.println("Setting up a LibZFS instance for this test run...");
                 zfs = new LibZFS();
             } catch (Throwable e) {
                 System.out.println("Aborted " + getName() + " because: " + e.toString());
