@@ -58,6 +58,11 @@ public abstract class ZFSObject implements Comparable<ZFSObject>, ZFSContainer {
 
     ZFSObject(final LibZFS library, final zfs_handle_t handle) {
         this.library = library;
+
+        if (!library.is_libzfs_enabled("ZFSObject")) {
+            throw new ZFSException(library);
+        }
+
         if (handle == null) {
             throw new ZFSException(library);
         }

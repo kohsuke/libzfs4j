@@ -222,7 +222,7 @@ public class LibZFS implements ZFSContainer {
      * Used in routines below to report if this LibZFS instance is not
      * enabled and allow a clean abortion of the corresponding call
      */
-    private boolean is_libzfs_enabled(String funcname) {
+    public boolean is_libzfs_enabled(String funcname) {
         if (!libzfs_enabled) {
             LOGGER.log(Level.INFO, "libzfs4j not enabled because: " + libzfsNotEnabledReason + ". Skipped " + funcname + "()");
         }
