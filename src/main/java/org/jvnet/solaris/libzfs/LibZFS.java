@@ -55,6 +55,7 @@ public class LibZFS implements ZFSContainer {
 
     private libzfs_handle_t handle;
     private boolean libzfs_enabled = false;
+    private String libzfsNotEnabledReason = "";
 
     /*
      * Track features available in current host ZFS ABI so we can use specific JNA
@@ -89,8 +90,9 @@ public class LibZFS implements ZFSContainer {
         n = "LIBZFS4J_ABI";
         v = getSetting(n,"");
         if (v.equals("off") || v.equals("disabled") || v.equals("false") || v.equals("NO-OP")) {
+            libzfsNotEnabledReason = "libzfs4j not enabled due to user-provided setting: LIBZFS4J_ABI='" + v + "'";
             features.put(n,"NO-OP");
-            throw new LinkageError("libzfs4j not enabled due to user-provided setting: LIBZFS4J_ABI='" + v + "'");
+            return;
         }
 
         if (v.equals("legacy") || v.equals("openzfs")) {
@@ -201,12 +203,17 @@ public class LibZFS implements ZFSContainer {
 
     public LibZFS() {
         libzfs_enabled = false;
+        libzfsNotEnabledReason = "";
 
         handle = LIBZFS.libzfs_init();
-        if (handle==null)
-            throw new LinkageError("Failed to initialize libzfs");
+        if (handle==null) {
+            libzfsNotEnabledReason = "Failed to initialize libzfs";
+        } else {
+            initFeatures();
+        }
 
-        initFeatures(); // Can throw LinkageError if e.g. ZFS is disabled by user settings
+        if (!libzfsNotEnabledReason.isEmpty())
+            throw new LinkageError(libzfsNotEnabledReason);
 
         libzfs_enabled = true;
     }
@@ -217,7 +224,7 @@ public class LibZFS implements ZFSContainer {
      */
     private boolean is_libzfs_enabled(String funcname) {
         if (!libzfs_enabled) {
-            LOGGER.log(Level.INFO, "libzfs4j not enabled; increase logging if needed to see why. Skipped " + funcname + "()");
+            LOGGER.log(Level.INFO, "libzfs4j not enabled because: " + libzfsNotEnabledReason + ". Skipped " + funcname + "()");
         }
         return libzfs_enabled;
     }
@@ -513,6 +520,7 @@ public class LibZFS implements ZFSContainer {
             LIBZFS.libzfs_fini(handle);
             handle = null;
             libzfs_enabled = false;
+            libzfsNotEnabledReason = "";
         }
     }
 
