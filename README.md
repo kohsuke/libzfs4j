@@ -61,6 +61,22 @@ the Jenkins web-application, they would survive eventual upgrades of the
 such cases as the future comes down upon us and the `libzfs.jar` sources
 have to be updated again :)
 
+For details about currently supported names and values for such toggles
+please see the source code for your version of `libzfs.jar` (this is at
+the moment regarded as "implementation detail" so options are not listed
+here), or refer to the current Git HEAD status:
+
+* Routines with `ABI` comments in
+  https://github.com/kohsuke/libzfs4j/blob/master/src/main/java/org/jvnet/solaris/libzfs/jna/libzfs.java
+* Manipulation with strings containing `LIBZFS4J` in `api.equals()` calls in
+  https://github.com/kohsuke/libzfs4j/blob/master/src/main/java/org/jvnet/solaris/libzfs/LibZFS.java
+  and https://github.com/kohsuke/libzfs4j/blob/master/src/main/java/org/jvnet/solaris/libzfs/ZFSObject.java
+  (later maybe other sources)
+
+Settings ultimately applied to each toggle can be seen in application server
+(or standalone Jetty app) log if you start it with a `FINE` or greater log4j
+logging level.
+
 Note that there is more work possible in this area, such as in particular
 expanding Jenkins ZFS support to operating systems that do not identify as
 a `SunOS`, but this improvement is out of the scope for this update (the
