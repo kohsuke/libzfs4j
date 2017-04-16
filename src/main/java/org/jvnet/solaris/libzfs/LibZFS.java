@@ -180,17 +180,21 @@ public class LibZFS implements ZFSContainer {
      */
     private String detectCurrentABI() {
         try {
+            LOGGER.log(Level.FINER, "libzfs4j autodetect: looking for spa_feature_is_enabled()");
             Function.getFunction("zfs","spa_feature_is_enabled");
             return "openzfs";
         } catch (Throwable e) {
             // fall through
         }
         try {
+            LOGGER.log(Level.FINER, "libzfs4j autodetect: looking for feature_is_supported()");
             Function.getFunction("zfs","feature_is_supported");
             return "openzfs";
         } catch (Throwable e) {
             // fall through
         }
+        LOGGER.log(Level.FINER, "libzfs4j autodetect: OpenZFS feature flag support not detected - assuming legacy ZFS");
+
         return "legacy";
     }
 
