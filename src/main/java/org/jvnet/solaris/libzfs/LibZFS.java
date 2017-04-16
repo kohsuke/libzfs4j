@@ -87,6 +87,10 @@ public class LibZFS implements ZFSContainer {
 
         n = "LIBZFS4J_ABI";
         v = getSetting(n,"");
+        if (v.equals("off") || v.equals("disabled") || v.equals("false")) {
+            throw new LinkageError("libzfs4j not enabled due to user-provided setting: LIBZFS4J_ABI='" + v + "'");
+        }
+
         if (v.equals("legacy") || v.equals("openzfs")) {
             /* Currently we recognize two values; later it may be more like openzfs-YYYY */
             abi = v;
@@ -194,7 +198,7 @@ public class LibZFS implements ZFSContainer {
         if (handle==null)
             throw new LinkageError("Failed to initialize libzfs");
 
-        initFeatures();
+        initFeatures(); // Can throw LinkageError if e.g. ZFS is disabled by user settings
     }
 
     /**
