@@ -132,6 +132,7 @@ public class LibZFS implements ZFSContainer {
             Function.getFunction("zfs","zfs_perm_set");
             v = getSetting(n,"pre-sol10u8");
         } catch (Throwable e) {
+            LOGGER.log(Level.FINEST, "While looking for zfs_perm_set() got this: " + e.toString());
             v = getSetting(n,null);
         }
         features.put(n,v);
@@ -141,6 +142,7 @@ public class LibZFS implements ZFSContainer {
             Function.getFunction("zfs","zfs_perm_remove");
             v = getSetting(n,"pre-sol10u8");
         } catch (Throwable e) {
+            LOGGER.log(Level.FINEST, "While looking for zfs_perm_remove() got this: " + e.toString());
             v = getSetting(n,null);
         }
         features.put(n,v);
@@ -182,19 +184,26 @@ public class LibZFS implements ZFSContainer {
      * See https://people.freebsd.org/~gibbs/zfs_doxygenation/html/d4/dd6/zfeature_8h.html
      */
     private String detectCurrentABI() {
-        try {
-            LOGGER.log(Level.FINER, "libzfs4j autodetect: looking for spa_feature_is_enabled()");
-            Function.getFunction("zfs","spa_feature_is_enabled");
-            return "openzfs";
-        } catch (Throwable e) {
-            // fall through
-        }
-        try {
-            LOGGER.log(Level.FINER, "libzfs4j autodetect: looking for feature_is_supported()");
-            Function.getFunction("zfs","feature_is_supported");
-            return "openzfs";
-        } catch (Throwable e) {
-            // fall through
+        /* This list was retrieved by running
+         *   nm /usr/lib/libzfs.so | grep feature | awk '{print "\""$NF"\","}' | sort
+         * on different systems */
+        String featureFuncs[] = { "deps_contains_feature", "feature_is_supported",
+            "spa_feature_is_enabled", "spa_feature_table",
+            "zfeature_checks_disable", "zfeature_depends_on", "zfeature_is_supported",
+            "zfeature_is_valid_guid", "zfeature_lookup_name", "zfeature_register",
+            "zpool_feature_init", "zpool_get_features",
+            "zpool_prop_feature", "zpool_prop_get_feature"
+            };
+
+        for (String featureFunc : featureFuncs) {
+            try {
+                LOGGER.log(Level.FINER, "libzfs4j autodetect: looking for " + featureFunc + "()");
+                Function.getFunction("zfs",featureFunc);
+                return "openzfs";
+            } catch (Throwable e) {
+                // fall through
+                LOGGER.log(Level.FINEST, "While looking for " + featureFunc + "() got this: " + e.toString());
+            }
         }
         LOGGER.log(Level.FINER, "libzfs4j autodetect: OpenZFS feature flag support not detected - assuming legacy ZFS");
 
