@@ -39,7 +39,10 @@ import org.jvnet.solaris.libzfs.jna.zfs_prop_t;
 import org.jvnet.solaris.libzfs.jna.zpool_prop_t;
 
 /**
- * Unit test for simple App.
+ * Unit test for simple ZFS-aware App.
+ *
+ * @author Kohsuke Kawaguchi
+ * @author Jim Klimov
  */
 public class LibZFSTest extends TestCase {
 
