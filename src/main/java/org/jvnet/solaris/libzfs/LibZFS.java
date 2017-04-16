@@ -89,7 +89,7 @@ public class LibZFS implements ZFSContainer {
 
         n = "LIBZFS4J_ABI";
         v = getSetting(n,"");
-        if (v.equals("off") || v.equals("disabled") || v.equals("false") || v.equals("NO-OP")) {
+        if (v.equals("off") || v.equals("no") || v.equals("disabled") || v.equals("false") || v.equals("NO-OP")) {
             libzfsNotEnabledReason = "libzfs4j not enabled due to user-provided setting: LIBZFS4J_ABI='" + v + "'";
             features.put(n,"NO-OP");
             return;
