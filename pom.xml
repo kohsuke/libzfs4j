@@ -35,8 +35,19 @@
         <configuration>
           <forkMode>never</forkMode>
           <skip>true</skip><!-- can't really run tests -->
+          <systemProperties>
+<!-- Note that the effective (default) config for tests requires that the
+     current user account can manage datasets under this existing root: -->
+<!--
+            <property>
+              <name>libzfs.test.pool</name>
+              <value>rpool/kohsuke/</value>
+            </property>
+-->
+          </systemProperties>
         </configuration>
       </plugin>
+
       <plugin>
         <artifactId>maven-assembly-plugin</artifactId>
         <configuration>
