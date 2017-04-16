@@ -47,7 +47,7 @@ public class LibZFSTest extends TestCase {
 
     private String ZFS_TEST_POOL_BASENAME;
 
-    private final LibZFS zfs = new LibZFS();
+    private LibZFS zfs = null;
 
     /**
      * The dataset name that can be created in a test.
@@ -58,8 +58,17 @@ public class LibZFSTest extends TestCase {
     public void setUp() throws Exception {
         super.setUp();
 
+        if (zfs == null) {
+            try {
+                zfs = new LibZFS();
+            } catch (Throwable e) {
+                System.out.println("Aborted " + getName() + " because: " + e.toString());
+                throw new Exception("Aborted " + getName() + " because: " + e.toString());
+            }
+        }
+
         /* allows override of zfs pool used in testing */
-       ZFS_TEST_POOL_BASENAME = System
+        ZFS_TEST_POOL_BASENAME = System
                 .getProperty(ZFS_TEST_POOL_OVERRIDE_PROPERTY,
                         ZFS_TEST_POOL_BASENAME_DEFAULT);
 
