@@ -199,14 +199,15 @@ public class LibZFS implements ZFSContainer {
             try {
                 LOGGER.log(Level.FINER, "libzfs4j autodetect: looking for " + featureFunc + "()");
                 Function.getFunction("zfs",featureFunc);
+                LOGGER.log(Level.FINER, "libzfs4j autodetect: OpenZFS feature flag support detected - assuming OpenZFS ABI");
                 return "openzfs";
             } catch (Throwable e) {
                 // fall through
                 LOGGER.log(Level.FINEST, "While looking for " + featureFunc + "() got this: " + e.toString());
             }
         }
-        LOGGER.log(Level.FINER, "libzfs4j autodetect: OpenZFS feature flag support not detected - assuming legacy ZFS");
 
+        LOGGER.log(Level.FINER, "libzfs4j autodetect: OpenZFS feature flag support not detected - assuming legacy ZFS ABI");
         return "legacy";
     }
 
