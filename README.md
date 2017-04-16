@@ -84,6 +84,13 @@ decision is made outside `libzfs.jar` codebase). It could help asking the
 wrapper whether it can represent ZFS on the host OS, rather than guessing
 by some strings the OS provides, though.
 
+At this time one can wrap calls to initialization of a `LibZFS` instance
+in caller's set-up method (rather than using a pre-initialized `static
+final` class member) and catch resulting exceptions -- this should wrap
+both absence of ZFS on the host OS (or other inability to use it) and the
+end-user's explicit request to not use the wrapper by `-DLIBZFS4J_API=off`.
+See `LibZFSTest.java` for more details.
+
 # Kudos
 
 * Kohsuke Kawaguchi

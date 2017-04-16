@@ -201,6 +201,16 @@ public class LibZFS implements ZFSContainer {
         return "legacy";
     }
 
+    /**
+     * Note that this constructor can throw exceptions if there are errors
+     * while initializing the native library (e.g. absent on the host OS).
+     * Similarly, it will throw if the end-user configuration explicitly
+     * requested to disable this wrapper and not use ZFS features in the
+     * calling program. Due to this, callers should not pre-initialize
+     * their `new LibZFS()` instances in class member declarations, but
+     * rather in constructors or setup methods, and check for exceptions.
+     * Or expect such exceptions in callers of classes that might use ZFS.
+     */
     public LibZFS() {
         libzfs_enabled = false;
         libzfsNotEnabledReason = "";
