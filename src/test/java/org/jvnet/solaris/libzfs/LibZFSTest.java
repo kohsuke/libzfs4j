@@ -58,6 +58,14 @@ public class LibZFSTest extends TestCase {
 
     private String ZFS_TEST_LOGLEVEL;
 
+    private static final String ZFS_TEST_FUNCNAME_OVERRIDE_PROPERTY = "libzfs.test.funcname";
+
+    private static final String ZFS_TEST_FUNCNAME_DEFAULT = "";
+
+    private String ZFS_TEST_FUNCNAME;
+
+    private static final String ZFS_TEST_TIMESTAMP = String.valueOf(System.currentTimeMillis());
+
     private LibZFS zfs = null;
 
     private Logger LOGGER = null;
@@ -107,13 +115,24 @@ public class LibZFSTest extends TestCase {
             }
         }
 
+        /* allows to specify just ZFS function(s) to test, geared for those with
+         * variable ABI; this would use the specified dataset directly */
+        ZFS_TEST_FUNCNAME = System
+                .getProperty(ZFS_TEST_FUNCNAME_OVERRIDE_PROPERTY,
+                        ZFS_TEST_FUNCNAME_DEFAULT);
+
         /* allows override of zfs pool used in testing */
         ZFS_TEST_POOL_BASENAME = System
                 .getProperty(ZFS_TEST_POOL_OVERRIDE_PROPERTY,
                         ZFS_TEST_POOL_BASENAME_DEFAULT)
                 .replaceAll("/+$", "");
 
-        dataSet = ZFS_TEST_POOL_BASENAME + "/" + getName();
+        if (ZFS_TEST_FUNCNAME.isEmpty()) {
+                dataSet = ZFS_TEST_POOL_BASENAME + "/" + getName();
+        } else {
+                dataSet = ZFS_TEST_POOL_BASENAME;
+                System.out.println("Will test just the following function(s): " + ZFS_TEST_FUNCNAME + "\n\tin dataset: " + dataSet);
+        }
 
         assertFalse("Prerequisite Failed, DataSet already exists [" + dataSet+ "] ", zfs.exists(dataSet));
     }
@@ -135,6 +154,10 @@ public class LibZFSTest extends TestCase {
     }
 
     public void testApp() {
+        /* TODO: Real func name */
+        if (!ZFS_TEST_FUNCNAME.isEmpty())
+            return;
+
         System.out.println("Iterating roots");
         for (ZFSFileSystem pool : zfs.roots()) {
             System.out.println(pool.getName());
@@ -144,7 +167,13 @@ public class LibZFSTest extends TestCase {
         }
     }
 
+    /* Note: here and below we assume, validly for Solarish systems
+     * (global zones at least), that an /rpool exists and is mountable */
     public void testGetFilesystemTree() {
+        /* TODO: Real func name */
+        if (!ZFS_TEST_FUNCNAME.isEmpty())
+            return;
+
         // List<ZFSPool> pools = zfs.roots();
         // if ( pools.size() > 0 ) {
         // ZFSObject filesystem = pools.get(0);
@@ -164,10 +193,18 @@ public class LibZFSTest extends TestCase {
     }
 
     public void testRpoolMount() throws Exception {
+        /* TODO: Real func name */
+        if (!ZFS_TEST_FUNCNAME.isEmpty())
+            return;
+
         assertNotNull(zfs.getFileSystemByMountPoint(new File("/rpool")));
     }
 
     public void testCreate() {
+        /* TODO: Real func name */
+        if (!ZFS_TEST_FUNCNAME.isEmpty() && !ZFS_TEST_FUNCNAME.matches(".*\\b" + "zfs_create" + "\\b.*") )
+            return;
+
         ZFSObject fs = zfs.create(dataSet, ZFSFileSystem.class);
 
         assertNotNull("ZFSObject was null for DataSet [" + dataSet + "]",
@@ -179,6 +216,9 @@ public class LibZFSTest extends TestCase {
     }
 
     public void testDestroy() {
+        if (!ZFS_TEST_FUNCNAME.isEmpty())
+            return;
+
         zfs.create(dataSet, ZFSFileSystem.class);
 
         assertTrue("Prerequisite Failed, Test DataSet [" + dataSet
@@ -198,7 +238,111 @@ public class LibZFSTest extends TestCase {
                 .exists(dataSet));
     }
 
+    public void testfunc_Destroy() {
+        if (ZFS_TEST_FUNCNAME.isEmpty())
+            return;
+
+        if ( !ZFS_TEST_FUNCNAME.matches(".*\\b" + "zfs_destroy" + "\\b.*") )
+            return;
+
+        ZFSObject fs = null;
+        try {
+            zfs.create(dataSet + "dummy", ZFSFileSystem.class);
+        } catch (Throwable e) {}
+        try {
+            fs = zfs.open(dataSet + "dummy");
+        } catch (Throwable e) {}
+
+        fs.destroy();
+    }
+
+    public void testSnapshot() {
+        if (!ZFS_TEST_FUNCNAME.isEmpty())
+            return;
+
+        ZFSObject fs = zfs.create(dataSet, ZFSFileSystem.class);
+
+        String snap = "libzfstest_" + ZFS_TEST_TIMESTAMP;
+        ZFSSnapshot o = fs.createSnapshot(snap);
+
+        assertNotNull("ZFSObject was null for DataSetSnap [" + dataSet + "@" + snap + "]",
+                o);
+        assertEquals("ZFSObject doesn't match name specified at create",
+                dataSet+ "@" + snap, o.getName());
+        assertTrue("ZFS exists doesn't report ZFS's creation", zfs
+                .exists(dataSet + "@" + snap));
+
+        boolean found = false;
+        for (ZFSObject snapds : fs.snapshots()) {
+            String name = snapds.getName();
+            if (name.equals(snap)) {
+                found = true;
+                System.out.println("snapshot(*) : " + name);
+            } else {
+                System.out.println("snapshot    : " + name);
+            }
+        }
+
+        fs.destroySnapshot(snap);
+        /* Should not throw exceptions nor segfault */
+    }
+
+    public void testfunc_CreateSnapshot() {
+        /* Note: This routine is ONLY for testing the linkability of the function's ABI */
+        if (ZFS_TEST_FUNCNAME.isEmpty())
+            return;
+
+        /* TODO: Real func name */
+        if ( !ZFS_TEST_FUNCNAME.matches(".*\\b" + "zfs_snapshot" + "\\b.*") )
+            return;
+
+        ZFSObject fs = zfs.open(dataSet);
+        assertNotNull("ZFSObject was null for DataSet [" + dataSet + "]",
+                fs);
+
+        String snap = "libzfstest_" + ZFS_TEST_TIMESTAMP;
+        ZFSSnapshot o = fs.createSnapshot(snap);
+    }
+
+    public void testfunc_IterSnapshot() {
+        /* Note: This routine is ONLY for testing the linkability of the function's ABI */
+        if (ZFS_TEST_FUNCNAME.isEmpty())
+            return;
+
+        if ( !ZFS_TEST_FUNCNAME.matches(".*\\b" + "zfs_iter_snapshots" + "\\b.*") )
+            return;
+
+        ZFSObject fs = zfs.open(dataSet);
+        assertNotNull("ZFSObject was null for DataSet [" + dataSet + "]",
+                fs);
+
+        for (ZFSObject snapds : fs.snapshots()) {
+            String name = snapds.getName();
+        }
+    }
+
+    public void testfunc_DestroySnapshot() {
+        /* Note: This routine is ONLY for testing the linkability of the function's ABI */
+        if (ZFS_TEST_FUNCNAME.isEmpty())
+            return;
+
+        if ( !ZFS_TEST_FUNCNAME.matches(".*\\b" + "zfs_destroy_snaps" + "\\b.*") )
+            return;
+
+        ZFSObject fs = zfs.open(dataSet);
+        assertNotNull("ZFSObject was null for DataSet [" + dataSet + "]",
+                fs);
+
+        String snap = "libzfstest_" + ZFS_TEST_TIMESTAMP;
+        fs.destroySnapshot(snap);
+        /* Should not throw exceptions nor segfault */
+    }
+
     public void testUserProperty() {
+        /* TODO: Real func name */
+        if (!ZFS_TEST_FUNCNAME.isEmpty())
+            return;
+
         ZFSFileSystem o = zfs.create(dataSet,ZFSFileSystem.class);
 
         String property = "my:test";
@@ -211,6 +355,10 @@ public class LibZFSTest extends TestCase {
     }
 
     public void testGetZfsProperties() {
+        /* TODO: Real func name */
+        if (!ZFS_TEST_FUNCNAME.isEmpty())
+            return;
+
         for (ZFSFileSystem pool : zfs.roots()) {
             System.out.println("pool    :" + pool.getName());
 
@@ -232,6 +380,10 @@ public class LibZFSTest extends TestCase {
     }
 
     public void testGetZpoolProperties() {
+        /* TODO: Real func name */
+        if (!ZFS_TEST_FUNCNAME.isEmpty())
+            return;
+
         for (ZFSPool o : zfs.pools()) {
             ZFSFileSystem r = zfs.open(o.getName(), ZFSFileSystem.class);
             assertNotNull(r.getPool());
@@ -246,7 +398,13 @@ public class LibZFSTest extends TestCase {
     }
 
     public void testAllow() {
+        if (!ZFS_TEST_FUNCNAME.isEmpty())
+            return;
+
         ZFSFileSystem fs = zfs.create(dataSet, ZFSFileSystem.class);
+        assertNotNull("ZFSObject was null for DataSet [" + dataSet + "]",
+                fs);
+
         ACLBuilder acl = new ACLBuilder();
         acl.everyone().with(ZFSPermission.CREATE);
         // this fails if the permission being allowed here isn't already allowed to me
@@ -255,7 +413,47 @@ public class LibZFSTest extends TestCase {
         // fs.unallow(acl);
     }
 
+    public void testfunc_Allow() {
+        /* Note: Given the presets and comments above, this routine is ONLY for testing the linkability of the function's ABI at the moment */
+        if (ZFS_TEST_FUNCNAME.isEmpty())
+            return;
+
+        if (!ZFS_TEST_FUNCNAME.matches(".*\\b" + "zfs_perm_set" + "\\b.*") && !ZFS_TEST_FUNCNAME.matches(".*\\b" + "zfs_allow" + "\\b.*") )
+            return;
+
+        ZFSObject fs = zfs.open(dataSet);
+        assertNotNull("ZFSObject was null for DataSet [" + dataSet + "]",
+                fs);
+
+        ACLBuilder acl = new ACLBuilder();
+        acl.everyone().with(ZFSPermission.CREATE);
+
+        fs.allow(acl);
+    }
+
+    public void testfun_Unallow() {
+        /* Note: Given the presets and comments above, this routine is ONLY for testing the linkability of the function's ABI at the moment */
+        if (ZFS_TEST_FUNCNAME.isEmpty())
+            return;
+
+        if (!ZFS_TEST_FUNCNAME.matches(".*\\b" + "zfs_perm_remove" + "\\b.*") && !ZFS_TEST_FUNCNAME.matches(".*\\b" + "zfs_unallow" + "\\b.*") )
+            return;
+
+        ZFSObject fs = zfs.open(dataSet);
+        assertNotNull("ZFSObject was null for DataSet [" + dataSet + "]",
+                fs);
+
+        ACLBuilder acl = new ACLBuilder();
+        acl.everyone().with(ZFSPermission.CREATE);
+
+        fs.unallow(acl);
+    }
+
     public void testInheritProperty() {
+        /* TODO: Real func name */
+        if (!ZFS_TEST_FUNCNAME.isEmpty())
+            return;
+
         ZFSFileSystem o  = zfs.create(dataSet, ZFSFileSystem.class);
         ZFSFileSystem o2 = zfs.create(dataSet+"/child",ZFSFileSystem.class);
 
@@ -272,6 +470,10 @@ public class LibZFSTest extends TestCase {
     }
 
     public void test_zfsObject_exists() {
+        /* TODO: Real func name */
+        if (!ZFS_TEST_FUNCNAME.isEmpty() && !ZFS_TEST_FUNCNAME.matches(".*\\b" + "zfs_destroy" + "\\b.*") && !ZFS_TEST_FUNCNAME.matches(".*\\b" + "zfs_create" + "\\b.*") )
+            return;
+
         final ZFSObject fs1 = zfs.create(dataSet, ZFSFileSystem.class);
 
         assertNotNull("Prerequisite Failed ZFS dataset created was null ["
@@ -306,6 +508,13 @@ public class LibZFSTest extends TestCase {
     }
 
     public void test_zfsObject_isMounted() {
+        /* TODO: Real func name */
+        if (!ZFS_TEST_FUNCNAME.isEmpty() &&
+            !ZFS_TEST_FUNCNAME.matches(".*\\b" + "zfs_mount" + "\\b.*") &&
+            !ZFS_TEST_FUNCNAME.matches(".*\\b" + "zfs_unmount" + "\\b.*") &&
+            !ZFS_TEST_FUNCNAME.matches(".*\\b" + "zfs_create" + "\\b.*") )
+            return;
+
         final ZFSFileSystem fs = zfs.create(dataSet, ZFSFileSystem.class);
 
         assertNotNull("Prerequisite Failed ZFS dataset created was null ["
@@ -332,6 +541,13 @@ public class LibZFSTest extends TestCase {
     }
 
     public void xtest_zfsObject_isShared() {
+        /* TODO: Real func name */
+        if (!ZFS_TEST_FUNCNAME.isEmpty() &&
+            !ZFS_TEST_FUNCNAME.matches(".*\\b" + "zfs_share" + "\\b.*") &&
+            !ZFS_TEST_FUNCNAME.matches(".*\\b" + "zfs_unshare" + "\\b.*") &&
+            !ZFS_TEST_FUNCNAME.matches(".*\\b" + "zfs_create" + "\\b.*") )
+            return;
+
         final ZFSFileSystem fs = zfs.create(dataSet, ZFSFileSystem.class);
 
         assertNotNull("Prerequisite Failed ZFS dataset created was null ["
