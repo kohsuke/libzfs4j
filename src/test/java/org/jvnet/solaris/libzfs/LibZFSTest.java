@@ -110,9 +110,10 @@ public class LibZFSTest extends TestCase {
         /* allows override of zfs pool used in testing */
         ZFS_TEST_POOL_BASENAME = System
                 .getProperty(ZFS_TEST_POOL_OVERRIDE_PROPERTY,
-                        ZFS_TEST_POOL_BASENAME_DEFAULT);
+                        ZFS_TEST_POOL_BASENAME_DEFAULT)
+                .replaceAll("/+$", "");
 
-        dataSet = ZFS_TEST_POOL_BASENAME + getName();
+        dataSet = ZFS_TEST_POOL_BASENAME + "/" + getName();
 
         assertFalse("Prerequisite Failed, DataSet already exists [" + dataSet+ "] ", zfs.exists(dataSet));
     }
@@ -220,7 +221,7 @@ public class LibZFSTest extends TestCase {
             }
         }
 
-        ZFSObject o = zfs.open("rpool/kohsuke");
+        ZFSObject o = zfs.open(ZFS_TEST_POOL_BASENAME);
         System.out.println("pool    :" + o.getName());
 
         Map<zfs_prop_t, String> zfsPoolProps = o.getZfsProperty(EnumSet.allOf(zfs_prop_t.class));
