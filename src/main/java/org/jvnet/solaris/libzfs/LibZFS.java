@@ -126,24 +126,31 @@ public class LibZFS implements ZFSContainer {
          * since Sol10u8. More detailed comments in ZFSObject.java::allow()
          * At this time we wrap the old routines and log an error if absent
          * when called; later might find and wrap newer implementations.
+         * If the caller does set a value here, honor it even if faulty.
          */
         n = "LIBZFS4J_ABI_zfs_perm_set";
-        try {
-            Function.getFunction("zfs","zfs_perm_set");
-            v = getSetting(n,"pre-sol10u8");
-        } catch (Throwable e) {
-            LOGGER.log(Level.FINEST, "While looking for zfs_perm_set() got this: " + e.toString());
-            v = getSetting(n,null);
+        v = getSetting(n,"");
+        if (v.isEmpty()) {
+            try {
+                Function.getFunction("zfs","zfs_perm_set");
+                v = getSetting(n,"pre-sol10u8");
+            } catch (Throwable e) {
+                LOGGER.log(Level.FINEST, "While looking for zfs_perm_set() got this: " + e.toString());
+                v = getSetting(n,null);
+            }
         }
         features.put(n,v);
 
         n = "LIBZFS4J_ABI_zfs_perm_remove";
-        try {
-            Function.getFunction("zfs","zfs_perm_remove");
-            v = getSetting(n,"pre-sol10u8");
-        } catch (Throwable e) {
-            LOGGER.log(Level.FINEST, "While looking for zfs_perm_remove() got this: " + e.toString());
-            v = getSetting(n,null);
+        v = getSetting(n,"");
+        if (v.isEmpty()) {
+            try {
+                Function.getFunction("zfs","zfs_perm_remove");
+                v = getSetting(n,"pre-sol10u8");
+            } catch (Throwable e) {
+                LOGGER.log(Level.FINEST, "While looking for zfs_perm_remove() got this: " + e.toString());
+                v = getSetting(n,null);
+            }
         }
         features.put(n,v);
 
