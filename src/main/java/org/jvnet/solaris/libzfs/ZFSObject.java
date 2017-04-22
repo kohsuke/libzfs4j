@@ -204,17 +204,26 @@ public abstract class ZFSObject implements Comparable<ZFSObject>, ZFSContainer {
     public ZFSSnapshot createSnapshot(final String snapshotName,
             final boolean recursive) {
         String fullName = name + '@' + snapshotName;
-        String abi = library.getFeature("LIBZFS4J_ABI_zfs_snapshot");
+        String abi_thisfunc = "createSnapshot";
+        String abi_toggle = "LIBZFS4J_ABI_zfs_snapshot";
+        String abi = library.getFeature(abi_toggle);
+        if (abi.equals("NO-OP")) {
+            LOGGER.log(Level.FINE, "NO-OP: libzfs4j::" + abi_thisfunc + "() was called while " + abi_toggle + "=='" + abi + "' - skipped due to config");
+        } else
+        if (abi.equals("openzfs") || abi.equals("legacy")) {
+            /* good for both "openzfs" and "legacy" as we know them today */
+            if (LIBZFS.zfs_snapshot(library.getHandle(), fullName, recursive, null) != 0) {
+                throw new ZFSException(library);
+            }
+        } else
         if (abi.equals("pre-nv96")) {
             /* Very-very old, prehistoric signature */
             if (LIBZFS.zfs_snapshot(library.getHandle(), fullName, recursive) != 0) {
                 throw new ZFSException(library);
             }
         } else {
-            /* good for both "openzfs" and "legacy" as we know them today */
-            if (LIBZFS.zfs_snapshot(library.getHandle(), fullName, recursive, null) != 0) {
-                throw new ZFSException(library);
-            }
+            LOGGER.log(Level.FINE, "NO-OP: libzfs4j::" + abi_thisfunc + "() was called while " + abi_toggle + "=='" + abi + "' and this is currently not a known value");
+            throw new ZFSException(library);
         }
 
         final ZFSSnapshot dataSet = (ZFSSnapshot) library.open(fullName, zfs_type_t.SNAPSHOT);
@@ -243,13 +252,22 @@ public abstract class ZFSObject implements Comparable<ZFSObject>, ZFSContainer {
      * {@link ErrorCode#EZFS_EXISTS}.
      */
     public void destroy() {
-        String abi = library.getFeature("LIBZFS4J_ABI_zfs_destroy");
+        String abi_thisfunc = "destroy";
+        String abi_toggle = "LIBZFS4J_ABI_zfs_destroy";
+        String abi = library.getFeature(abi_toggle);
+        if (abi.equals("NO-OP")) {
+            LOGGER.log(Level.FINE, "NO-OP: libzfs4j::" + abi_thisfunc + "() was called while " + abi_toggle + "=='" + abi + "' - skipped due to config");
+        } else
         if (abi.equals("openzfs")) {
             if (LIBZFS.zfs_destroy(handle,false/*?*/) != 0)
                 throw new ZFSException(library,"Failed to destroy "+getName());
-        } else {
+        } else
+        if (abi.equals("legacy")) {
             if (LIBZFS.zfs_destroy(handle) != 0)
                 throw new ZFSException(library,"Failed to destroy "+getName());
+        } else {
+            LOGGER.log(Level.FINE, "NO-OP: libzfs4j::" + abi_thisfunc + "() was called while " + abi_toggle + "=='" + abi + "' and this is currently not a known value");
+            throw new ZFSException(library);
         }
     }
 
@@ -268,13 +286,22 @@ public abstract class ZFSObject implements Comparable<ZFSObject>, ZFSContainer {
      * Destroy a named snapshot of this dataset.
      */
     public void destroySnapshot(String name) {
-        String abi = library.getFeature("LIBZFS4J_ABI_zfs_destroy_snaps");
+        String abi_thisfunc = "destroySnapshot";
+        String abi_toggle = "LIBZFS4J_ABI_zfs_destroy_snaps";
+        String abi = library.getFeature(abi_toggle);
+        if (abi.equals("NO-OP")) {
+            LOGGER.log(Level.FINE, "NO-OP: libzfs4j::" + abi_thisfunc + "() was called while " + abi_toggle + "=='" + abi + "' - skipped due to config");
+        } else
         if (abi.equals("openzfs")) {
             if (LIBZFS.zfs_destroy_snaps(handle, name, false/*?*/) != 0)
                 throw new ZFSException(library,"Failed to destroy "+getName());
-        } else {
+        } else
+        if (abi.equals("legacy")) {
             if (LIBZFS.zfs_destroy_snaps(handle, name) != 0)
                 throw new ZFSException(library,"Failed to destroy "+getName());
+        } else {
+            LOGGER.log(Level.FINE, "NO-OP: libzfs4j::" + abi_thisfunc + "() was called while " + abi_toggle + "=='" + abi + "' and this is currently not a known value");
+            throw new ZFSException(library);
         }
     }
 
@@ -491,7 +518,12 @@ public abstract class ZFSObject implements Comparable<ZFSObject>, ZFSContainer {
      */
     public Set<ZFSSnapshot> snapshots() {
         final Set<ZFSSnapshot> set = new TreeSet<ZFSSnapshot>();
-        String abi = library.getFeature("LIBZFS4J_ABI_zfs_iter_snapshots");
+        String abi_thisfunc = "snapshots";
+        String abi_toggle = "LIBZFS4J_ABI_zfs_iter_snapshots";
+        String abi = library.getFeature(abi_toggle);
+        if (abi.equals("NO-OP")) {
+            LOGGER.log(Level.FINE, "NO-OP: libzfs4j::" + abi_thisfunc + "() was called while " + abi_toggle + "=='" + abi + "' - skipped due to config");
+        } else
         if (abi.equals("openzfs")) {
             LIBZFS.zfs_iter_snapshots(handle, false, new libzfs.zfs_iter_f() {
                 public int callback(zfs_handle_t handle, Pointer arg) {
@@ -499,13 +531,17 @@ public abstract class ZFSObject implements Comparable<ZFSObject>, ZFSContainer {
                     return 0;
                 }
             }, null);
-        } else {
+        } else
+        if (abi.equals("legacy")) {
             LIBZFS.zfs_iter_snapshots(handle, new libzfs.zfs_iter_f() {
                 public int callback(zfs_handle_t handle, Pointer arg) {
                     set.add((ZFSSnapshot)ZFSObject.create(library, handle));
                     return 0;
                 }
             }, null);
+        } else {
+            LOGGER.log(Level.FINE, "NO-OP: libzfs4j::" + abi_thisfunc + "() was called while " + abi_toggle + "=='" + abi + "' and this is currently not a known value");
+            throw new ZFSException(library);
         }
         return set;
     }
@@ -519,14 +555,23 @@ public abstract class ZFSObject implements Comparable<ZFSObject>, ZFSContainer {
      * related data types and comments are still present in the headers.
      */
     public void allow(ACLBuilder acl) {
-        String abi = library.getFeature("LIBZFS4J_ABI_zfs_perm_set");
+        String abi_thisfunc = "allow";
+        String abi_toggle = "LIBZFS4J_ABI_zfs_perm_set";
+        String abi = library.getFeature(abi_toggle);
+        if (abi.equals("NO-OP")) {
+            LOGGER.log(Level.FINE, "NO-OP: libzfs4j::" + abi_thisfunc + "() was called while " + abi_toggle + "=='" + abi + "' - skipped due to config");
+        } else
+        if (abi.equals("openzfs") || abi.equals("legacy")) {
+            LOGGER.log(Level.FINE, "NO-OP: libzfs4j::" + abi_thisfunc + "() was called while " + abi_toggle + "=='" + abi + "' and this is currently not implemented");
+        } else
         if (abi.equals("pre-sol10u8")) {
             for (PermissionBuilder b : acl.builders) {
                 if(LIBZFS.zfs_perm_set(handle,b.toNativeFormat(this))!=0)
                     throw new ZFSException(library);
             }
         } else {
-            LOGGER.log(Level.FINE, "NO-OP: libzfs4j::allow() was called while LIBZFS4J_ABI_zfs_perm_set=='"+abi+"' and this is currently not implemented");
+            LOGGER.log(Level.FINE, "NO-OP: libzfs4j::" + abi_thisfunc + "() was called while " + abi_toggle + "=='" + abi + "' and this is currently not a known value");
+            throw new ZFSException(library);
         }
 
     }
@@ -536,14 +581,23 @@ public abstract class ZFSObject implements Comparable<ZFSObject>, ZFSContainer {
      * See also the detailed "NOTE" comment above.
      */
     public void unallow(ACLBuilder acl) {
-        String abi = library.getFeature("LIBZFS4J_ABI_zfs_perm_remove");
+        String abi_thisfunc = "unallow";
+        String abi_toggle = "LIBZFS4J_ABI_zfs_perm_remove";
+        String abi = library.getFeature(abi_toggle);
+        if (abi.equals("NO-OP")) {
+            LOGGER.log(Level.FINE, "NO-OP: libzfs4j::" + abi_thisfunc + "() was called while " + abi_toggle + "=='" + abi + "' - skipped due to config");
+        } else
+        if (abi.equals("openzfs") || abi.equals("legacy")) {
+            LOGGER.log(Level.FINE, "NO-OP: libzfs4j::" + abi_thisfunc + "() was called while " + abi_toggle + "=='" + abi + "' and this is currently not implemented");
+        } else
         if (abi.equals("pre-sol10u8")) {
             for (PermissionBuilder b : acl.builders) {
                 if(LIBZFS.zfs_perm_remove(handle,b.toNativeFormat(this))!=0)
                     throw new ZFSException(library);
             }
         } else {
-            LOGGER.log(Level.FINE, "NO-OP: libzfs4j::unallow() was called while LIBZFS4J_ABI_zfs_perm_remove=='"+abi+"' and this is currently not implemented");
+            LOGGER.log(Level.FINE, "NO-OP: libzfs4j::" + abi_thisfunc + "() was called while " + abi_toggle + "=='" + abi + "' and this is currently not a known value");
+            throw new ZFSException(library);
         }
     }
 
