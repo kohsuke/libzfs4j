@@ -32,7 +32,6 @@ build_libzfs() {
         die $? "FAILED to build code"
 }
 
-LIBZFSTEST_MVN_OPTIONS="${LIBZFSTEST_MVN_OPTIONS-} -Dlibzfs.test.loglevel=FINEST"
 ### NOTE: Better just create that dataset and `zfs allow` your account to test
 ### in it. Or use
 ### "$(mkfile -v 16M testpool.img && zpool create testpool `pwd`/testpool.img)"
@@ -40,6 +39,9 @@ LIBZFSTEST_MVN_OPTIONS="${LIBZFSTEST_MVN_OPTIONS-} -Dlibzfs.test.loglevel=FINEST
 ###   sudo zfs allow -ld jim mount,create,share,destroy,snapshot rpool/kohsuke
 LIBZFSTEST_DATASET="rpool/kohsuke"
 LIBZFSTEST_MVN_OPTIONS="${LIBZFSTEST_MVN_OPTIONS-} -Dlibzfs.test.pool=${LIBZFSTEST_DATASET}"
+LIBZFSTEST_MVN_OPTIONS="${LIBZFSTEST_MVN_OPTIONS-} -Dlibzfs.test.loglevel=FINEST"
+### Avoid parallel test-cases inside our class - it is unreadable to debug
+LIBZFSTEST_MVN_OPTIONS="${LIBZFSTEST_MVN_OPTIONS-} -Dparallel=classes -DforkCount=0"
 
 test_libzfs() (
     echo ""
@@ -48,9 +50,10 @@ test_libzfs() (
     echo "$SETTINGS"
 
     RES=0
-    MAVEN_OPTS="-XX:ErrorFile=/dev/null -Xmx64M"
+    DUMPING_OPTS="-XX:ErrorFile=/dev/null -Xmx64M"
+    MAVEN_OPTS="${DUMPING_OPTS}"
     export MAVEN_OPTS
-    OUT="$(mvn -DargLine='-XX:ErrorFile=/dev/null -Xmx64M' $LIBZFSTEST_MVN_OPTIONS $* test 2>&1)" || RES=$?
+    OUT="$(mvn -DargLine="${DUMPING_OPTS}" $LIBZFSTEST_MVN_OPTIONS $* test 2>&1)" || RES=$?
     if [ "$VERBOSE" = yes ]; then
         echo "$OUT" | egrep '^FINE.*LIBZFS4J' | uniq
         echo "$OUT" | egrep -v '^FINE.*LIBZFS4J|org.jvnet.solaris.libzfs.LibZFS initFeatures'
@@ -122,11 +125,13 @@ for ZFS_FUNCNAME in "${!LIBZFS_VARIANT_FUNCTIONS[@]}" ; do
         eval export LIBZFS4J_ABI_${ZFS_FUNCNAME}
 done
 
+# See also some docs:
+#  http://maven.apache.org/surefire/maven-surefire-plugin/examples/single-test.html
 for ZFS_FUNCNAME in "${!LIBZFS_VARIANT_FUNCTIONS[@]}" ; do
     echo ""
-#    echo "ZFS_FUNCNAME='$ZFS_FUNCNAME'"
+    # Note: Empty token must be in the end - for library picking defaults,
+    # and as the fatal end of loop if nothing tried works for this system.
     for ZFS_VARIANT in ${LIBZFS_VARIANT_FUNCTIONS[${ZFS_FUNCNAME}]} "" ; do
-#        echo " ZFS_VARIANT='$ZFS_VARIANT'"
         eval LIBZFS4J_ABI_${ZFS_FUNCNAME}="${ZFS_VARIANT}"
         eval export LIBZFS4J_ABI_${ZFS_FUNCNAME}
         echo "Testing function variant LIBZFS4J_ABI_${ZFS_FUNCNAME}='${ZFS_VARIANT}'..."
@@ -134,9 +139,10 @@ for ZFS_FUNCNAME in "${!LIBZFS_VARIANT_FUNCTIONS[@]}" ; do
         if [ -z "$ZFS_VARIANT" ]; then
             die 1 "FAILED to find a working variant for $ZFS_FUNCNAME"
         fi
-#die 1 "one loop"
+        #die 1 "After first test"
     done
-#die 1 "one loop"
+    echo "============== Picked function variant LIBZFS4J_ABI_${ZFS_FUNCNAME}='${ZFS_VARIANT}'..."
+    #die 1 "After one loop"
 done
 
 echo ""
