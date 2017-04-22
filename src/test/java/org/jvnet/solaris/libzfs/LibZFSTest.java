@@ -182,7 +182,7 @@ public class LibZFSTest extends TestCase {
      * (global zones at least), that an /rpool exists and is mountable */
     public void testGetFilesystemTree() {
         /* TODO: Real func name */
-        if (!ZFS_TEST_FUNCNAME.isEmpty())
+        if (!ZFS_TEST_FUNCNAME.isEmpty() && !ZFS_TEST_FUNCNAME.matches(".*\\b" + "zfs_iter_snapshots" + "\\b.*") )
             return;
 
         // List<ZFSPool> pools = zfs.roots();
