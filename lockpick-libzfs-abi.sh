@@ -50,7 +50,7 @@ test_libzfs() (
     RES=0
     MAVEN_OPTS="-XX:ErrorFile=/dev/null -Xmx64M"
     export MAVEN_OPTS
-    OUT="$(mvn -DargLine=-XX:ErrorFile=/dev/null -Xmx64M $LIBZFSTEST_MVN_OPTIONS $* test 2>&1)" || RES=$?
+    OUT="$(mvn -DargLine='-XX:ErrorFile=/dev/null -Xmx64M' $LIBZFSTEST_MVN_OPTIONS $* test 2>&1)" || RES=$?
     if [ "$VERBOSE" = yes ]; then
         echo "$OUT" | egrep '^FINE.*LIBZFS4J' | uniq
         echo "$OUT" | egrep -v '^FINE.*LIBZFS4J|org.jvnet.solaris.libzfs.LibZFS initFeatures'
