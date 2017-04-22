@@ -104,6 +104,10 @@ build_libzfs
 
 # Value set in looped calls below
 export LIBZFS4J_ABI
+
+echo "Test usability of Native ZFS from Java..."
+test_libzfs -Dlibzfs.test.funcname=testCouldStart -X || die $? "Does this host have libzfs.so?"
+
 #test_defaults && exit
 
 # Override the default for individual variants explicitly in the loop below

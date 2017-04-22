@@ -159,6 +159,11 @@ public class LibZFSTest extends TestCase {
         zfs.dispose();
     }
 
+    public void testCouldStart() {
+        assertFalse("Native ZFS library could not be loaded", zfs == null);
+        System.out.println("LibZFSTest loaded OK");
+    }
+
     public void testApp() {
         /* TODO: Real func name */
         if (!ZFS_TEST_FUNCNAME.isEmpty())
