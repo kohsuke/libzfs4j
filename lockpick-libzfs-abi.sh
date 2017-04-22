@@ -187,6 +187,7 @@ export LIBZFS4J_ABI
 
 test_linkability
 
+[ "$FORCE_LOCKPICK" != yes ] && \
 test_defaults && test_all_routines && report_match && exit
 
 test_lockpick
