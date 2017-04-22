@@ -129,16 +129,22 @@ public class LibZFSTest extends TestCase {
 
         if (ZFS_TEST_FUNCNAME.isEmpty()) {
                 dataSet = ZFS_TEST_POOL_BASENAME + "/" + getName();
+                assertFalse("Prerequisite Failed, DataSet already exists [" + dataSet+ "] ", zfs.exists(dataSet));
         } else {
                 dataSet = ZFS_TEST_POOL_BASENAME;
-                System.out.println("Will test just the following function(s): " + ZFS_TEST_FUNCNAME + "\n\tin dataset: " + dataSet);
+                System.out.println("Will test just the following function(s): " + ZFS_TEST_FUNCNAME
+                        + "\tin dataset: '" + dataSet + "' (no '" + getName() + "' attached)");
         }
-
-        assertFalse("Prerequisite Failed, DataSet already exists [" + dataSet+ "] ", zfs.exists(dataSet));
     }
 
     public void tearDown() throws Exception {
         super.tearDown();
+
+        if (!ZFS_TEST_FUNCNAME.isEmpty()) {
+            System.out.println("Quickly ending test " + getName());
+            zfs.dispose();
+            return;
+        }
 
         if (dataSet != null) {
             System.out.println("TearDown test dataset [" + dataSet + "]");

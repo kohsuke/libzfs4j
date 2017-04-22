@@ -3,6 +3,8 @@
 # Try to "lockpick" the settings relevant for libzfs.jar on this host OS
 # Note that the "correct answer" may change across OS updates... as well
 # as libzfs.jar evolution. Requires sources, "mvn" and JDK at this time.
+# Note it is likely to leave around Java coredump files, or at least logs
+# of those with stack traces.
 #
 # TODO: Add an option to libzfstest to run just a certain native routine.
 #
@@ -12,15 +14,29 @@
 # Also, below, bash associative arrays are used
 set -o pipefail
 
+die() {
+    RES="$1"
+    [ -n "$RES" ] && [ "$RES" -gt 0 ] && shift || RES=1
+    if [ -n "$*" ]; then
+        echo "FATAL: $@" >&2
+    fi
+    exit $RES
+}
+
 build_libzfs() {
     echo "Building latest libzfs4j.jar and tests..."
     mvn compile test-compile 2>/dev/null >/dev/null && echo "OK" || \
-        { RES=$?; echo "FAILED to build code" >&2; exit $RES; }
+        die $? "FAILED to build code"
 }
 
-#LIBZFSTEST_MVN_OPTIONS="${LIBZFSTEST_MVN_OPTIONS-} -Dlibzfs.test.loglevel=FINEST"
-#LIBZFSTEST_MVN_OPTIONS="${LIBZFSTEST_MVN_OPTIONS-} -Dlibzfs.test.pool=mydatapool/mydataset"
-LIBZFSTEST_MVN_OPTIONS="${LIBZFSTEST_MVN_OPTIONS-} -Dlibzfs.test.pool=rpool"
+LIBZFSTEST_MVN_OPTIONS="${LIBZFSTEST_MVN_OPTIONS-} -Dlibzfs.test.loglevel=FINEST"
+### NOTE: Better just create that dataset and `zfs allow` your account to test
+### in it. Or use
+### "$(mkfile -v 16M testpool.img && zpool create testpool `pwd`/testpool.img)"
+### to create a test pool (as root)...
+###   sudo zfs allow -ld jim mount,create,share,destroy,snapshot rpool/kohsuke
+LIBZFSTEST_DATASET="rpool/kohsuke"
+LIBZFSTEST_MVN_OPTIONS="${LIBZFSTEST_MVN_OPTIONS-} -Dlibzfs.test.pool=${LIBZFSTEST_DATASET}"
 
 test_libzfs() (
     echo ""
@@ -29,11 +45,12 @@ test_libzfs() (
     echo "$SETTINGS"
 
     RES=0
-    MAVEN_OPTS="-XX:ErrorFile=/dev/null"
+    MAVEN_OPTS="-XX:ErrorFile=/dev/null -Xmx64M"
     export MAVEN_OPTS
-    OUT="$(mvn -DargLine=-XX:ErrorFile=/dev/null $LIBZFSTEST_MVN_OPTIONS $* test 2>&1)" || RES=$?
+    OUT="$(mvn -DargLine=-XX:ErrorFile=/dev/null -Xmx64M $LIBZFSTEST_MVN_OPTIONS $* test 2>&1)" || RES=$?
     if [ "$VERBOSE" = yes ]; then
-        echo "$OUT"
+        echo "$OUT" | egrep '^FINE.*LIBZFS4J' | uniq
+        echo "$OUT" | egrep -v '^FINE.*LIBZFS4J|org.jvnet.solaris.libzfs.LibZFS initFeatures'
     else
         echo "$OUT" | egrep '^FINE.*LIBZFS4J' | uniq
     fi
@@ -57,7 +74,7 @@ test_defaults() {
         openzfs \
         "" \
     ; do
-        test_libzfs && exit
+        test_libzfs && return 0
     done
 }
 
@@ -84,12 +101,17 @@ build_libzfs
 
 # Value set in looped calls below
 export LIBZFS4J_ABI
-#test_defaults
+#test_defaults && exit
 
 # Override the default for individual variants explicitly in the loop below
 LIBZFS4J_ABI=legacy
 echo ""
 echo "Simple approach failed - begin lockpicking..."
+for ZFS_FUNCNAME in "${!LIBZFS_VARIANT_FUNCTIONS[@]}" ; do
+        eval LIBZFS4J_ABI_${ZFS_FUNCNAME}="NO-OP"
+        eval export LIBZFS4J_ABI_${ZFS_FUNCNAME}
+done
+
 for ZFS_FUNCNAME in "${!LIBZFS_VARIANT_FUNCTIONS[@]}" ; do
     echo ""
 #    echo "ZFS_FUNCNAME='$ZFS_FUNCNAME'"
@@ -99,11 +121,20 @@ for ZFS_FUNCNAME in "${!LIBZFS_VARIANT_FUNCTIONS[@]}" ; do
         eval export LIBZFS4J_ABI_${ZFS_FUNCNAME}
         echo "Testing function variant LIBZFS4J_ABI_${ZFS_FUNCNAME}='${ZFS_VARIANT}'..."
         test_libzfs -Dlibzfs.test.funcname="${ZFS_FUNCNAME}" -X && break
+        if [ -z "$ZFS_VARIANT" ]; then
+            die 1 "FAILED to find a working variant for $ZFS_FUNCNAME"
+        fi
+#die 1 "one loop"
     done
+#die 1 "one loop"
 done
 
 echo ""
 echo "Re-validating the full set of lockpicking results..."
-VERBOSE=yes test_libzfs && exit
+VERBOSE=yes test_libzfs || die $? "FAILED re-validation"
 
-exit 1
+echo ""
+echo "Packaging the results..."
+mvn $LIBZFSTEST_MVN_OPTIONS package || die $? "FAILED packaging"
+
+exit 0
