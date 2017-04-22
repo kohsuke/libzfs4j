@@ -60,7 +60,10 @@ test_libzfs() (
 
     case "$RES" in
         0|1) # Test could fail e.g. due to inaccessible datasets
-            echo "SUCCESS ($RES)"
+            echo "SUCCESS (did not core-dump, returned $RES)"
+            if [ "$TEST_OK_ZERO_ONLY" = yes ]; then
+                return $RES
+            fi
             return 0
             ;;
         134|*) # 134 = 128 + 6 = coredump on OS signal SEGABRT
@@ -106,7 +109,7 @@ build_libzfs
 export LIBZFS4J_ABI
 
 echo "Test usability of Native ZFS from Java..."
-test_libzfs -Dlibzfs.test.funcname=testCouldStart -X || die $? "Does this host have libzfs.so?"
+TEST_OK_ZERO_ONLY=yes test_libzfs -Dlibzfs.test.funcname=testCouldStart -X || die $? "Does this host have libzfs.so?"
 
 #test_defaults && exit
 
