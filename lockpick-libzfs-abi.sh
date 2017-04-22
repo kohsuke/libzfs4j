@@ -14,6 +14,9 @@
 # Also, below, bash associative arrays are used
 set -o pipefail
 
+# We do not care for these coredumps
+ulimit -c 0
+
 die() {
     RES="$1"
     [ -n "$RES" ] && [ "$RES" -gt 0 ] && shift || RES=1
