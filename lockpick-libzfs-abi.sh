@@ -113,8 +113,11 @@ test_all_routines() {
 declare -A LIBZFS_VARIANT_FUNCTIONS
 LIBZFS_VARIANT_FUNCTIONS["zfs_iter_snapshots"]=" legacy openzfs"
 #LIBZFS_VARIANT_FUNCTIONS["zfs_iter_snapshots"]="openzfs legacy"
-LIBZFS_VARIANT_FUNCTIONS["zfs_snapshot"]="pre-nv96 legacy openzfs"
-#LIBZFS_VARIANT_FUNCTIONS["zfs_snapshot"]="openzfs legacy pre-nv96"
+### Do not normally test pre-nv96 early on - it fits inside newer
+### argument list and so does not cause a linking error, but can
+### potentially pass random heap garbage to the called new signature.
+###LIBZFS_VARIANT_FUNCTIONS["zfs_snapshot"]="pre-nv96 legacy openzfs"
+LIBZFS_VARIANT_FUNCTIONS["zfs_snapshot"]="openzfs legacy pre-nv96"
 LIBZFS_VARIANT_FUNCTIONS["zfs_destroy_snaps"]="openzfs legacy"
 LIBZFS_VARIANT_FUNCTIONS["zfs_destroy"]="openzfs legacy"
 # TODO: New ABI syntax for either major branch of ZFS has not yet been

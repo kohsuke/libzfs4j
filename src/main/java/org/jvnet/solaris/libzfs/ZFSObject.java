@@ -218,6 +218,9 @@ public abstract class ZFSObject implements Comparable<ZFSObject>, ZFSContainer {
         } else
         if (abi.equals("pre-nv96")) {
             /* Very-very old, prehistoric signature */
+            /* Be careful to not call this signature on newer OSes though,
+             * because it is a subset of newer ABI and so does not cause a
+             * link error - but may provide random data as the last arg. */
             if (LIBZFS.zfs_snapshot(library.getHandle(), fullName, recursive) != 0) {
                 throw new ZFSException(library);
             }
