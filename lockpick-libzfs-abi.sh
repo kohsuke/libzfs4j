@@ -104,6 +104,10 @@ test_defaults() {
     done
 }
 
+test_all_routines() {
+    echo "Re-validate specific routines"
+    test_libzfs -Dlibzfs.test.funcname="${!LIBZFS_VARIANT_FUNCTIONS[*]}"
+}
 
 # Put most-probable variants first, to reduce amount of iterations
 declare -A LIBZFS_VARIANT_FUNCTIONS
@@ -129,7 +133,8 @@ build_libzfs
 export LIBZFS4J_ABI
 
 test_linkability
-#test_defaults && exit
+
+#test_defaults && test_all_routines && exit
 
 # Override the default for individual variants explicitly in the loop below
 LIBZFS4J_ABI=legacy
@@ -160,7 +165,7 @@ done
 
 echo ""
 echo "Re-validating the full set of lockpicking results..."
-VERBOSITY=high test_libzfs || die $? "FAILED re-validation"
+VERBOSITY=high test_libzfs && VERBOSITY=high test_all_routines || die $? "FAILED re-validation"
 
 echo ""
 echo "Packaging the results..."
