@@ -18,6 +18,8 @@ set -o pipefail
 # But the hs_err_pid*.log files are not so easy to avoid
 ulimit -c 0
 
+[ -n "${VERBOSITY-}" ] || VERBOSITY=quiet
+
 die() {
     RES="$1"
     [ -n "$RES" ] && [ "$RES" -gt 0 ] && shift || RES=1
@@ -55,13 +57,17 @@ test_libzfs() (
     MAVEN_OPTS="${DUMPING_OPTS}"
     export MAVEN_OPTS
     OUT="$(mvn -DargLine="${DUMPING_OPTS}" $LIBZFSTEST_MVN_OPTIONS $* test 2>&1)" || RES=$?
-    if [ "$VERBOSE" = yes ]; then
+    case "$VERBOSITY" in
+    high)
         echo "$OUT" | egrep '^FINE.*LIBZFS4J' | uniq
         echo "$OUT" | egrep -v '^FINE.*LIBZFS4J|org.jvnet.solaris.libzfs.LibZFS initFeatures|^$'
-    else
+        ;;
+    yes)
         echo "$OUT" | egrep '^FINE.*LIBZFS4J' | uniq
         echo "$OUT" | egrep 'testfunc_' | uniq
-    fi
+        ;;
+    quiet|*) ;;
+    esac
 
     case "$RES" in
         0|1) # Test could fail e.g. due to inaccessible datasets
@@ -153,7 +159,7 @@ done
 
 echo ""
 echo "Re-validating the full set of lockpicking results..."
-VERBOSE=yes test_libzfs || die $? "FAILED re-validation"
+VERBOSITY=high test_libzfs || die $? "FAILED re-validation"
 
 echo ""
 echo "Packaging the results..."
