@@ -78,6 +78,12 @@ test_libzfs() (
     return $RES
 )
 
+test_linkability() {
+    echo "Test usability of Native ZFS from Java..."
+    TEST_OK_ZERO_ONLY=yes test_libzfs -Dlibzfs.test.funcname=testCouldStart -X >/dev/null 2>&1 \
+        && echo SUCCESS || die $? "Does this host have libzfs.so?"
+}
+
 test_defaults() {
     echo "Try with default settings and an auto-guesser..."
     for LIBZFS4J_ABI in \
@@ -113,9 +119,7 @@ build_libzfs
 # Value set in looped calls below
 export LIBZFS4J_ABI
 
-echo "Test usability of Native ZFS from Java..."
-TEST_OK_ZERO_ONLY=yes test_libzfs -Dlibzfs.test.funcname=testCouldStart -X || die $? "Does this host have libzfs.so?"
-
+test_linkability
 #test_defaults && exit
 
 # Override the default for individual variants explicitly in the loop below
