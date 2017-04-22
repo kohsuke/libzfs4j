@@ -72,6 +72,7 @@ die() {
 
 report_match() {
     SETTINGS="$(set | egrep '^LIBZFS4J_.*=')"
+    uname -a
     echo "MATCHED with the following settings: " $SETTINGS
     return 0
 }
