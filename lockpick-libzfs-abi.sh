@@ -59,7 +59,7 @@ test_libzfs() (
     DUMPING_OPTS="-XX:ErrorFile=/dev/null -Xmx64M"
     MAVEN_OPTS="${DUMPING_OPTS}"
     export MAVEN_OPTS
-    OUT="$(mvn -DargLine="${DUMPING_OPTS}" $LIBZFSTEST_MVN_OPTIONS $* test 2>&1)" || RES=$?
+    OUT="$(mvn -DargLine="${DUMPING_OPTS}" $LIBZFSTEST_MVN_OPTIONS "$@" test 2>&1)" || RES=$?
     case "$VERBOSITY" in
     high)
         echo "$OUT" | egrep '^FINE.*LIBZFS4J' | uniq
