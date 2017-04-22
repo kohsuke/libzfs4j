@@ -56,9 +56,10 @@ test_libzfs() (
     OUT="$(mvn -DargLine="${DUMPING_OPTS}" $LIBZFSTEST_MVN_OPTIONS $* test 2>&1)" || RES=$?
     if [ "$VERBOSE" = yes ]; then
         echo "$OUT" | egrep '^FINE.*LIBZFS4J' | uniq
-        echo "$OUT" | egrep -v '^FINE.*LIBZFS4J|org.jvnet.solaris.libzfs.LibZFS initFeatures'
+        echo "$OUT" | egrep -v '^FINE.*LIBZFS4J|org.jvnet.solaris.libzfs.LibZFS initFeatures|^$'
     else
         echo "$OUT" | egrep '^FINE.*LIBZFS4J' | uniq
+        echo "$OUT" | egrep 'testfunc_' | uniq
     fi
 
     case "$RES" in

@@ -90,7 +90,7 @@ public class LibZFSTest extends TestCase {
             Level level;
             try {
                 level = Level.parse(ZFS_TEST_LOGLEVEL);
-            } catch ( Throwable e ) {
+            } catch (Exception e) {
                 level = Level.FINE;
             }
             LOGGER.setLevel(level);
@@ -109,7 +109,7 @@ public class LibZFSTest extends TestCase {
             try {
                 //System.out.println("Setting up a LibZFS instance for this test run...");
                 zfs = new LibZFS();
-            } catch (Throwable e) {
+            } catch (Exception e) {
                 System.out.println("Aborted " + getName() + " because: " + e.toString());
                 throw new Exception("Aborted " + getName() + " because: " + e.toString());
             }
@@ -261,14 +261,15 @@ public class LibZFSTest extends TestCase {
         ZFSObject fs = null;
         try {
             zfs.create(dataSet + "/dummy", ZFSFileSystem.class);
-        } catch (Throwable e) { System.out.println("testfunc__zfs_destroy() : exception: " + e.toString()); }
+        } catch (Exception e) { System.out.println("testfunc__zfs_destroy() : exception: " + e.toString()); }
         try {
             fs = zfs.open(dataSet + "/dummy");
-        } catch (Throwable e) { System.out.println("testfunc__zfs_destroy() : exception: " + e.toString()); }
+        } catch (Exception e) { System.out.println("testfunc__zfs_destroy() : exception: " + e.toString()); }
 
         try {
             fs.destroy();
-        } catch (Throwable e) { System.out.println("testfunc__zfs_destroy() : exception: " + e.toString()); }
+            System.out.println("testfunc__zfs_destroy() : passed the routine");
+        } catch (Exception e) { System.out.println("testfunc__zfs_destroy() : exception: " + e.toString()); }
     }
 
     public void testSnapshot() {
@@ -317,10 +318,11 @@ public class LibZFSTest extends TestCase {
         String snap = "libzfstest_" + ZFS_TEST_TIMESTAMP;
         try {
             fs = zfs.open(dataSet);
-        } catch (Throwable e) { System.out.println("testfunc__zfs_snapshot() : exception: " + e.toString()); }
+        } catch (Exception e) { System.out.println("testfunc__zfs_snapshot() : exception: " + e.toString()); }
         try {
             ZFSSnapshot o = fs.createSnapshot(snap);
-        } catch (Throwable e) { System.out.println("testfunc__zfs_snapshot() : exception: " + e.toString()); }
+            System.out.println("testfunc__zfs_snapshot() : passed the routine");
+        } catch (Exception e) { System.out.println("testfunc__zfs_snapshot() : exception: " + e.toString()); }
     }
 
     public void testfunc__zfs_iter_snapshots() {
@@ -336,12 +338,13 @@ public class LibZFSTest extends TestCase {
         ZFSObject fs = null;
         try {
             fs = zfs.open(dataSet);
-        } catch (Throwable e) { System.out.println("testfunc__zfs_iter_snapshots() : exception: " + e.toString()); }
+        } catch (Exception e) { System.out.println("testfunc__zfs_iter_snapshots() : exception: " + e.toString()); }
         try {
             for (ZFSObject snapds : fs.snapshots()) {
                 String name = snapds.getName();
             }
-        } catch (Throwable e) { System.out.println("testfunc__zfs_iter_snapshots() : exception: " + e.toString()); }
+            System.out.println("testfunc__zfs_iter_snapshots() : passed the routine");
+        } catch (Exception e) { System.out.println("testfunc__zfs_iter_snapshots() : exception: " + e.toString()); }
     }
 
     public void testfunc__zfs_destroy_snaps() {
@@ -358,10 +361,11 @@ public class LibZFSTest extends TestCase {
         String snap = "libzfstest_" + ZFS_TEST_TIMESTAMP;
         try {
             fs = zfs.open(dataSet);
-        } catch (Throwable e) { System.out.println("testfunc__zfs_destroy_snaps() : exception: " + e.toString()); }
+        } catch (Exception e) { System.out.println("testfunc__zfs_destroy_snaps() : exception: " + e.toString()); }
         try {
             fs.destroySnapshot(snap);
-        } catch (Throwable e) { System.out.println("testfunc__zfs_destroy_snaps() : exception: " + e.toString()); }
+            System.out.println("testfunc__zfs_destroy_snaps() : passed the routine");
+        } catch (Exception e) { System.out.println("testfunc__zfs_destroy_snaps() : exception: " + e.toString()); }
         /* Should not segfault */
     }
 
@@ -455,14 +459,15 @@ public class LibZFSTest extends TestCase {
 
         try {
             fs = zfs.open(dataSet);
-        } catch (Throwable e) { System.out.println("testfunc__zfs_perm_set() : exception: " + e.toString()); }
+        } catch (Exception e) { System.out.println("testfunc__zfs_perm_set() : exception: " + e.toString()); }
         try {
             acl = new ACLBuilder();
             acl.everyone().with(ZFSPermission.CREATE);
-        } catch (Throwable e) { System.out.println("testfunc__zfs_perm_set() : exception: " + e.toString()); }
+        } catch (Exception e) { System.out.println("testfunc__zfs_perm_set() : exception: " + e.toString()); }
         try {
             fs.allow(acl);
-        } catch (Throwable e) { System.out.println("testfunc__zfs_perm_set() : exception: " + e.toString()); }
+            System.out.println("testfunc__zfs_perm_set() : passed the routine");
+        } catch (Exception e) { System.out.println("testfunc__zfs_perm_set() : exception: " + e.toString()); }
     }
 
     public void testfunc__zfs_perm_remove() {
@@ -480,14 +485,15 @@ public class LibZFSTest extends TestCase {
 
         try {
             fs = zfs.open(dataSet);
-        } catch (Throwable e) { System.out.println("testfunc__zfs_perm_remove() : exception: " + e.toString()); }
+        } catch (Exception e) { System.out.println("testfunc__zfs_perm_remove() : exception: " + e.toString()); }
         try {
             acl = new ACLBuilder();
             acl.everyone().with(ZFSPermission.CREATE);
-        } catch (Throwable e) { System.out.println("testfunc__zfs_perm_remove() : exception: " + e.toString()); }
+        } catch (Exception e) { System.out.println("testfunc__zfs_perm_remove() : exception: " + e.toString()); }
         try {
             fs.unallow(acl);
-        } catch (Throwable e) { System.out.println("testfunc__zfs_perm_remove() : exception: " + e.toString()); }
+            System.out.println("testfunc__zfs_perm_remove() : passed the routine");
+        } catch (Exception e) { System.out.println("testfunc__zfs_perm_remove() : exception: " + e.toString()); }
     }
 
     public void testInheritProperty() {
