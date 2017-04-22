@@ -75,7 +75,9 @@ here), or refer to the current Git HEAD status:
 
 Settings ultimately applied to each toggle can be seen in application server
 (or standalone Jetty app) log if you start it with a `FINE` or greater log4j
-logging level.
+logging level. See also the `lockpick-libzfs-abi.sh` script that tries out
+the currently known toggle options and their values, to pick the correct
+settings for an end-user's deployment.
 
 Note that there is more work possible in this area, such as in particular
 expanding Jenkins ZFS support to operating systems that do not identify as
