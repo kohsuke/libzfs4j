@@ -465,6 +465,7 @@ public class LibZFSTest extends TestCase {
             acl.everyone().with(ZFSPermission.CREATE);
         } catch (Exception e) { System.out.println("testfunc__zfs_perm_set() : exception: " + e.toString()); }
         try {
+            System.out.println("testfunc__zfs_perm_set() : starting the routine");
             fs.allow(acl);
             System.out.println("testfunc__zfs_perm_set() : passed the routine");
         } catch (Exception e) { System.out.println("testfunc__zfs_perm_set() : exception: " + e.toString()); }
@@ -491,6 +492,7 @@ public class LibZFSTest extends TestCase {
             acl.everyone().with(ZFSPermission.CREATE);
         } catch (Exception e) { System.out.println("testfunc__zfs_perm_remove() : exception: " + e.toString()); }
         try {
+            System.out.println("testfunc__zfs_perm_remove() : starting the routine");
             fs.unallow(acl);
             System.out.println("testfunc__zfs_perm_remove() : passed the routine");
         } catch (Exception e) { System.out.println("testfunc__zfs_perm_remove() : exception: " + e.toString()); }
