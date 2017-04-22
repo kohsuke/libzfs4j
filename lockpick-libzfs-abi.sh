@@ -106,7 +106,7 @@ test_defaults() {
 declare -A LIBZFS_VARIANT_FUNCTIONS
 LIBZFS_VARIANT_FUNCTIONS["zfs_iter_snapshots"]=" legacy openzfs"
 #LIBZFS_VARIANT_FUNCTIONS["zfs_iter_snapshots"]="openzfs legacy"
-LIBZFS_VARIANT_FUNCTIONS["zfs_snapshot"]="legacy openzfs pre-nv96"
+LIBZFS_VARIANT_FUNCTIONS["zfs_snapshot"]="pre-nv96 legacy openzfs"
 #LIBZFS_VARIANT_FUNCTIONS["zfs_snapshot"]="openzfs legacy pre-nv96"
 LIBZFS_VARIANT_FUNCTIONS["zfs_destroy_snaps"]="openzfs legacy"
 LIBZFS_VARIANT_FUNCTIONS["zfs_destroy"]="openzfs legacy"
