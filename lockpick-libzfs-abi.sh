@@ -15,6 +15,7 @@
 set -o pipefail
 
 # We do not care for these coredumps
+# But the hs_err_pid*.log files are not so easy to avoid
 ulimit -c 0
 
 die() {
