@@ -9,6 +9,9 @@
 # TODO: Add an option to libzfstest to run just a certain native routine.
 #
 # Copyright (C) 2017 by Jim Klimov
+#
+# See also some docs:
+#  http://maven.apache.org/surefire/maven-surefire-plugin/examples/single-test.html
 
 # Bashism to allow pipes to fail not only due to last called program
 # Also, below, bash associative arrays are used
@@ -133,12 +136,10 @@ LIBZFS4J_ABI=legacy
 echo ""
 echo "Simple approach failed - begin lockpicking..."
 for ZFS_FUNCNAME in "${!LIBZFS_VARIANT_FUNCTIONS[@]}" ; do
-        eval LIBZFS4J_ABI_${ZFS_FUNCNAME}="NO-OP"
-        eval export LIBZFS4J_ABI_${ZFS_FUNCNAME}
+    eval LIBZFS4J_ABI_${ZFS_FUNCNAME}="NO-OP"
+    eval export LIBZFS4J_ABI_${ZFS_FUNCNAME}
 done
 
-# See also some docs:
-#  http://maven.apache.org/surefire/maven-surefire-plugin/examples/single-test.html
 for ZFS_FUNCNAME in "${!LIBZFS_VARIANT_FUNCTIONS[@]}" ; do
     echo ""
     # Note: Empty token must be in the end - for library picking defaults,
