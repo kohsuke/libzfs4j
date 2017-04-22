@@ -2,7 +2,8 @@
 
 # Try to "lockpick" the settings relevant for libzfs.jar on this host OS
 # Note that the "correct answer" may change across OS updates... as well
-# as libzfs.jar evolution. Requires sources, "mvn" and JDK at this time.
+# as libzfs.jar evolution. Requires sources, "mvn" and JDK at this time,
+# and you may have to allow tests in pom.xml (set "<skip>" to "false").
 # Note it is likely to leave around Java coredump files, or at least logs
 # of those with stack traces.
 #
