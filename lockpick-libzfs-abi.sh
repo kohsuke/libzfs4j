@@ -198,7 +198,7 @@ VERBOSITY=high test_libzfs && VERBOSITY=high test_all_routines || die $? "FAILED
 
 echo ""
 echo "Packaging the results..."
-mvn $LIBZFSTEST_MVN_OPTIONS package || die $? "FAILED packaging"
+mvn $LIBZFSTEST_MVN_OPTIONS package || echo "FAILED packaging (maybe tests failed due to missing datasets/permissions - then fix pom.xml back to skipt tests and re-run "mvn package")"
 
 report_match
 exit 0
