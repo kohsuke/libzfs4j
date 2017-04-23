@@ -22,9 +22,12 @@
 # Also, below, bash associative arrays are used
 set -o pipefail
 
+# Abort on unhandled errors
+set -e
+
 # We do not care for these coredumps
 # But the hs_err_pid*.log files are not so easy to avoid
-ulimit -c 0
+ulimit -c 0 || true
 
 [ -n "${VERBOSITY-}" ] || VERBOSITY=quiet
 
@@ -76,7 +79,7 @@ die() {
 }
 
 report_match() {
-    SETTINGS="$(set | egrep '^LIBZFS4J_.*=')"
+    SETTINGS="$(set | egrep '^LIBZFS4J_.*=')" || true
     uname -a
     echo ""
     echo "MATCHED with the following settings: " $SETTINGS
@@ -92,7 +95,7 @@ build_libzfs() {
 test_libzfs() (
     echo ""
     echo "Testing with the following settings:"
-    SETTINGS="$(set | egrep '^LIBZFS4J_.*=')"
+    SETTINGS="$(set | egrep '^LIBZFS4J_.*=')" || true
     echo "$SETTINGS"
 
     RES=0
@@ -102,12 +105,12 @@ test_libzfs() (
     OUT="$(mvn -DargLine="${DUMPING_OPTS}" $LIBZFSTEST_MVN_OPTIONS "$@" test 2>&1)" || RES=$?
     case "$VERBOSITY" in
     high)
-        echo "$OUT" | egrep '^FINE.*libzfs4j features.*LIBZFS4J' | uniq
-        echo "$OUT" | egrep -v '^FINE.*libzfs4j features.*LIBZFS4J|org.jvnet.solaris.libzfs.LibZFS initFeatures|^$'
+        echo "$OUT" | egrep '^FINE.*libzfs4j features.*LIBZFS4J' | uniq || true
+        echo "$OUT" | egrep -v '^FINE.*libzfs4j features.*LIBZFS4J|org.jvnet.solaris.libzfs.LibZFS initFeatures|^$' || true
         ;;
     yes)
-        echo "$OUT" | egrep '^FINE.*LIBZFS4J' | uniq
-        echo "$OUT" | egrep 'testfunc_' | uniq
+        echo "$OUT" | egrep '^FINE.*LIBZFS4J' | uniq || true
+        echo "$OUT" | egrep 'testfunc_' | uniq || true
         ;;
     quiet|*) ;;
     esac
@@ -136,18 +139,20 @@ test_linkability() {
 
 test_defaults() {
     echo "Try with default settings and an auto-guesser..."
+    RES_LOOP=127
     for LIBZFS4J_ABI in \
         legacy \
         openzfs \
         "" \
     ; do
-        test_libzfs && return 0
+        test_libzfs && return 0 || RES_LOOP=$?
     done
+    return $RES_LOOP
 }
 
 test_all_routines() {
     echo "Re-validate specific routines"
-    test_libzfs -Dlibzfs.test.funcname="${!LIBZFS_VARIANT_FUNCTIONS[*]}"
+    test_libzfs -Dlibzfs.test.funcname="${!LIBZFS_VARIANT_FUNCTIONS[*]}" || return $?
 }
 
 
@@ -169,7 +174,9 @@ test_lockpick() {
         for ZFS_VARIANT in ${LIBZFS_VARIANT_FUNCTIONS[${ZFS_FUNCNAME}]} "" ; do
             eval LIBZFS4J_ABI_${ZFS_FUNCNAME}="${ZFS_VARIANT}"
             echo "Testing function variant LIBZFS4J_ABI_${ZFS_FUNCNAME}='${ZFS_VARIANT}'..."
-            test_libzfs -Dlibzfs.test.funcname="${ZFS_FUNCNAME}" -X && break
+            if test_libzfs -Dlibzfs.test.funcname="${ZFS_FUNCNAME}" -X ; then
+                break
+            fi
             if [ -z "$ZFS_VARIANT" ]; then
                 die 1 "FAILED to find a working variant for $ZFS_FUNCNAME"
             fi
@@ -193,8 +200,10 @@ export LIBZFS4J_ABI
 test_linkability
 
 ### Quick tests may give false comfort
-[ "$FORFEIT_LOCKPICK" = yes ] && \
-    test_defaults && test_all_routines && report_match && exit
+if [ "$FORFEIT_LOCKPICK" = yes ] ; then
+    test_defaults && test_all_routines && report_match && exit || \
+    echo "Deeper tests are needed..."
+fi
 
 test_lockpick
 
