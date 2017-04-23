@@ -19,7 +19,9 @@
 #
 
 # Bashism to allow pipes to fail not only due to last called program
-set -o pipefail
+if [ -n "${BASH_VERSION-}" ]; then
+    set -o pipefail
+fi
 
 # Abort on unhandled errors
 set -e
