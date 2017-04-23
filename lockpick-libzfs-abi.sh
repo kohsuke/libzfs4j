@@ -19,7 +19,6 @@
 #
 
 # Bashism to allow pipes to fail not only due to last called program
-# Also, below, bash associative arrays are used
 set -o pipefail
 
 # Abort on unhandled errors
@@ -37,12 +36,13 @@ ulimit -c 0 || true
 # newer argument list and so does not cause a linking error, but still can
 # potentially pass random heap garbage to the actually called new function.
 # Find the options scaterred in sources (mostly ZFSObject.java).
-declare -A LIBZFS_VARIANT_FUNCTIONS
 
-LIBZFS_VARIANT_FUNCTIONS["zfs_snapshot"]="openzfs legacy pre-nv96"
-LIBZFS_VARIANT_FUNCTIONS["zfs_iter_snapshots"]="openzfs legacy"
-LIBZFS_VARIANT_FUNCTIONS["zfs_destroy_snaps"]="openzfs legacy"
-LIBZFS_VARIANT_FUNCTIONS["zfs_destroy"]="openzfs legacy"
+# Alas, associative arrays of bash4 are not yet available in Solaris 10
+# (at least as "recent" as 10u8) which is a platform of interest for this.
+LIBZFS_VARIANT_FUNCTIONS__zfs_snapshot="openzfs legacy pre-nv96"
+LIBZFS_VARIANT_FUNCTIONS__zfs_iter_snapshots="openzfs legacy"
+LIBZFS_VARIANT_FUNCTIONS__zfs_destroy_snaps="openzfs legacy"
+LIBZFS_VARIANT_FUNCTIONS__zfs_destroy="openzfs legacy"
 
 # TODO: New ABI syntax for either major branch of ZFS has not yet been
 # figured out, so routines are sort of deprecated (NO-OPs) until then.
@@ -50,11 +50,13 @@ LIBZFS_VARIANT_FUNCTIONS["zfs_destroy"]="openzfs legacy"
 # the old ABI first -- be sure to use TEST_OK_ZERO_ONLY=yes as well.
 # By currently more probable default we just "no-op" them, although
 # the "legacy" or "openzfs" options are also valid until implemented.
-#LIBZFS_VARIANT_FUNCTIONS["zfs_perm_remove"]="pre-sol10u8 NO-OP"
-#LIBZFS_VARIANT_FUNCTIONS["zfs_perm_set"]="pre-sol10u8 NO-OP"
-LIBZFS_VARIANT_FUNCTIONS["zfs_perm_remove"]="NO-OP pre-sol10u8"
-LIBZFS_VARIANT_FUNCTIONS["zfs_perm_set"]="NO-OP pre-sol10u8"
+#LIBZFS_VARIANT_FUNCTIONS__zfs_perm_remove="pre-sol10u8 NO-OP"
+#LIBZFS_VARIANT_FUNCTIONS__zfs_perm_set="pre-sol10u8 NO-OP"
+LIBZFS_VARIANT_FUNCTIONS__zfs_perm_remove="NO-OP pre-sol10u8"
+LIBZFS_VARIANT_FUNCTIONS__zfs_perm_set="NO-OP pre-sol10u8"
 
+# List of functions in the pattern above
+LIBZFS_VARIANT_FUNCTIONS="$(echo ${!LIBZFS_VARIANT_FUNCTIONS__*} | sed 's,LIBZFS_VARIANT_FUNCTIONS__,,g')"
 
 ### NOTE: Better just create that dataset and `zfs allow` your account to test
 ### in it. Or use
@@ -132,7 +134,7 @@ test_libzfs() (
 )
 
 test_linkability() {
-    echo "Test usability of Native ZFS from Java..."
+    echo "Test linkability of Native ZFS from Java..."
     TEST_OK_ZERO_ONLY=yes test_libzfs -Dlibzfs.test.funcname=testCouldStart -X >/dev/null 2>&1 \
         && echo SUCCESS || die $? "Does this host have libzfs.so?"
 }
@@ -152,7 +154,7 @@ test_defaults() {
 
 test_all_routines() {
     echo "Re-validate specific routines"
-    test_libzfs -Dlibzfs.test.funcname="${!LIBZFS_VARIANT_FUNCTIONS[*]}" || return $?
+    test_libzfs -Dlibzfs.test.funcname="${LIBZFS_VARIANT_FUNCTIONS}" || return $?
 }
 
 
@@ -162,16 +164,16 @@ test_lockpick() {
 
     echo ""
     echo "Simple approach failed - begin lockpicking..."
-    for ZFS_FUNCNAME in "${!LIBZFS_VARIANT_FUNCTIONS[@]}" ; do
+    for ZFS_FUNCNAME in ${LIBZFS_VARIANT_FUNCTIONS} ; do
         eval LIBZFS4J_ABI_${ZFS_FUNCNAME}="NO-OP"
         eval export LIBZFS4J_ABI_${ZFS_FUNCNAME}
     done
 
-    for ZFS_FUNCNAME in "${!LIBZFS_VARIANT_FUNCTIONS[@]}" ; do
+    for ZFS_FUNCNAME in ${LIBZFS_VARIANT_FUNCTIONS} ; do
         echo ""
         # Note: Empty token must be in the end - for library picking defaults,
         # and as the fatal end of loop if nothing tried works for this system.
-        for ZFS_VARIANT in ${LIBZFS_VARIANT_FUNCTIONS[${ZFS_FUNCNAME}]} "" ; do
+        for ZFS_VARIANT in `eval echo '$'"{LIBZFS_VARIANT_FUNCTIONS__${ZFS_FUNCNAME}}"` "" ; do
             eval LIBZFS4J_ABI_${ZFS_FUNCNAME}="${ZFS_VARIANT}"
             echo "Testing function variant LIBZFS4J_ABI_${ZFS_FUNCNAME}='${ZFS_VARIANT}'..."
             if test_libzfs -Dlibzfs.test.funcname="${ZFS_FUNCNAME}" -X ; then
