@@ -11,8 +11,12 @@
 #
 # Copyright (C) 2017 by Jim Klimov
 #
+# Recommended usage to track down issues:
+#  VERBOSITY=high FORCE_LOCKPICK=yes ./lockpick-libzfs-abi.sh | tee "lock.`date +%s`.log"
+#
 # See also some docs:
 #  http://maven.apache.org/surefire/maven-surefire-plugin/examples/single-test.html
+#
 
 # Bashism to allow pipes to fail not only due to last called program
 # Also, below, bash associative arrays are used
@@ -74,6 +78,7 @@ die() {
 report_match() {
     SETTINGS="$(set | egrep '^LIBZFS4J_.*=')"
     uname -a
+    echo ""
     echo "MATCHED with the following settings: " $SETTINGS
     return 0
 }
@@ -148,7 +153,8 @@ test_all_routines() {
 
 test_lockpick() {
     # Override the default for individual variants explicitly in the loop below
-    LIBZFS4J_ABI=legacy
+    LIBZFS4J_ABI=""
+
     echo ""
     echo "Simple approach failed - begin lockpicking..."
     for ZFS_FUNCNAME in "${!LIBZFS_VARIANT_FUNCTIONS[@]}" ; do
@@ -162,7 +168,6 @@ test_lockpick() {
         # and as the fatal end of loop if nothing tried works for this system.
         for ZFS_VARIANT in ${LIBZFS_VARIANT_FUNCTIONS[${ZFS_FUNCNAME}]} "" ; do
             eval LIBZFS4J_ABI_${ZFS_FUNCNAME}="${ZFS_VARIANT}"
-            eval export LIBZFS4J_ABI_${ZFS_FUNCNAME}
             echo "Testing function variant LIBZFS4J_ABI_${ZFS_FUNCNAME}='${ZFS_VARIANT}'..."
             test_libzfs -Dlibzfs.test.funcname="${ZFS_FUNCNAME}" -X && break
             if [ -z "$ZFS_VARIANT" ]; then
