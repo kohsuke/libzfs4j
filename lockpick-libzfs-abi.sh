@@ -167,7 +167,6 @@ test_lockpick() {
         # and as the fatal end of loop if nothing tried works for this system.
         for ZFS_VARIANT in ${LIBZFS_VARIANT_FUNCTIONS[${ZFS_FUNCNAME}]} "" ; do
             eval LIBZFS4J_ABI_${ZFS_FUNCNAME}="${ZFS_VARIANT}"
-            eval export LIBZFS4J_ABI_${ZFS_FUNCNAME}
             echo "Testing function variant LIBZFS4J_ABI_${ZFS_FUNCNAME}='${ZFS_VARIANT}'..."
             test_libzfs -Dlibzfs.test.funcname="${ZFS_FUNCNAME}" -X && break
             if [ -z "$ZFS_VARIANT" ]; then
