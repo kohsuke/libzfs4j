@@ -165,16 +165,25 @@ public class LibZFSTest extends TestCase {
     }
 
     public void testApp() {
-        /* TODO: Real func name */
-        if (!ZFS_TEST_FUNCNAME.isEmpty())
+        /* TODO: Real func name - if more than zfs_iter_snapshots
+         * ABI variations are covered later */
+        if (!ZFS_TEST_FUNCNAME.isEmpty() && !ZFS_TEST_FUNCNAME.matches(".*\\b" + "zfs_iter_snapshots" + "\\b.*") )
             return;
 
         System.out.println("Iterating roots");
+        Boolean seen_snaps = false;
         for (ZFSFileSystem pool : zfs.roots()) {
             System.out.println(pool.getName());
             for (ZFSObject child : pool.descendants()) {
                 System.out.println("- " + child.getName());
+                if (!seen_snaps && child.getName().contains("@")) {
+                    seen_snaps = true;
+                }
             }
+        }
+
+        if (!ZFS_TEST_FUNCNAME.isEmpty() && !seen_snaps) {
+            System.out.println("WARNING: we tested to iterate snapshots, but none were found under any pool!");
         }
     }
 
@@ -182,7 +191,7 @@ public class LibZFSTest extends TestCase {
      * (global zones at least), that an /rpool exists and is mountable */
     public void testGetFilesystemTree() {
         /* TODO: Real func name */
-        if (!ZFS_TEST_FUNCNAME.isEmpty() && !ZFS_TEST_FUNCNAME.matches(".*\\b" + "zfs_iter_snapshots" + "\\b.*") )
+        if (!ZFS_TEST_FUNCNAME.isEmpty())
             return;
 
         // List<ZFSPool> pools = zfs.roots();
@@ -190,26 +199,12 @@ public class LibZFSTest extends TestCase {
         // ZFSObject filesystem = pools.get(0);
         ZFSObject filesystem = zfs.open("rpool");
         if (filesystem != null) {
-            Boolean seen_snaps = false;
             System.out.println("single tree: " + filesystem.getName());
             for (ZFSObject child : filesystem.children()) {
                 if (child.getName().contains("@")) {
                     System.out.println("snapshot  :" + child.getName());
-                    seen_snaps = true;
                 } else {
                     System.out.println("child     :" + child.getName());
-                }
-            }
-
-            if (!ZFS_TEST_FUNCNAME.isEmpty() && !seen_snaps) {
-                for (ZFSObject child : filesystem.descendants()) {
-                    if (child.getName().contains("@")) {
-                        System.out.println("snapshot  :" + child.getName());
-                        seen_snaps = true;
-                    }
-                }
-                if (!seen_snaps) {
-                    System.out.println("WARNING: we test to iterate snapshots, but none were found under whole rpool!");
                 }
             }
         } else {
