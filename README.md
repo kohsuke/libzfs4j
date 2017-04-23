@@ -79,6 +79,18 @@ logging level. See also the `lockpick-libzfs-abi.sh` script that tries out
 the currently known toggle options and their values, to pick the correct
 settings for an end-user's deployment.
 
+From practice, for late versions of Sun Solaris and several half a decade of
+operating systems and ZFS modules based on illumos and OpenZFS codebases,
+a likely end-user setup (e.g. in application server settings) would be:
+
+````
+LIBZFS4J_ABI=openzfs LIBZFS4J_ABI_zfs_iter_snapshots=legacy
+````
+while for illumos-based OSes with kernel since mid-2016 it would be all-new:
+````
+LIBZFS4J_ABI=openzfs
+````
+
 Note that there is more work possible in this area, such as in particular
 expanding Jenkins ZFS support to operating systems that do not identify as
 a `SunOS`, but this improvement is out of the scope for this update (the
