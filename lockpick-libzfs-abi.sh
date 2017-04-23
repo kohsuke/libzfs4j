@@ -59,12 +59,14 @@ LIBZFS_VARIANT_FUNCTIONS__zfs_perm_set="NO-OP pre-sol10u8"
 LIBZFS_VARIANT_FUNCTIONS="$(echo ${!LIBZFS_VARIANT_FUNCTIONS__*} | sed 's,LIBZFS_VARIANT_FUNCTIONS__,,g')"
 
 ### NOTE: Better just create that dataset and `zfs allow` your account to test
-### in it. Or use
-### "$(mkfile -v 16M testpool.img && zpool create testpool `pwd`/testpool.img)"
-### to create a test pool (as root)...
-###   sudo zfs allow -ld jim mount,create,share,destroy,snapshot rpool/kohsuke
-#LIBZFSTEST_DATASET="rpool/kohsuke"
-LIBZFSTEST_DATASET="missingrpool/fakedataset"
+### in it - avoids NPEs in some tests that preclude actual routines.
+### Can do this (as root):
+###   mkfile -v 16M testpool.img && zpool create testpool `pwd`/testpool.img
+### to create a test pool and set ZFS management permissisons on test dataset:
+###   sudo zfs create testpool/testdataset
+###   sudo zfs allow -ld "$USER" mount,create,share,destroy,snapshot testpool/testdataset
+LIBZFSTEST_DATASET="rpool/kohsuke"
+#LIBZFSTEST_DATASET="testrpool/testdataset"
 LIBZFSTEST_MVN_OPTIONS="${LIBZFSTEST_MVN_OPTIONS-} -Dlibzfs.test.pool=${LIBZFSTEST_DATASET}"
 LIBZFSTEST_MVN_OPTIONS="${LIBZFSTEST_MVN_OPTIONS-} -Dlibzfs.test.loglevel=FINEST"
 ### Avoid parallel test-cases inside our class - it is unreadable to debug
