@@ -152,7 +152,8 @@ test_all_routines() {
 
 test_lockpick() {
     # Override the default for individual variants explicitly in the loop below
-    LIBZFS4J_ABI=legacy
+    LIBZFS4J_ABI=""
+
     echo ""
     echo "Simple approach failed - begin lockpicking..."
     for ZFS_FUNCNAME in "${!LIBZFS_VARIANT_FUNCTIONS[@]}" ; do
