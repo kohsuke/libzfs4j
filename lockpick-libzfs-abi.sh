@@ -11,8 +11,12 @@
 #
 # Copyright (C) 2017 by Jim Klimov
 #
+# Recommended usage to track down issues:
+#  VERBOSITY=high FORCE_LOCKPICK=yes ./lockpick-libzfs-abi.sh | tee "lock.`date +%s`.log"
+#
 # See also some docs:
 #  http://maven.apache.org/surefire/maven-surefire-plugin/examples/single-test.html
+#
 
 # Bashism to allow pipes to fail not only due to last called program
 # Also, below, bash associative arrays are used
