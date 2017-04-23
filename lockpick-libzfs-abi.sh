@@ -12,7 +12,7 @@
 # Copyright (C) 2017 by Jim Klimov
 #
 # Recommended usage to track down issues:
-#  VERBOSITY=high FORCE_LOCKPICK=yes ./lockpick-libzfs-abi.sh | tee "lock.`date +%s`.log"
+#  VERBOSITY=high ./lockpick-libzfs-abi.sh | tee "lock.`date +%s`.log"
 #
 # See also some docs:
 #  http://maven.apache.org/surefire/maven-surefire-plugin/examples/single-test.html
@@ -192,8 +192,9 @@ export LIBZFS4J_ABI
 
 test_linkability
 
-[ "$FORCE_LOCKPICK" != yes ] && \
-test_defaults && test_all_routines && report_match && exit
+### Quick tests may give false comfort
+[ "$FORFEIT_LOCKPICK" = yes ] && \
+    test_defaults && test_all_routines && report_match && exit
 
 test_lockpick
 
