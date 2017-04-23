@@ -190,12 +190,26 @@ public class LibZFSTest extends TestCase {
         // ZFSObject filesystem = pools.get(0);
         ZFSObject filesystem = zfs.open("rpool");
         if (filesystem != null) {
+            Boolean seen_snaps = false;
             System.out.println("single tree: " + filesystem.getName());
             for (ZFSObject child : filesystem.children()) {
                 if (child.getName().contains("@")) {
                     System.out.println("snapshot  :" + child.getName());
+                    seen_snaps = true;
                 } else {
                     System.out.println("child     :" + child.getName());
+                }
+            }
+
+            if (!ZFS_TEST_FUNCNAME.isEmpty() && !seen_snaps) {
+                for (ZFSObject child : filesystem.descendants()) {
+                    if (child.getName().contains("@")) {
+                        System.out.println("snapshot  :" + child.getName());
+                        seen_snaps = true;
+                    }
+                }
+                if (!seen_snaps) {
+                    System.out.println("WARNING: we test to iterate snapshots, but none were found under whole rpool!");
                 }
             }
         } else {
