@@ -13,8 +13,6 @@
 # See also some docs:
 #  http://maven.apache.org/surefire/maven-surefire-plugin/examples/single-test.html
 #
-# TODO: Add an option to libzfstest to run just a certain native routine.
-#
 # Copyright (C) 2017 by Jim Klimov, on the terms of CDDL license:
 #
 # This file and its contents are supplied under the terms of the
