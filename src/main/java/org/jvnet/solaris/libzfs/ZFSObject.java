@@ -112,6 +112,7 @@ public abstract class ZFSObject implements Comparable<ZFSObject>, ZFSContainer {
     }
 
     public List<ZFSObject> children() {
+        /* Return just depth=1 level of contained datasets */
         return children(ZFSObject.class);
     }
 
@@ -120,7 +121,8 @@ public abstract class ZFSObject implements Comparable<ZFSObject>, ZFSContainer {
     }
 
     public List<ZFSObject> descendants() {
-        return children(ZFSObject.class);
+        /* Return all levels of contained datasets */
+        return descendants(ZFSObject.class);
     }
 
     public <T extends ZFSObject> List<T> descendants(Class<T> type) {
