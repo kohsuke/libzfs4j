@@ -7,15 +7,23 @@
 # Note it is likely to leave around Java coredump files, or at least logs
 # of those with stack traces.
 #
-# TODO: Add an option to libzfstest to run just a certain native routine.
-#
-# Copyright (C) 2017 by Jim Klimov
-#
 # Recommended usage to track down issues:
 #  VERBOSITY=high ./lockpick-libzfs-abi.sh | tee "lock.`date +%s`.log"
 #
 # See also some docs:
 #  http://maven.apache.org/surefire/maven-surefire-plugin/examples/single-test.html
+#
+# TODO: Add an option to libzfstest to run just a certain native routine.
+#
+# Copyright (C) 2017 by Jim Klimov, on the terms of CDDL license:
+#
+# This file and its contents are supplied under the terms of the
+# Common Development and Distribution License ("CDDL"). You may
+# only use this file in accordance with the terms of the CDDL.
+#
+# A full copy of the text of the CDDL should have accompanied this
+# source. A copy of the CDDL is also available via the Internet at
+# http://www.illumos.org/license/CDDL.
 #
 
 # Bashism to allow pipes to fail not only due to last called program
