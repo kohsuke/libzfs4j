@@ -41,6 +41,10 @@ public final class ZFSPool {
     private final String name;
 
     ZFSPool(final LibZFS parent, final zpool_handle_t handle) {
+        if (!parent.is_libzfs_enabled("ZFSPool")) {
+            throw new ZFSException(parent);
+        }
+
         this.library = parent;
         this.handle = handle;
         this.name = LIBZFS.zpool_get_name(handle);

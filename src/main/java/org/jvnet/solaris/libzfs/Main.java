@@ -7,7 +7,13 @@ package org.jvnet.solaris.libzfs;
  */
 public class Main {
     public static void main(String[] args) {
-        LibZFS zfs = new LibZFS();
+        LibZFS zfs;
+        try {
+            zfs = new LibZFS();
+        } catch (Throwable e) {
+            System.out.println("Aborted because " + e.toString());
+            return;
+        }
         for (ZFSFileSystem fs : zfs.roots()) {
             System.out.println(fs.getName());
             for (ZFSFileSystem c : fs.children(ZFSFileSystem.class)) {

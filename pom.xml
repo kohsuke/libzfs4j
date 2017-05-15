@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+
   <parent>
     <groupId>org.kohsuke</groupId>
     <artifactId>pom</artifactId>
@@ -31,8 +35,34 @@
         <configuration>
           <forkMode>never</forkMode>
           <skip>true</skip><!-- can't really run tests -->
+          <systemProperties>
+<!-- Note that the effective (default) config for tests requires that the
+     current user account can manage datasets under this existing root: -->
+<!--
+            <property>
+              <name>libzfs.test.pool</name>
+              <value>rpool/kohsuke/</value>
+            </property>
+-->
+
+<!-- To simplify tests on developer's private system, you can specify
+     the LIBZFS4J_* settings by uncommenting and/or adding lines like
+     the following (note that ideally auto-guesswork should succeed): -->
+<!--
+            <property>
+              <name>LIBZFS4J_ABI</name>
+              <value>openzfs</value>
+            </property>
+-->
+
+            <property>
+              <name>libzfs.test.loglevel</name>
+              <value>INFO</value>
+            </property>
+          </systemProperties>
         </configuration>
       </plugin>
+
       <plugin>
         <artifactId>maven-assembly-plugin</artifactId>
         <configuration>
@@ -45,6 +75,23 @@
             <descriptorRef>jar-with-dependencies</descriptorRef>
           </descriptorRefs>
         </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.3</version>
+        <configuration>
+          <compilerArgument>
+            -Xlint:unchecked,deprecation
+          </compilerArgument>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>2.9.1</version>
       </plugin>
     </plugins>
   </build>

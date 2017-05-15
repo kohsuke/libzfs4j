@@ -75,7 +75,21 @@ here), or refer to the current Git HEAD status:
 
 Settings ultimately applied to each toggle can be seen in application server
 (or standalone Jetty app) log if you start it with a `FINE` or greater log4j
-logging level.
+logging level. See also the `lockpick-libzfs-abi.sh` script that tries out
+the currently known toggle options and their values, to pick the correct
+settings for an end-user's deployment.
+
+From practice, for late versions of Sun Solaris and several half a decade of
+operating systems and ZFS modules based on illumos and OpenZFS codebases,
+a likely end-user setup (e.g. in application server settings) would be:
+
+````
+LIBZFS4J_ABI=openzfs LIBZFS4J_ABI_zfs_iter_snapshots=legacy
+````
+while for illumos-based OSes with kernel since mid-2016 it would be all-new:
+````
+LIBZFS4J_ABI=openzfs
+````
 
 Note that there is more work possible in this area, such as in particular
 expanding Jenkins ZFS support to operating systems that do not identify as
@@ -83,6 +97,13 @@ a `SunOS`, but this improvement is out of the scope for this update (the
 decision is made outside `libzfs.jar` codebase). It could help asking the
 wrapper whether it can represent ZFS on the host OS, rather than guessing
 by some strings the OS provides, though.
+
+At this time one can wrap calls to initialization of a `LibZFS` instance
+in caller's set-up method (rather than using a pre-initialized `static
+final` class member) and catch resulting exceptions -- this should wrap
+both absence of ZFS on the host OS (or other inability to use it) and the
+end-user's explicit request to not use the wrapper by `-DLIBZFS4J_API=off`.
+See `LibZFSTest.java` for more details.
 
 # Kudos
 
