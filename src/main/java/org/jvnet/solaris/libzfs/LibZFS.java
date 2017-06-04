@@ -236,6 +236,7 @@ public class LibZFS implements ZFSContainer {
         if (handle==null) {
             libzfsNotEnabledReason = "Failed to initialize libzfs";
         } else {
+            LOGGER.log(Level.WARNING, "libzfs4j is used on this system. If your JVM crashes with clues pointing to Java Native Interface link errors, please read documentation at https://github.com/kohsuke/libzfs4j/ regarding setup of LIBZFS4J_ABI family of variables.");
             initFeatures();
         }
 
