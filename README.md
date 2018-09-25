@@ -105,6 +105,50 @@ both absence of ZFS on the host OS (or other inability to use it) and the
 end-user's explicit request to not use the wrapper by `-DLIBZFS4J_ABI=off`.
 See `LibZFSTest.java` for more details.
 
+# Troubleshooting
+
+It is likely that you've got to this repository because your Jenkins server
+did not start, or even had its JVM segfaulted, with hints pointing at ZFS.
+
+It should be helpful to increase log4j level of your application server to
+`FINE` or above, so this library would report more details about its activity
+to help you pin-point where and why it failed.
+
+Certain situations are known to cause issues for out-of-the-box setups:
+
+* Mismatch of LibZFS ABI between the native code in your operating system
+  libraries and the Java Native Interfaces in this repository. The JVM of
+  a Jenkins server would crash a couple of minutes after startup, producing
+  some `hs_err_pid*.log` files with stack traces that mention `zfs`.
+** See above about setting up the ABI to use for each routine that is
+   known to have evolved into having several binary signatures, using
+   application server properties or environment variables.
+** Work with your OS distribution community or vendor to pre-package
+   a Jenkins service that would take these settings into account.
+** If the problem is with a routine whose signature is not handled by
+   this library, please develop, test on your OS and propose a pull
+   request at https://github.com/kohsuke/libzfs4j to handle the new
+   binary dialect. See existing code for examples of handling this.
+
+* Too many datasets (including snapshots) on the Jenkins server - long
+startup and/or crash due to exhausting JVM memory. Might happen during
+calls into native code, then producing stack traces way too similar (on
+the first glance) to the ABI mismatch issue. Logging at a `FINE` level
+would show that your server looks at snapshots of all ZFS datasets in
+order, and maybe would log some out-of-heap errors before stalling or
+crashing; tools like `top` would show the `java` process size growing
+until its configured limit.
+** Constrain the ZFS scope visible to Jenkins by running it in a zone
+   or otherwise dedicated environment.
+** Limit the amount of snapshots made on your system, such as by an
+   automatic snapshots service (zfs-auto-snap, time-slider, znapzend
+   etc.).
+** As a temporary fix, try increasing the `-Xmx` setting of your JVM and
+   throw lots of RAM at it.
+** Fix Jenkins-core and/or this library to not track the whole universe by
+   default during startup - it should suffice to know just the datasets
+   mounted under `JENKINS_HOME` and maybe a few other similar locations.
+
 # Kudos
 
 * Kohsuke Kawaguchi
