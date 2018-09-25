@@ -530,6 +530,7 @@ public abstract class ZFSObject implements Comparable<ZFSObject>, ZFSContainer {
             LOGGER.log(Level.FINE, "NO-OP: libzfs4j::" + abi_thisfunc + "() was called while " + abi_toggle + "=='" + abi + "' - skipped due to config");
         } else
         if (abi.equals("openzfs")) {
+            LOGGER.log(Level.FINE, "CALLING LIBZFS4J: libzfs4j::" + abi_thisfunc + "() was called while " + abi_toggle + "=='" + abi + "' for dataset '" + getName() + "' ...");
             LIBZFS.zfs_iter_snapshots(handle, false, new libzfs.zfs_iter_f() {
                 public int callback(zfs_handle_t handle, Pointer arg) {
                     set.add((ZFSSnapshot)ZFSObject.create(library, handle));
@@ -538,6 +539,7 @@ public abstract class ZFSObject implements Comparable<ZFSObject>, ZFSContainer {
             }, null);
         } else
         if (abi.equals("legacy")) {
+            LOGGER.log(Level.FINE, "CALLING LIBZFS4J: libzfs4j::" + abi_thisfunc + "() was called while " + abi_toggle + "=='" + abi + "' for dataset '" + getName() + "' ...");
             LIBZFS.zfs_iter_snapshots(handle, new libzfs.zfs_iter_f() {
                 public int callback(zfs_handle_t handle, Pointer arg) {
                     set.add((ZFSSnapshot)ZFSObject.create(library, handle));
