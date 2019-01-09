@@ -121,17 +121,17 @@ Certain situations are known to cause issues for out-of-the-box setups:
   a Jenkins server would crash a couple of minutes after startup, producing
   some `hs_err_pid*.log` files with stack traces that mention `zfs`.
   
-** See above about setting up the ABI to use for each routine that is
-   known to have evolved into having several binary signatures, using
-   application server properties or environment variables.
+  * See above about setting up the ABI to use for each routine that is
+    known to have evolved into having several binary signatures, using
+    application server properties or environment variables.
    
-** Work with your OS distribution community or vendor to pre-package
-   a Jenkins service that would take these settings into account.
+  * Work with your OS distribution community or vendor to pre-package
+    a Jenkins service that would take these settings into account.
    
-** If the problem is with a routine whose signature is not handled by
-   this library, please develop, test on your OS and propose a pull
-   request at https://github.com/kohsuke/libzfs4j to handle the new
-   binary dialect. See existing code for examples of handling this.
+  * If the problem is with a routine whose signature is not handled by
+    this library, please develop, test on your OS and propose a pull
+    request at https://github.com/kohsuke/libzfs4j to handle the new
+    binary dialect. See existing code for examples of handling this.
 
 * Too many datasets (including snapshots) on the Jenkins server - long
 startup and/or crash due to exhausting JVM memory. Might happen during
@@ -142,19 +142,19 @@ order, and maybe would log some out-of-heap errors before stalling or
 crashing; tools like `top` would show the `java` process size growing
 until its configured limit.
 
-** Constrain the ZFS scope visible to Jenkins by running it in a zone
-   or otherwise dedicated environment.
+  * Constrain the ZFS scope visible to Jenkins by running it in a zone
+    or otherwise dedicated environment.
    
-** Limit the amount of snapshots made on your system, such as by an
-   automatic snapshots service (zfs-auto-snap, time-slider, znapzend
-   etc.).
+  * Limit the amount of snapshots made on your system, such as by an
+    automatic snapshots service (zfs-auto-snap, time-slider, znapzend
+    etc.).
    
-** As a temporary fix, try increasing the `-Xmx` setting of your JVM and
-   throw lots of RAM at it.
+  * As a temporary fix, try increasing the `-Xmx` setting of your JVM and
+    throw lots of RAM at it.
    
-** Fix Jenkins-core and/or this library to not track the whole universe by
-   default during startup - it should suffice to know just the datasets
-   mounted under `JENKINS_HOME` and maybe a few other similar locations.
+  * Fix Jenkins-core and/or this library to not track the whole universe by
+    default during startup - it should suffice to know just the datasets
+    mounted under `JENKINS_HOME` and maybe a few other similar locations.
 
 # Kudos
 
