@@ -3,6 +3,10 @@
 The [`libzfs.jar`](https://github.com/kohsuke/libzfs4j) is a Java wrapper
 for native ZFS functionality as implemented by a host operating system.
 
+If you are here because of stack traces or segmentation fault logs which
+mention ZFS in a Java program, please take a look at the (#Troubleshooting)
+section below.
+
 # A bit of turbulent history
 
 Since the ZFS filesystem, data integrity and volume management subsystem was
