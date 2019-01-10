@@ -127,10 +127,16 @@ Certain situations are known to cause issues for out-of-the-box setups:
 
   * See above about setting up the ABI to use for each routine that is
     known to have evolved into having several binary signatures, using
-    application server properties or environment variables.
+    application server properties or environment variables. In particular,
+    give a shot to the `lockpick-libzfs-abi.sh` script that tries out
+    the currently known toggle options and their values, to pick the
+    correct settings for an end-user's deployment. OSes and their native
+    `libzfs.so` interfaces do evolve and change over time, making older
+    "good" settings obsolete.
 
   * Work with your OS distribution community or vendor to pre-package
-    a Jenkins service that would take these settings into account.
+    a Jenkins service (or other packages using `libzfs4j`) that would
+    take these settings into account.
 
   * If the problem is with a routine whose signature is not handled by
     this library, please develop, test on your OS and propose a pull
